@@ -3,6 +3,7 @@ To-Do List
  - Create name and logo
  - Create quiz page/widget
  - Create an updating point system
+ - Comment?
 
  Notes
 - ChangeNotifier class added to a state class to store fields for all widgets to access and methods with notifyListeners().

@@ -11,15 +11,29 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
+    return ChangeNotifierProvider(
+      create: (context) => MyAppState(),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          useMaterial3: true,
+        ),
+        home: const MyHomePage(title: '5 Minute Sanskrit'),
       ),
-      home: const MyHomePage(title: '5 Minute Sanskrit'),
     );
   }
+}
+
+class MyAppState extends ChangeNotifier {
+  var counter = 0;
+
+  void increment() {
+    counter++;
+    notifyListeners();
+  }
+
+  //can add more variables and methods if needed
 }
 
 class MyHomePage extends StatefulWidget {
@@ -84,13 +98,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     color: Colors.grey.withOpacity(0.5),
                     spreadRadius: 5,
                     blurRadius: 7,
-                    offset: Offset(0, 3), // Changes position of shadow
+                    offset: const Offset(0, 3), // Changes position of shadow
                   ),
                 ],
               ),
-              child: const Text('200',
-                  style:
-                      TextStyle(fontSize: 20.0) //DefaultTextStyle.of(context)
+              child: Text('${context.watch<MyAppState>().counter}',
+                  style: const TextStyle(
+                      fontSize: 20.0) //DefaultTextStyle.of(context)
                   // .style
                   // .apply(fontSizeFactor: 2.0), <-Future Code
                   ),
@@ -120,12 +134,14 @@ class _MyHomePageState extends State<MyHomePage> {
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
 
-    @override
-    Widget build(BuildContext) {
-      return Scaffold(
-        // floatingActionButton: FloatingActionButton(
-        //   onPressed: ,
-        // ),
-      );
-    }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.read<MyAppState>().increment();
+        },
+      ),
+    );
   }
+}
