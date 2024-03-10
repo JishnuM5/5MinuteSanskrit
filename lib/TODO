@@ -1,5 +1,46 @@
- - Learn how state providers work (Floating Action Button)
+To-Do List
  - Firebase authentication
  - Create name and logo
  - Create quiz page/widget
  - Create an updating point system
+ - Comment?
+
+ Notes
+- ChangeNotifier class added to a state class to store fields for all widgets to access and methods with notifyListeners().
+- ChangeNotifierProvider is the widget that provides an instance of ChangeNotifier, added in the main method (MultiProvider if multiple classes needed).
+
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => MyAppState(),
+      child: const MyApp(),
+    ),
+  );
+}
+- MyAppState() is an example of a "model", which are similar to helper classes/objects in OOP.
+
+- These are different methods to use ChangeNotifier. Each one has tiny differences but many can be interchanged in most cases. Internet recommends using context.read() and context.watch().
+final model = context.read<MyAppState>();
+- This returns the Model without listening for any changes.
+
+final model = context.watch<MyAppState>();
+- This makes the widget listen for changes on the Model.
+
+final model = Provider.of<MyAppState>(context, listen: false);
+- This works the same as context.read<MyAppState>();
+
+final model = Provider.of<MyAppState>(context);
+- This works the same as context.watch<MyAppState>();
+
+Consumer<MyAppState>(
+    builder: (context, stateVar, child) {
+        return Text('${stateVar.value}');
+    }
+)
+- This works the same as context.watch<MyAppState>();
+
+Links:
+- https://docs.flutter.dev/data-and-backend/state-mgmt/simple
+- https://flutterbyexample.com/lesson/change-notifier-provider 
+- https://stackoverflow.com/questions/58774301/when-to-use-provider-ofx-vs-consumerx-in-flutter
+- https://stackoverflow.com/questions/62257064/is-provider-ofcontext-listen-false-equivalent-to-context-read 
