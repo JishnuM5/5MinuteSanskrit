@@ -1,3 +1,5 @@
+import 'dart:js_util';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14,6 +16,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
@@ -58,10 +61,10 @@ class _MyHomePageState extends State<MyHomePage> {
     Widget page;
     switch (_selectedIndex) {
       case 0:
-        page = MainPage();
+        page = const MainPage();
         break;
       case 1:
-        page = Placeholder();
+        page = const Placeholder();
         break;
       default:
         throw UnimplementedError();
@@ -91,14 +94,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 border: Border.all(
                   color: Colors.black,
                 ),
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                borderRadius: const BorderRadius.all(Radius.circular(7)),
                 color: Theme.of(context).primaryColor,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 5,
-                    blurRadius: 7,
-                    offset: const Offset(0, 3), // Changes position of shadow
+                    spreadRadius: 3,
+                    blurRadius: 5,
+                    offset: const Offset(0, 1), // Changes position of shadow
                   ),
                 ],
               ),
@@ -131,17 +134,45 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
   @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.read<MyAppState>().increment();
-        },
+        body: Center(
+      child: Column(
+        children: [
+          const Text("This Week's Quizzes", style: TextStyle(fontSize: 40)),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Divider(),
+          ),
+          Container(
+            padding: const EdgeInsets.all(15.0),
+            constraints: BoxConstraints.expand(width: 800.0, height: 400.0),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.black,
+              ),
+              borderRadius: const BorderRadius.all(Radius.circular(7)),
+              color: Theme.of(context).primaryColor,
+            ),
+            alignment: Alignment.center,
+            margin: new EdgeInsets.all(20.0),
+            child: const Text('Sample Quiz',
+                style: TextStyle(fontSize: 20.0) //DefaultTextStyle.of(context)
+                // .style
+                // .apply(fontSizeFactor: 2.0), <-Future Code
+                ),
+          ),
+        ],
       ),
-    );
+    ));
   }
 }
