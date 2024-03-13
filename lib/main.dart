@@ -1,5 +1,3 @@
-import 'dart:js_util';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -10,7 +8,7 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  // This widget is the root of my application.
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -28,15 +26,14 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// This class contains app states lifted out of the widget tree
 class MyAppState extends ChangeNotifier {
-  var counter = 0;
+  int _pageIndex = 0;
 
-  void increment() {
-    counter++;
+  void _onItemTapped(int index) {
+    _pageIndex = index;
     notifyListeners();
   }
-
-  //can add more variables and methods if needed
 }
 
 class MyHomePage extends StatefulWidget {
@@ -47,30 +44,28 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+// This class is the manages the framework of the app
 class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
+  // The selected index state manages page navigation
   @override
   Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
     Widget page;
-    switch (_selectedIndex) {
+    switch (appState._pageIndex) {
       case 0:
         page = const MainPage();
         break;
       case 1:
         page = const Placeholder();
         break;
+      case 2:
+        page = QuizPage();
       default:
         throw UnimplementedError();
     }
 
     return Scaffold(
+      // The top bar of the app
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: const Row(
@@ -105,9 +100,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ],
               ),
-              child: Text('${context.watch<MyAppState>().counter}',
-                  style: const TextStyle(
-                      fontSize: 20.0) //DefaultTextStyle.of(context)
+              child: const Text('',
+                  style:
+                      TextStyle(fontSize: 20.0) //DefaultTextStyle.of(context)
                   // .style
                   // .apply(fontSizeFactor: 2.0), <-Future Code
                   ),
@@ -115,9 +110,12 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
+      // The bottom navigation bar of the app
       bottomNavigationBar: NavigationBar(
-        onDestinationSelected: _onItemTapped,
-        selectedIndex: _selectedIndex,
+        //This method is passed as a callback function, so parameter is implicit
+        //Still, I'm explicitly calling it here with a lambda function for comprehensibility
+        // I also don't need a currentIndex property because I don't need to access it.
+        onDestinationSelected: (int index) => appState._onItemTapped(index),
         destinations: const <Widget>[
           NavigationDestination(
             icon: Icon(Icons.home),
@@ -129,6 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
+      // The body of the app
       body: page,
     );
   }
@@ -141,38 +140,79 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
+// This class is the main page of the app
 class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-      child: Column(
-        children: [
-          const Text("This Week's Quizzes", style: TextStyle(fontSize: 40)),
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Divider(),
-          ),
-          Container(
-            padding: const EdgeInsets.all(15.0),
-            constraints: BoxConstraints.expand(width: 800.0, height: 400.0),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.black,
+      // A scroll view of the quiz tiles
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            children: [
+              const Text("This Week's Quizzes", style: TextStyle(fontSize: 40)),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Divider(),
               ),
-              borderRadius: const BorderRadius.all(Radius.circular(7)),
-              color: Theme.of(context).primaryColor,
-            ),
-            alignment: Alignment.center,
-            margin: new EdgeInsets.all(20.0),
-            child: const Text('Sample Quiz',
-                style: TextStyle(fontSize: 20.0) //DefaultTextStyle.of(context)
-                // .style
-                // .apply(fontSizeFactor: 2.0), <-Future Code
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                // A single quiz tile
+                child: InkWell(
+                  onTap: () {
+                    context.read<MyAppState>()._onItemTapped(2);
+                  },
+                  highlightColor: Colors.blueGrey
+                      .withOpacity(0.2),
+                  splashColor: Colors.blueGrey
+                      .withOpacity(0.5),
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.black,
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(7)),
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints.tightFor(
+                          width: 800, height: 200),
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(15.0),
+                          alignment: Alignment.center,
+                          child: const Text(
+                            'Sample Quiz',
+                            style: TextStyle(
+                                fontSize: 20.0 //DefaultTextStyle.of(context)
+                                // .style
+                                // .apply(fontSizeFactor: 2.0), <-Future Code
+                                ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-    ));
+    );
+  }
+}
+
+class QuizPage extends StatefulWidget {
+  const QuizPage({super.key});
+
+  @override
+  State<QuizPage> createState() => _QuizPageState();
+}
+
+class _QuizPageState extends State<QuizPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold();
   }
 }
