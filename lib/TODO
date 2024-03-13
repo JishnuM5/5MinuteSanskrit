@@ -3,8 +3,7 @@ To-Do List
  - Create name and logo
  - Create quiz page/widget
  - Create an updating point system
- - Comment?
-
+ - Create a matching theme throughout the app
  Notes
 - ChangeNotifier class added to a state class to store fields for all widgets to access and methods with notifyListeners().
 - ChangeNotifierProvider is the widget that provides an instance of ChangeNotifier, added in the main method (MultiProvider if multiple classes needed).
@@ -22,9 +21,11 @@ void main() {
 - These are different methods to use ChangeNotifier. Each one has tiny differences but many can be interchanged in most cases. Internet recommends using context.read() and context.watch().
 final model = context.read<MyAppState>();
 - This returns the Model without listening for any changes.
+- Used when CHANGING a state but not ACCESSING it (or only accessing it once).
 
 final model = context.watch<MyAppState>();
 - This makes the widget listen for changes on the Model.
+- Used to ACCESS state throughout changes.
 
 final model = Provider.of<MyAppState>(context, listen: false);
 - This works the same as context.read<MyAppState>();
