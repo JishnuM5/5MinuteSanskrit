@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -59,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
         page = const Placeholder();
         break;
       case 2:
-        page = QuizPage();
+        page = const QuizPage();
       default:
         throw UnimplementedError();
     }
@@ -147,56 +148,48 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       // A scroll view of the quiz tiles
       body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            children: [
-              const Text("This Week's Quizzes", style: TextStyle(fontSize: 40)),
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Divider(),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                // A single quiz tile
-                child: InkWell(
-                  onTap: () {
-                    context.read<MyAppState>()._onItemTapped(2);
-                  },
-                  highlightColor: Colors.blueGrey
-                      .withOpacity(0.2),
-                  splashColor: Colors.blueGrey
-                      .withOpacity(0.5),
-                  child: Ink(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.black,
-                      ),
-                      borderRadius: const BorderRadius.all(Radius.circular(7)),
-                      color: Theme.of(context).primaryColor,
+        child: Column(
+          children: [
+            const Text("This Week's Quizzes", style: TextStyle(fontSize: 40)),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Divider(),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              // A single quiz tile
+              child: InkWell(
+                onTap: () {
+                  context.read<MyAppState>()._onItemTapped(2);
+                },
+                highlightColor: Colors.blueGrey.withOpacity(0.2),
+                splashColor: Colors.blueGrey.withOpacity(0.5),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.black,
                     ),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints.tightFor(
-                          width: 800, height: 200),
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.all(15.0),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            'Sample Quiz',
-                            style: TextStyle(
-                                fontSize: 20.0 //DefaultTextStyle.of(context)
-                                // .style
-                                // .apply(fontSizeFactor: 2.0), <-Future Code
-                                ),
+                    borderRadius: const BorderRadius.all(Radius.circular(7)),
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  child: Container(
+                    constraints:
+                        const BoxConstraints.tightFor(width: 800, height: 200),
+                    padding: const EdgeInsets.all(15.0),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Sample Quiz',
+                      style: TextStyle(
+                          fontSize: 20.0 //DefaultTextStyle.of(context)
+                          // .style
+                          // .apply(fontSizeFactor: 2.0), <-Future Code
                           ),
-                        ),
-                      ),
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -213,6 +206,67 @@ class QuizPage extends StatefulWidget {
 class _QuizPageState extends State<QuizPage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      // A scroll view of questions
+      body: LayoutBuilder(builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+                minWidth: constraints.maxWidth,
+                minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  const Text('सः पुरुष्हः कार्यालये _ करोति'),
+                  Expanded(child: const AnswerTile(option: 'Answer 1')),
+                  Expanded(child: const AnswerTile(option: 'Answer 2')),
+                  Expanded(child: const AnswerTile(option: 'Answer 3')),
+                  Expanded(child: const AnswerTile(option: 'Answer 4')),
+                  const Text('Next'),
+                  Container(
+                      height: 500,
+                      decoration: const BoxDecoration(color: Colors.blue))
+                ],
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class AnswerTile extends StatelessWidget {
+  const AnswerTile({
+    super.key,
+    required this.option,
+  });
+
+  final String option;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.black,
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(7)),
+          color: Theme.of(context).primaryColorLight,
+        ),
+        padding: const EdgeInsets.all(15.0),
+        alignment: Alignment.center,
+        child: Text(
+          option,
+          style: const TextStyle(fontSize: 10.0 //DefaultTextStyle.of(context)
+              // .style
+              // .apply(fontSizeFactor: 2.0), <-Future Code
+              ),
+        ),
+      ),
+    );
   }
 }
