@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -52,15 +51,29 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
     Widget page;
+    Widget appBar;
     switch (appState._pageIndex) {
       case 0:
         page = const MainPage();
+        appBar = NavBar(
+          appState: appState,
+          navBarIndex: 0,
+        );
+
         break;
       case 1:
         page = const Placeholder();
+        appBar = NavBar(
+          appState: appState,
+          navBarIndex: 1,
+        );
         break;
       case 2:
         page = const QuizPage();
+        appBar = QuizBar(
+          appState: appState,
+          navBarIndex: 1,
+        );
       default:
         throw UnimplementedError();
     }
@@ -112,24 +125,81 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       // The bottom navigation bar of the app
-      bottomNavigationBar: NavigationBar(
-        //This method is passed as a callback function, so parameter is implicit
-        //Still, I'm explicitly calling it here with a lambda function for comprehensibility
-        // I also don't need a currentIndex property because I don't need to access it.
-        onDestinationSelected: (int index) => appState._onItemTapped(index),
-        destinations: const <Widget>[
-          NavigationDestination(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.account_circle_rounded),
-            label: 'Profile',
-          ),
-        ],
-      ),
+      bottomNavigationBar: appBar,
       // The body of the app
       body: page,
+    );
+  }
+}
+
+class NavBar extends StatelessWidget {
+  const NavBar({super.key, required this.appState, required this.navBarIndex});
+
+  final MyAppState appState;
+  final int navBarIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    return NavigationBar(
+      //This method is passed as a callback function, so parameter is implicit
+      //Still, I'm explicitly calling it here with a lambda function for comprehensibility
+      // I also don't need a currentIndex property because I don't need to access it.
+      onDestinationSelected: (int index) => appState._onItemTapped(index),
+      selectedIndex: navBarIndex,
+      destinations: const <Widget>[
+        NavigationDestination(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.account_circle_rounded),
+          label: 'Profile',
+        ),
+      ],
+    );
+  }
+}
+
+class QuizBar extends StatelessWidget {
+  const QuizBar({
+    super.key,
+    required this.appState,
+    required this.navBarIndex,
+  });
+
+  final MyAppState appState;
+  final int navBarIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    return NavigationBar(
+      selectedIndex: navBarIndex,
+      onDestinationSelected: (int index) => appState._onItemTapped(index),
+      //indicatorColor: Colors.transparent,
+      destinations: <Widget>[
+        const NavigationDestination(
+          icon: Icon(Icons.arrow_back),
+          label: 'Home',
+        ),
+        const Center(child: Text('Sample Quiz')),
+        Center(
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(10, 2.5, 10, 2.5),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.black,
+              ),
+              borderRadius: const BorderRadius.all(Radius.circular(7)),
+              color: Theme.of(context).primaryColor,
+            ),
+            child: Text(
+              '⅕',
+              style:
+                  DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
+            ),
+          ),
+        )
+      ],
     );
   }
 }
@@ -214,19 +284,16 @@ class _QuizPageState extends State<QuizPage> {
             constraints: BoxConstraints(
                 minWidth: constraints.maxWidth,
                 minHeight: constraints.maxHeight),
-            child: IntrinsicHeight(
+            child: const IntrinsicHeight(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  const Text('सः पुरुष्हः कार्यालये _ करोति'),
-                  Expanded(child: const AnswerTile(option: 'Answer 1')),
-                  Expanded(child: const AnswerTile(option: 'Answer 2')),
-                  Expanded(child: const AnswerTile(option: 'Answer 3')),
-                  Expanded(child: const AnswerTile(option: 'Answer 4')),
-                  const Text('Next'),
-                  Container(
-                      height: 500,
-                      decoration: const BoxDecoration(color: Colors.blue))
+                  Text('सः पुरुष्हः कार्यालये _ करोति'),
+                  Expanded(child: AnswerTile(option: 'Answer 1')),
+                  Expanded(child: AnswerTile(option: 'Answer 2')),
+                  Expanded(child: AnswerTile(option: 'Answer 3')),
+                  Expanded(child: AnswerTile(option: 'Answer 4')),
+                  Text('Next'),
                 ],
               ),
             ),
