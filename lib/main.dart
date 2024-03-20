@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'quiz_page.dart';
+import 'themes.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,12 +19,8 @@ class MyApp extends StatelessWidget {
       create: (context) => MyAppState(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-          useMaterial3: true,
-          //fontFamily:
-        ),
+        title: '5 Minute संस्कृतम्',
+        theme: theme,
         home: const MyHomePage(title: '5 Minute संस्कृतम्'),
       ),
     );
@@ -83,16 +82,17 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       // The top bar of the app
       appBar: AppBar(
+        toolbarHeight: 60,
         backgroundColor: Colors.white,
-        title: const Row(
+        title: Row(
           children: [
-            Image(
-              image: AssetImage('assets/logo.png'),
-              height: 30,
-            ),
+            // const Image(
+            //   image: AssetImage('assets/logo.png'),
+            //   height: 30,
+            // ),
             Padding(
-              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-              child: Text('App Name'),
+              padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+              child: logo,
             )
           ],
         ),
@@ -116,12 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ],
               ),
-              child: const Text('',
-                  style:
-                      TextStyle(fontSize: 20.0) //DefaultTextStyle.of(context)
-                  // .style
-                  // .apply(fontSizeFactor: 2.0), <-Future Code
-                  ),
+              child: const Text('', style: TextStyle(fontSize: 20.0)),
             ),
           ),
         ],
@@ -163,6 +158,7 @@ class NavBar extends StatelessWidget {
   }
 }
 
+// This navigation bar is for the quiz page
 class QuizBar extends StatelessWidget {
   const QuizBar({
     super.key,
@@ -178,7 +174,6 @@ class QuizBar extends StatelessWidget {
     return NavigationBar(
       selectedIndex: navBarIndex,
       onDestinationSelected: (int index) => appState._onItemTapped(index),
-      //indicatorColor: Colors.transparent,
       destinations: <Widget>[
         const NavigationDestination(
           icon: Icon(Icons.arrow_back),
@@ -223,7 +218,10 @@ class _MainPageState extends State<MainPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const Text("This Week's Quizzes", style: TextStyle(fontSize: 40)),
+            Text("This Week's Quizzes",
+                style: DefaultTextStyle.of(context).style.apply(
+                    fontSizeFactor: 2.0,
+                    fontFamily: GoogleFonts.montserrat().fontFamily)),
             const Padding(
               padding: EdgeInsets.all(8.0),
               child: Divider(),
@@ -252,14 +250,21 @@ class _MainPageState extends State<MainPage> {
                     alignment: Alignment.center,
                     child: Text(
                       'Sample Quiz',
-                      style: DefaultTextStyle.of(context)
-                          .style
-                          .apply(fontSizeFactor: 2.0),
+                      style: DefaultTextStyle.of(context).style.apply(
+                          fontSizeFactor: 2.0,
+                          fontFamily: GoogleFonts.courierPrime().fontFamily),
                     ),
                   ),
                 ),
               ),
             ),
+            AnimatedTextKit(animatedTexts: [
+              TypewriterAnimatedText(
+                'some text',
+                cursor: '।',
+                speed: const Duration(milliseconds: 100),
+              )
+            ]),
           ],
         ),
       ),

@@ -19,17 +19,21 @@ class _QuizPageState extends State<QuizPage> {
             constraints: BoxConstraints(
                 minWidth: constraints.maxWidth,
                 minHeight: constraints.maxHeight),
-            child: const IntrinsicHeight(
+            child: IntrinsicHeight(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  Text('सः पुरुष्हः कार्यालये _ करोति'),
-                  SizedBox(height: 50),
-                  Expanded(child: AnswerTile(option: 'Answer 1')),
-                  Expanded(child: AnswerTile(option: 'Answer 2')),
-                  Expanded(child: AnswerTile(option: 'Answer 3')),
-                  Expanded(child: AnswerTile(option: 'Answer 4')),
-                  Text('Next'),
+                  Text(
+                    'सः पुरुष्हः कार्यालये _ करोति',
+                    style: DefaultTextStyle.of(context)
+                        .style
+                        .apply(fontSizeFactor: 1.25),
+                  ),
+                  const SizedBox(height: 50),
+                  const Expanded(child: AnswerTile(option: 'Answer 1')),
+                  const Expanded(child: AnswerTile(option: 'Answer 2')),
+                  const Expanded(child: AnswerTile(option: 'Answer 3')),
+                  const Expanded(child: AnswerTile(option: 'Answer 4')),
                 ],
               ),
             ),
@@ -62,10 +66,7 @@ class AnswerTile extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(15.0),
         alignment: Alignment.center,
-        child: Text(
-          option,
-          style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
-        ),
+        child: Text(option),
       ),
     );
   }
