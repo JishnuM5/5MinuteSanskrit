@@ -1,9 +1,10 @@
 To-Do List
  - Firebase authentication
- - Create name and logo
- - Create quiz page/widget
+ - Create clickable options
  - Create an updating point system
  - Create a matching theme throughout the app
+    - Add default text style instead of fixed font size
+
  Notes
 - ChangeNotifier class added to a state class to store fields for all widgets to access and methods with notifyListeners().
 - ChangeNotifierProvider is the widget that provides an instance of ChangeNotifier, added in the main method (MultiProvider if multiple classes needed).
@@ -43,5 +44,14 @@ Consumer<MyAppState>(
 Links:
 - https://docs.flutter.dev/data-and-backend/state-mgmt/simple
 - https://flutterbyexample.com/lesson/change-notifier-provider 
-- https://stackoverflow.com/questions/58774301/when-to-use-provider-ofx-vs-consumerx-in-flutter
 - https://stackoverflow.com/questions/62257064/is-provider-ofcontext-listen-false-equivalent-to-context-read 
+
+Setting the UI
+- https://pub.dev/packages/google_fonts
+- https://stackoverflow.com/questions/56194440/flutter-default-font-size
+- https://infinum.com/blog/flutter-color-schemes/
+
+- Font Pairing: Courier New (+ Quicksand, Montserrat?)
+- Sanskrit Font: Baloo 2
+- Color Pallete: https://www.color-hex.com/color-palette/1041210
+- Logo/Cursor: https://en.wikipedia.org/wiki/Danda, https://pub.dev/documentation/animated_text_kit/latest/#typewriter
