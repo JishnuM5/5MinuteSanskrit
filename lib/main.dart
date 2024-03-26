@@ -15,8 +15,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of my application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<MyAppState>(create: (context) => MyAppState()),
+        ChangeNotifierProvider<MyQuizState>(create: (context) => MyQuizState()),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: '5 Minute संस्कृतम्',
@@ -258,13 +261,16 @@ class _MainPageState extends State<MainPage> {
                 ),
               ),
             ),
-            AnimatedTextKit(animatedTexts: [
-              TypewriterAnimatedText(
-                'some text',
-                cursor: '।',
-                speed: const Duration(milliseconds: 100),
-              )
-            ]),
+            AnimatedTextKit(
+                isRepeatingAnimation: true,
+                repeatForever: false,
+                animatedTexts: [
+                  TypewriterAnimatedText(
+                    'some text',
+                    cursor: '।',
+                    speed: const Duration(milliseconds: 100),
+                  )
+                ]),
           ],
         ),
       ),
