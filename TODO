@@ -1,6 +1,7 @@
 To-Do List
+ - Code cleanup: more classes, comments, rename Vars
+ - Add logo and finalize fonts
  - Firebase authentication
- - Create clickable options
  - Create an updating point system
  - Create a matching theme throughout the app
     - Add default text style instead of fixed font size

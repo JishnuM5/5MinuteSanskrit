@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'quiz_page.dart';
+import 'app_bars.dart';
 import 'themes.dart';
 
 void main() {
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
 class MyAppState extends ChangeNotifier {
   int _pageIndex = 0;
 
-  void _onItemTapped(int index) {
+  void onItemTapped(int index) {
     _pageIndex = index;
     notifyListeners();
   }
@@ -53,31 +54,24 @@ class _MyHomePageState extends State<MyHomePage> {
   // The selected index state manages page navigation
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
     Widget page;
     Widget appBar;
-    switch (appState._pageIndex) {
+    switch (context.watch<MyAppState>()._pageIndex) {
       case 0:
         page = const MainPage();
-        appBar = NavBar(
-          appState: appState,
-          navBarIndex: 0,
-        );
-
+        appBar = const NavBar(navBarIndex: 0);
         break;
       case 1:
         page = const Placeholder();
-        appBar = NavBar(
-          appState: appState,
-          navBarIndex: 1,
-        );
+        appBar = const NavBar(navBarIndex: 1);
         break;
       case 2:
         page = const QuizPage();
-        appBar = QuizBar(
-          appState: appState,
-          navBarIndex: 1,
-        );
+        appBar = const QuizBar(navBarIndex: 1);
+      case 3:
+        page = const Placeholder();
+        appBar = const QuizBar(navBarIndex: 1);
+        break;
       default:
         throw UnimplementedError();
     }
@@ -119,7 +113,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ],
               ),
-              child: const Text('', style: TextStyle(fontSize: 20.0)),
+              child: Text('${context.watch<MyQuizState>().points}',
+                  style: const TextStyle(fontSize: 20.0)),
             ),
           ),
         ],
@@ -128,79 +123,6 @@ class _MyHomePageState extends State<MyHomePage> {
       bottomNavigationBar: appBar,
       // The body of the app
       body: page,
-    );
-  }
-}
-
-//This is the navigation bar that will be displayed on the main page
-class NavBar extends StatelessWidget {
-  const NavBar({super.key, required this.appState, required this.navBarIndex});
-
-  final MyAppState appState;
-  final int navBarIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    return NavigationBar(
-      //This method is passed as a callback function, so parameter is implicit
-      //Still, I'm explicitly calling it here with a lambda function for comprehensibility
-      // I also don't need a currentIndex property because I don't need to access it.
-      onDestinationSelected: (int index) => appState._onItemTapped(index),
-      selectedIndex: navBarIndex,
-      destinations: const <Widget>[
-        NavigationDestination(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.account_circle_rounded),
-          label: 'Profile',
-        ),
-      ],
-    );
-  }
-}
-
-// This navigation bar is for the quiz page
-class QuizBar extends StatelessWidget {
-  const QuizBar({
-    super.key,
-    required this.appState,
-    required this.navBarIndex,
-  });
-
-  final MyAppState appState;
-  final int navBarIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    return NavigationBar(
-      selectedIndex: navBarIndex,
-      onDestinationSelected: (int index) => appState._onItemTapped(index),
-      destinations: <Widget>[
-        const NavigationDestination(
-          icon: Icon(Icons.arrow_back),
-          label: 'Home',
-        ),
-        const Center(child: Text('Sample Quiz')),
-        Center(
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(10, 2.5, 10, 2.5),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.black,
-              ),
-              borderRadius: const BorderRadius.all(Radius.circular(7)),
-              color: Theme.of(context).primaryColor,
-            ),
-            child: Text(
-              '⅕',
-              style:
-                  DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
-            ),
-          ),
-        )
-      ],
     );
   }
 }
@@ -221,10 +143,11 @@ class _MainPageState extends State<MainPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Text("This Week's Quizzes",
-                style: DefaultTextStyle.of(context).style.apply(
-                    fontSizeFactor: 2.0,
-                    fontFamily: GoogleFonts.montserrat().fontFamily)),
+            Text(
+              "This Week's Quizzes",
+              style:
+                  DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
+            ),
             const Padding(
               padding: EdgeInsets.all(8.0),
               child: Divider(),
@@ -234,7 +157,8 @@ class _MainPageState extends State<MainPage> {
               // A single quiz tile
               child: InkWell(
                 onTap: () {
-                  context.read<MyAppState>()._onItemTapped(2);
+                  context.read<MyAppState>().onItemTapped(2);
+                  context.read<MyQuizState>().reset();
                 },
                 highlightColor: Colors.blueGrey.withOpacity(0.2),
                 splashColor: Colors.blueGrey.withOpacity(0.5),
@@ -261,19 +185,23 @@ class _MainPageState extends State<MainPage> {
                 ),
               ),
             ),
-            AnimatedTextKit(
-                isRepeatingAnimation: true,
-                repeatForever: false,
-                animatedTexts: [
-                  TypewriterAnimatedText(
-                    'some text',
-                    cursor: '।',
-                    speed: const Duration(milliseconds: 100),
-                  )
-                ]),
           ],
         ),
       ),
     );
   }
+}
+
+Widget useLater() {
+  return AnimatedTextKit(
+    isRepeatingAnimation: true,
+    repeatForever: false,
+    animatedTexts: [
+      TypewriterAnimatedText(
+        'some text',
+        cursor: '।',
+        speed: const Duration(milliseconds: 100),
+      )
+    ],
+  );
 }

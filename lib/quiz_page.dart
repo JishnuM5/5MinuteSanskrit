@@ -1,18 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'question.dart';
 
 class MyQuizState extends ChangeNotifier {
-  int _selectedIndex = -1;
-  final int _correctIndex = 0;
+  final List<Question> _qList = [
+    Question(
+        question: "Question 1",
+        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        correctIndex: 0),
+    Question(
+        question: "Question 2",
+        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        correctIndex: 0),
+    Question(
+        question: "Question 3",
+        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        correctIndex: 0),
+    Question(
+        question: "Question 4",
+        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        correctIndex: 0),
+    Question(
+        question: "Question 5",
+        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        correctIndex: 0),
+  ];
 
-  void _onAnswerSelected(int index) {
+  int _selectedIndex = -1;
+  bool _ansSubmitted = false;
+  int currentQ = 0;
+  int points = 0;
+
+  void _addPoints(int numPoints) {
+    if (_selectedIndex == _qList[currentQ].correctIndex) {
+      points += numPoints;
+    }
+  }
+
+  void _onAnsSelected(int index) {
     _selectedIndex = index;
     notifyListeners();
   }
 
-  bool _onAnswerSubmitted() {
+  void _onAnsSubmitted() {
+    _ansSubmitted = true;
     notifyListeners();
-    return _correctIndex == _selectedIndex;
+  }
+
+  void reset() {
+    if (currentQ == _qList.length - 1) {
+      //Summary Page
+    } else {
+      if (_ansSubmitted) {
+        currentQ++;
+      }
+    }
+    _selectedIndex = -1;
+    _ansSubmitted = false;
+    notifyListeners();
   }
 }
 
@@ -26,6 +71,9 @@ class QuizPage extends StatefulWidget {
 class _QuizPageState extends State<QuizPage> {
   @override
   Widget build(BuildContext context) {
+    var watchState = context.watch<MyQuizState>();
+    var readState = context.read<MyQuizState>();
+    var currentQ = watchState.currentQ;
     return Scaffold(
       // A scroll view of questions
       body: LayoutBuilder(builder: (context, constraints) {
@@ -40,35 +88,55 @@ class _QuizPageState extends State<QuizPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Text(
-                      'सः पुरुष्हः कार्यालये _ करोति',
-                      style: DefaultTextStyle.of(context)
-                          .style
-                          .apply(fontSizeFactor: 1.25),
-                    ),
+                    Text(watchState._qList[currentQ].question,
+                        style: DefaultTextStyle.of(context)
+                            .style
+                            .apply(fontSizeFactor: 1.25)),
                     const SizedBox(height: 50),
-                    const Expanded(
-                        child: AnswerTile(option: 'Answer 1', index: 0)),
-                    const Expanded(
-                        child: AnswerTile(option: 'Answer 2', index: 1)),
-                    const Expanded(
-                        child: AnswerTile(option: 'Answer 3', index: 2)),
-                    const Expanded(
-                        child: AnswerTile(option: 'Answer 4', index: 3)),
+                    Expanded(
+                        child: AnswerTile(
+                            option: watchState._qList[currentQ].answers[0],
+                            index: 0)),
+                    Expanded(
+                        child: AnswerTile(
+                            option: watchState._qList[currentQ].answers[1],
+                            index: 1)),
+                    Expanded(
+                        child: AnswerTile(
+                            option: watchState._qList[currentQ].answers[2],
+                            index: 2)),
+                    Expanded(
+                        child: AnswerTile(
+                            option: watchState._qList[currentQ].answers[3],
+                            index: 3)),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: OutlinedButton(
-                            onPressed: () => {},
+                            onPressed: watchState._selectedIndex == -1
+                                ? null
+                                : () => {
+                                      if (readState._ansSubmitted)
+                                        {
+                                          readState._addPoints(5),
+                                          readState.reset(),
+                                        }
+                                      else
+                                        {readState._onAnsSubmitted()}
+                                    },
                             style: OutlinedButton.styleFrom(
-                              side: const BorderSide(width: 1.5),
+                              side: watchState._selectedIndex == -1
+                                  ? null
+                                  : const BorderSide(width: 1.5),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(7),
                               ),
                             ),
-                            child: const Text("Submit"),
+                            child: Text(
+                              watchState._ansSubmitted ? "Next" : "Submit",
+                            ),
                           ),
                         ),
                       ],
@@ -96,22 +164,49 @@ class AnswerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var quizState = context.watch<MyQuizState>();
+    var watchState = context.watch<MyQuizState>();
+    var readState = context.read<MyQuizState>();
     Border border;
-    if (quizState._selectedIndex == index) {
-      border = Border.all(
-        color: Theme.of(context).primaryColorDark,
-        width: 4.0,
-      );
+    if (watchState._selectedIndex == index) {
+      if (watchState._ansSubmitted) {
+        if (readState._qList[readState.currentQ].correctIndex == index) {
+          border = Border.all(
+            color: Colors.green[800]!,
+            width: 4.0,
+          );
+        } else {
+          border = Border.all(
+            color: Colors.red[900]!,
+            width: 4.0,
+          );
+        }
+      } else {
+        border = Border.all(
+          color: Theme.of(context).primaryColorDark,
+          width: 4.0,
+        );
+      }
     } else {
-      border = Border.all(color: Colors.black, width: 1.5);
+      if (watchState._ansSubmitted &&
+          readState._qList[readState.currentQ].correctIndex == index) {
+        border = Border.all(
+          color: Colors.green[800]!,
+          width: 4.0,
+        );
+      } else {
+        border = Border.all(color: Colors.black, width: 1.5);
+      }
     }
     return Padding(
       padding: const EdgeInsets.all(10),
       child: MouseRegion(
-        cursor: SystemMouseCursors.click,
+        cursor: watchState._ansSubmitted
+            ? SystemMouseCursors.basic
+            : SystemMouseCursors.click,
         child: GestureDetector(
-          onTap: () => context.read<MyQuizState>()._onAnswerSelected(index),
+          onTap: watchState._ansSubmitted
+              ? null
+              : () => readState._onAnsSelected(index),
           child: Container(
             decoration: BoxDecoration(
               border: border,
