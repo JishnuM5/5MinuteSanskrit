@@ -37,6 +37,8 @@ dependencies:
   provider: ^6.1.2
   google_fonts: ^6.2.0
   animated_text_kit: ^4.2.2
+  firebase_core: ^2.27.2
+  firebase_database: ^10.5.0
 
 
 dev_dependencies:

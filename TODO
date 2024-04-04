@@ -2,9 +2,9 @@ To-Do List
  - Code cleanup: more classes, comments, rename Vars
  - Add logo and finalize fonts
  - Firebase authentication
- - Create an updating point system
  - Create a matching theme throughout the app
     - Add default text style instead of fixed font size
+ - Change how many points are added and when the summary page shows up
 
  Notes
 - ChangeNotifier class added to a state class to store fields for all widgets to access and methods with notifyListeners().
@@ -56,3 +56,12 @@ Setting the UI
 - Sanskrit Font: Baloo 2
 - Color Pallete: https://www.color-hex.com/color-palette/1041210
 - Logo/Cursor: https://en.wikipedia.org/wiki/Danda, https://pub.dev/documentation/animated_text_kit/latest/#typewriter
+
+Database:
+- https://stackoverflow.com/questions/40467777/how-do-i-store-excel-data-into-firebase
+- https://www.youtube.com/watch?v=uYgbwOrW-p4 (Sync Excel Data)
+
+- https://docs.flutter.dev/data-and-backend/serialization/json 
+- https://www.youtube.com/watch?v=sXBJZD0fBa4 (The Firebase Realtime Database and Flutter - Firecasts)
+- https://www.youtube.com/watch?v=ofedT-v6858 (A Guide on Flutter Realtime Database with Firebase - Flutterware)
+- https://firebase.google.com/docs/database/flutter/start

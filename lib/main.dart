@@ -1,23 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'quiz_page.dart';
 import 'app_bars.dart';
 import 'themes.dart';
+import 'package:firebase_database/firebase_database.dart';
 
-void main() {
+//This is the main method, from where the code runs.
+void main() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
+// This widget is the root of my application.
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of my application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // I have two Provider classes, which contain app states lifted out of the widget.
         ChangeNotifierProvider<MyAppState>(create: (context) => MyAppState()),
         ChangeNotifierProvider<MyQuizState>(create: (context) => MyQuizState()),
       ],
@@ -31,7 +39,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// This class contains app states lifted out of the widget tree
+// This class contains app states lifted out of the widget tree.
 class MyAppState extends ChangeNotifier {
   int _pageIndex = 0;
 
@@ -49,9 +57,9 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-// This class is the manages the framework of the app
+// This class manages the framework of the app.
 class _MyHomePageState extends State<MyHomePage> {
-  // The selected index state manages page navigation
+  // The selected index state manages page navigation.
   @override
   Widget build(BuildContext context) {
     Widget page;
@@ -69,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
         page = const QuizPage();
         appBar = const QuizBar(navBarIndex: 1);
       case 3:
-        page = const Placeholder();
+        page = const SummaryPage();
         appBar = const QuizBar(navBarIndex: 1);
         break;
       default:
@@ -94,10 +102,13 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
         actions: <Widget>[
+          // This widget is the point counter.
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
             child: Container(
-              padding: const EdgeInsets.all(5.0),
+              alignment: Alignment.center,
+              width: 50,
+              height: 37.5,
               decoration: BoxDecoration(
                 border: Border.all(
                   color: Colors.black,
@@ -109,12 +120,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     color: Colors.grey.withOpacity(0.5),
                     spreadRadius: 3,
                     blurRadius: 5,
-                    offset: const Offset(0, 1), // Changes position of shadow
+                    offset: const Offset(0, 1),
                   ),
                 ],
               ),
-              child: Text('${context.watch<MyQuizState>().points}',
-                  style: const TextStyle(fontSize: 20.0)),
+              child: Text(
+                '${context.watch<MyQuizState>().points}',
+                style: TextStyle(
+                  fontSize: 27.5,
+                  fontFamily: GoogleFonts.courierPrime().fontFamily,
+                ),
+              ),
             ),
           ),
         ],
@@ -176,7 +192,7 @@ class _MainPageState extends State<MainPage> {
                     padding: const EdgeInsets.all(15.0),
                     alignment: Alignment.center,
                     child: Text(
-                      'Sample Quiz',
+                      context.read<MyQuizState>().quiz.name,
                       style: DefaultTextStyle.of(context).style.apply(
                           fontSizeFactor: 2.0,
                           fontFamily: GoogleFonts.courierPrime().fontFamily),
@@ -192,6 +208,7 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
+// This is a text animation I want to use later in my code; possibly for the login/loading page.
 Widget useLater() {
   return AnimatedTextKit(
     isRepeatingAnimation: true,
