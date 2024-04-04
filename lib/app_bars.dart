@@ -4,8 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'main.dart';
 import 'quiz_page.dart';
 
-//This is the navigation bar that will be displayed on the main page
-
+//This is the navigation bar that will be displayed on the main page.
 class NavBar extends StatelessWidget {
   const NavBar({super.key, required this.navBarIndex});
 
@@ -14,7 +13,7 @@ class NavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NavigationBar(
-      //This method is passed as a callback function, so parameter is implicit
+      //This method is passed as a callback function, so the parameter is implicit.
       //Still, I'm explicitly calling it here with a lambda function for comprehensibility
       // I also don't need a currentIndex property because I don't need to access it.
       onDestinationSelected: (int index) =>
@@ -34,7 +33,7 @@ class NavBar extends StatelessWidget {
   }
 }
 
-// This navigation bar is for the quiz page
+// This navigation bar is for the quiz page.
 class QuizBar extends StatelessWidget {
   const QuizBar({
     super.key,
@@ -71,6 +70,7 @@ class QuizBar extends StatelessWidget {
               borderRadius: const BorderRadius.all(Radius.circular(7)),
               color: Theme.of(context).primaryColor,
             ),
+            // This is the question counter.
             child: Text(
               '${context.watch<MyQuizState>().currentQ + 1}/5',
               style: DefaultTextStyle.of(context).style.apply(

@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "963903160741",
+    "firebase_url": "https://sanskrt-web-app-default-rtdb.firebaseio.com",
+    "project_id": "sanskrt-web-app",
+    "storage_bucket": "sanskrt-web-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:963903160741:android:c95603087666c382db284c",
+        "android_client_info": {
+          "package_name": "com.example.sanskrit_web_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlTMweSpii3e2bEbKyT6NDV-4h4fCN9d4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+// This theme variable is used to keep design consistent throughout the application
 final theme = ThemeData(
   colorScheme:
       ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 11, 83, 148)),
@@ -12,6 +13,7 @@ final theme = ThemeData(
           MaterialStateProperty.all<TextStyle?>(GoogleFonts.courierPrime())),
 );
 
+// This is the main logo that I'm using for my app.
 final logo = RichText(
   text: TextSpan(
     style: TextStyle(
