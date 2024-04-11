@@ -243,11 +243,7 @@ Future createQuestion(String question) async {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   final quiz2 = firestore.collection('quizzes').doc('quiz2');
 
-  final json = {
-    'question': question,
-    'answers': [5, 10, 4, 2],
-    'correctIndex': 2
-  };
+  final json = {'question': question};
 
   await quiz2.set(json);
 }
