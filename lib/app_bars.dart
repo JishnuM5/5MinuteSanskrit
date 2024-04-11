@@ -64,12 +64,20 @@ class QuizBar extends StatelessWidget {
             width: 50,
             height: 40,
             decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.black,
-              ),
-              borderRadius: const BorderRadius.all(Radius.circular(7)),
-              color: Theme.of(context).primaryColor,
-            ),
+                border: Border.all(
+                  color: Colors.black,
+                ),
+                borderRadius: const BorderRadius.all(Radius.circular(7)),
+                color: Theme.of(context).primaryColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 3,
+                    blurRadius: 5,
+                    offset: const Offset(0, 1),
+                  )
+                ]),
+
             // This is the question counter.
             child: Text(
               '${context.watch<MyQuizState>().currentQ + 1}/5',

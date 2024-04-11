@@ -65,3 +65,6 @@ Database:
 - https://www.youtube.com/watch?v=sXBJZD0fBa4 (The Firebase Realtime Database and Flutter - Firecasts)
 - https://www.youtube.com/watch?v=ofedT-v6858 (A Guide on Flutter Realtime Database with Firebase - Flutterware)
 - https://firebase.google.com/docs/database/flutter/start
+
+- https://stackoverflow.com/questions/63492211/no-firebase-app-default-has-been-created-call-firebase-initializeapp-in
+- https://firebase.google.com/docs/database/security

@@ -5,7 +5,7 @@ class Question {
   final List<String> answers;
   final int correctIndex;
 
-  Question({
+  const Question({
     required this.question,
     required this.answers,
     required this.correctIndex,
@@ -17,7 +17,7 @@ class Question {
 class Quiz {
   final List<Question> questions;
   final String name;
-  int quizPoints = 0;
+  // int quizPoints = 0;
 
-  Quiz({required this.questions, required this.name});
+  const Quiz({required this.questions, required this.name});
 }
