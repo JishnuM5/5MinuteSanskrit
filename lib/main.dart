@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'quiz_page.dart';
 import 'app_bars.dart';
 import 'themes.dart';
-import 'package:firebase_database/firebase_database.dart';
 
 //This is the main method, from where the code runs.
 void main() async {
@@ -138,7 +138,10 @@ class _MyHomePageState extends State<MyHomePage> {
       // The bottom navigation bar of the app
       bottomNavigationBar: appBar,
       // The body of the app
-      body: page,
+      body: Padding(
+        padding: const EdgeInsets.all(5.0),
+        child: page,
+      ),
     );
   }
 }
@@ -165,47 +168,88 @@ class _MainPageState extends State<MainPage> {
                   DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
             ),
             const Padding(
-              padding: EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(5.0),
               child: Divider(),
             ),
             Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(10.0),
               // A single quiz tile
-              child: InkWell(
+              child: InkWellBox(
+                maxWidth: 800,
+                maxHeight: 200,
+                child: Text(
+                  context.read<MyQuizState>().quiz.name,
+                  style: DefaultTextStyle.of(context).style.apply(
+                      fontSizeFactor: 2.0,
+                      fontFamily: GoogleFonts.courierPrime().fontFamily),
+                ),
                 onTap: () {
-                  context.read<MyAppState>().onItemTapped(2);
+                  if (context.read<MyQuizState>().showSummary) {
+                    context.read<MyAppState>().onItemTapped(3);
+                  } else {
+                    context.read<MyAppState>().onItemTapped(2);
+                  }
                   context.read<MyQuizState>().reset();
                 },
-                highlightColor: Colors.blueGrey.withOpacity(0.2),
-                splashColor: Colors.blueGrey.withOpacity(0.5),
-                child: Ink(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.black,
-                    ),
-                    borderRadius: const BorderRadius.all(Radius.circular(7)),
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  child: Container(
-                    constraints:
-                        const BoxConstraints.tightFor(width: 800, height: 200),
-                    padding: const EdgeInsets.all(15.0),
-                    alignment: Alignment.center,
-                    child: Text(
-                      context.read<MyQuizState>().quiz.name,
-                      style: DefaultTextStyle.of(context).style.apply(
-                          fontSizeFactor: 2.0,
-                          fontFamily: GoogleFonts.courierPrime().fontFamily),
-                    ),
-                  ),
-                ),
               ),
             ),
+            const SizedBox(width: 300, height: 300),
+            const AddtoDB(),
           ],
         ),
       ),
     );
   }
+}
+
+class AddtoDB extends StatefulWidget {
+  const AddtoDB({
+    super.key,
+  });
+
+  @override
+  State<AddtoDB> createState() => _AddtoDBState();
+}
+
+class _AddtoDBState extends State<AddtoDB> {
+  final controller = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(
+          height: 50,
+          width: 800,
+          child: TextField(controller: controller),
+        ),
+        IconButton(
+          onPressed: () {
+            final question = controller.text;
+            createQuestion(question);
+          },
+          icon: const Icon(
+            Icons.add,
+          ),
+        )
+      ],
+    );
+  }
+}
+
+Future createQuestion(String question) async {
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final quiz2 = firestore.collection('quizzes').doc('quiz2');
+
+  final json = {
+    'question': question,
+    'answers': [5, 10, 4, 2],
+    'correctIndex': 2
+  };
+
+  await quiz2.set(json);
 }
 
 // This is a text animation I want to use later in my code; possibly for the login/loading page.

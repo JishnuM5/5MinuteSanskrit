@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sanskrit_web_app/main.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'main.dart';
 import 'classes.dart';
+import 'themes.dart';
 
 // This class contains app states, specifically for the quiz, lifted out of the widget tree
 class MyQuizState extends ChangeNotifier {
   // A sample quiz.
-  final quiz = Quiz(
+  final quiz = const Quiz(
     name: "Sample Quiz",
     questions: [
       Question(
@@ -36,20 +39,19 @@ class MyQuizState extends ChangeNotifier {
   bool _ansSubmitted = false;
   int currentQ = 0;
   int points = 0;
+  int correctQs = 0;
   bool showSummary = false;
-
-  void _addPoints(int numPoints) {
-    if (_selectedIndex == quiz.questions[currentQ].correctIndex) {
-      points += numPoints;
-    }
-  }
 
   void _onAnsSelected(int index) {
     _selectedIndex = index;
     notifyListeners();
   }
 
-  void _onAnsSubmitted() {
+  void _onAnsSubmitted(int numPoints) {
+    if (_selectedIndex == quiz.questions[currentQ].correctIndex) {
+      points += numPoints;
+      correctQs++;
+    }
     _ansSubmitted = true;
     notifyListeners();
   }
@@ -91,84 +93,81 @@ class _QuizPageState extends State<QuizPage> {
             constraints: BoxConstraints(
                 minWidth: constraints.maxWidth,
                 minHeight: constraints.maxHeight),
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: IntrinsicHeight(
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    // The question.
-                    Text(watchState.quiz.questions[currentQ].question,
-                        style: DefaultTextStyle.of(context)
-                            .style
-                            .apply(fontSizeFactor: 1.25)),
-                    const SizedBox(height: 50),
+            child: IntrinsicHeight(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  // The question.
+                  Text(watchState.quiz.questions[currentQ].question,
+                      style: DefaultTextStyle.of(context)
+                          .style
+                          .apply(fontSizeFactor: 1.25)),
+                  const SizedBox(height: 50),
 
-                    // The four answers.
-                    Expanded(
-                        child: AnswerTile(
-                            option:
-                                watchState.quiz.questions[currentQ].answers[0],
-                            index: 0)),
-                    Expanded(
-                        child: AnswerTile(
-                            option:
-                                watchState.quiz.questions[currentQ].answers[1],
-                            index: 1)),
-                    Expanded(
-                        child: AnswerTile(
-                            option:
-                                watchState.quiz.questions[currentQ].answers[2],
-                            index: 2)),
-                    Expanded(
-                        child: AnswerTile(
-                            option:
-                                watchState.quiz.questions[currentQ].answers[3],
-                            index: 3)),
+                  // The four answers.
+                  Expanded(
+                      child: AnswerTile(
+                          option:
+                              watchState.quiz.questions[currentQ].answers[0],
+                          index: 0)),
+                  Expanded(
+                      child: AnswerTile(
+                          option:
+                              watchState.quiz.questions[currentQ].answers[1],
+                          index: 1)),
+                  Expanded(
+                      child: AnswerTile(
+                          option:
+                              watchState.quiz.questions[currentQ].answers[2],
+                          index: 2)),
+                  Expanded(
+                      child: AnswerTile(
+                          option:
+                              watchState.quiz.questions[currentQ].answers[3],
+                          index: 3)),
 
-                    // This is the next/submit button.
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: OutlinedButton(
-                            // If a question option isn't selected, you can't click submit.
-                            // If an option is selected, it will add 5 points if the answer is correct and reset the question page.
-                            onPressed: (watchState._selectedIndex == -1)
+                  // This is the next/submit button.
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: OutlinedButton(
+                          // If a question option isn't selected, you can't click submit.
+                          // If an option is selected, it will submit the answer and add 5 points if the it's is correct
+                          // If answer has already been submitted, this button will reset the question page and move on to the next question.
+                          onPressed: (watchState._selectedIndex == -1)
+                              ? null
+                              : () => {
+                                    if (readState._ansSubmitted)
+                                      {
+                                        readState.reset(),
+                                        if (watchState.showSummary)
+                                          {
+                                            context
+                                                .read<MyAppState>()
+                                                .onItemTapped(3)
+                                          }
+                                      }
+                                    else
+                                      {readState._onAnsSubmitted(5)}
+                                  },
+                          style: OutlinedButton.styleFrom(
+                            side: watchState._selectedIndex == -1
                                 ? null
-                                : () => {
-                                      if (readState._ansSubmitted)
-                                        {
-                                          readState._addPoints(5),
-                                          readState.reset(),
-                                          if (watchState.showSummary)
-                                            {
-                                              context
-                                                  .read<MyAppState>()
-                                                  .onItemTapped(3)
-                                            }
-                                        }
-                                      else
-                                        {readState._onAnsSubmitted()}
-                                    },
-                            style: OutlinedButton.styleFrom(
-                              side: watchState._selectedIndex == -1
-                                  ? null
-                                  : const BorderSide(width: 1.5),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(7),
-                              ),
-                            ),
-                            child: Text(
-                              watchState._ansSubmitted ? "Next" : "Submit",
+                                : const BorderSide(width: 1.5),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(7),
                             ),
                           ),
+                          child: Text(
+                            watchState._ansSubmitted ? "Next" : "Submit",
+                          ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
@@ -271,17 +270,44 @@ class SummaryPage extends StatelessWidget {
                   DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
             ),
             const Padding(
-              padding: EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(5.0),
               child: Divider(),
             ),
             const Padding(
               padding: EdgeInsets.all(20.0),
-              //IMAGE HERE
-              child: Text(
-                "🎉",
-                style: TextStyle(fontSize: 200),
+              child: Image(
+                image: AssetImage('assets/party-popper.png'),
+                height: 200,
               ),
             ),
+            Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: InkWellBox(
+                      maxWidth: 400,
+                      maxHeight: 200,
+                      child: Text(
+                          "${context.read<MyQuizState>().correctQs}/5 correct"),
+                      onTap: () {},
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: InkWellBox(
+                      maxWidth: 400,
+                      maxHeight: 200,
+                      child: Text(
+                          "${context.read<MyQuizState>().points} points earned"),
+                      onTap: () {},
+                    ),
+                  ),
+                ),
+              ],
+            )
           ],
         ),
       ),
