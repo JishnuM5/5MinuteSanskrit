@@ -1,6 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'main.dart';
 import 'classes.dart';
@@ -9,7 +10,7 @@ import 'themes.dart';
 // This class contains app states, specifically for the quiz, lifted out of the widget tree
 class MyQuizState extends ChangeNotifier {
   // A sample quiz.
-  final quiz = const Quiz(
+  final sampleQuiz = const Quiz(
     name: "Sample Quiz",
     questions: [
       Question(
@@ -34,6 +35,29 @@ class MyQuizState extends ChangeNotifier {
           correctIndex: 0),
     ],
   );
+
+  late Quiz quiz;
+
+  // Future<Quiz> readQuiz() {
+  //   return Future.delayed(Duration(seconds: 5), () => quiz = sampleQuiz);
+  // }
+  Future<Quiz> readQuiz() {
+    late Map<String, dynamic> data;
+    final quiz1Doc =
+        FirebaseFirestore.instance.collection('quizzes').doc('quiz1');
+    return quiz1Doc.get().then(
+      (DocumentSnapshot doc) {
+        data = doc.data() as Map<String, dynamic>;
+        final List<Question> questions = [];
+        for (Map<String, dynamic> question in data.values) {
+          questions.add(Question.fromMap(question));
+        }
+
+        quiz = Quiz(questions: questions, name: 'Quiz 1');
+        return Future.value(quiz);
+      },
+    );
+  }
 
   int _selectedIndex = -1;
   bool _ansSubmitted = false;

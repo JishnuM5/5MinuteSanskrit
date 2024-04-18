@@ -10,6 +10,19 @@ class Question {
     required this.answers,
     required this.correctIndex,
   });
+
+  factory Question.fromMap(Map<String, dynamic> map) {
+    List<String> mapAnswers = [];
+    for (dynamic answer in map["answers"]) {
+      mapAnswers.add(answer.toString());
+    }
+
+    return Question(
+      question: map['question'],
+      answers: mapAnswers,
+      correctIndex: map['correctIndex'],
+    );
+  }
 }
 
 // The quiz class manages a list of questions.
