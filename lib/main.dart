@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:sanskrit_web_app/classes.dart';
 import 'firebase_options.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'quiz_page.dart';
@@ -59,6 +60,14 @@ class MyHomePage extends StatefulWidget {
 
 // This class manages the framework of the app.
 class _MyHomePageState extends State<MyHomePage> {
+  Future<Quiz>? myFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    myFuture = Provider.of<MyQuizState>(context, listen: false).readQuiz();
+  }
+
   // The selected index state manages page navigation.
   @override
   Widget build(BuildContext context) {
@@ -83,66 +92,78 @@ class _MyHomePageState extends State<MyHomePage> {
       default:
         throw UnimplementedError();
     }
-
-    return Scaffold(
-      // The top bar of the app
-      appBar: AppBar(
-        toolbarHeight: 60,
-        backgroundColor: Colors.white,
-        title: Row(
-          children: [
-            // const Image(
-            //   image: AssetImage('assets/logo.png'),
-            //   height: 30,
-            // ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-              child: logo,
-            )
-          ],
-        ),
-        actions: <Widget>[
-          // This widget is the point counter.
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-            child: Container(
-              alignment: Alignment.center,
-              width: 50,
-              height: 37.5,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.black,
-                ),
-                borderRadius: const BorderRadius.all(Radius.circular(7)),
-                color: Theme.of(context).primaryColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 3,
-                    blurRadius: 5,
-                    offset: const Offset(0, 1),
+    return FutureBuilder(
+        future: myFuture,
+        builder: (context, snapshot) {
+          return (!snapshot.hasData)
+              ? const Center(
+                  child: SizedBox(
+                    width: 50,
+                    height: 50,
+                    child: CircularProgressIndicator(),
                   ),
-                ],
-              ),
-              child: Text(
-                '${context.watch<MyQuizState>().points}',
-                style: TextStyle(
-                  fontSize: 27.5,
-                  fontFamily: GoogleFonts.courierPrime().fontFamily,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-      // The bottom navigation bar of the app
-      bottomNavigationBar: appBar,
-      // The body of the app
-      body: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: page,
-      ),
-    );
+                )
+              : Scaffold(
+                  // The top bar of the app
+                  appBar: AppBar(
+                    toolbarHeight: 60,
+                    backgroundColor: Colors.white,
+                    title: Row(
+                      children: [
+                        // const Image(
+                        //   image: AssetImage('assets/logo.png'),
+                        //   height: 30,
+                        // ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                          child: logo,
+                        )
+                      ],
+                    ),
+                    actions: <Widget>[
+                      // This widget is the point counter.
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                        child: Container(
+                          alignment: Alignment.center,
+                          width: 50,
+                          height: 37.5,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Colors.black,
+                            ),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(7)),
+                            color: Theme.of(context).primaryColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 3,
+                                blurRadius: 5,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            '${context.watch<MyQuizState>().points}',
+                            style: TextStyle(
+                              fontSize: 27.5,
+                              fontFamily: GoogleFonts.courierPrime().fontFamily,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  // The bottom navigation bar of the app
+                  bottomNavigationBar: appBar,
+                  // The body of the app
+                  body: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: page,
+                  ),
+                );
+        });
   }
 }
 
@@ -178,7 +199,8 @@ class _MainPageState extends State<MainPage> {
                 maxWidth: 800,
                 maxHeight: 200,
                 child: Text(
-                  context.read<MyQuizState>().quiz.name,
+                  //context.read<MyQuizState>().quiz.name, TODO
+                  "Sample Quiz",
                   style: DefaultTextStyle.of(context).style.apply(
                       fontSizeFactor: 2.0,
                       fontFamily: GoogleFonts.courierPrime().fontFamily),
