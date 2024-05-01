@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,6 +7,7 @@ import 'firebase_options.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'quiz_page.dart';
 import 'app_bars.dart';
+import 'quiz_page_helpers.dart';
 import 'themes.dart';
 
 //This is the main method, from where the code runs.
@@ -93,77 +93,70 @@ class _MyHomePageState extends State<MyHomePage> {
         throw UnimplementedError();
     }
     return FutureBuilder(
-        future: myFuture,
-        builder: (context, snapshot) {
-          return (!snapshot.hasData)
-              ? const Center(
-                  child: SizedBox(
-                    width: 50,
-                    height: 50,
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              : Scaffold(
-                  // The top bar of the app
-                  appBar: AppBar(
-                    toolbarHeight: 60,
-                    backgroundColor: Colors.white,
-                    title: Row(
-                      children: [
-                        // const Image(
-                        //   image: AssetImage('assets/logo.png'),
-                        //   height: 30,
-                        // ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                          child: logo,
-                        )
-                      ],
-                    ),
-                    actions: <Widget>[
-                      // This widget is the point counter.
+      future: myFuture,
+      builder: (context, snapshot) {
+        return (!snapshot.hasData)
+            ? Material(
+                child: animatedLogo(context),
+              )
+            : Scaffold(
+                // The top bar of the app
+                appBar: AppBar(
+                  toolbarHeight: 60,
+                  backgroundColor: Colors.white,
+                  title: Row(
+                    children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                        child: Container(
-                          alignment: Alignment.center,
-                          width: 50,
-                          height: 37.5,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.black,
-                            ),
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(7)),
-                            color: Theme.of(context).primaryColor,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 3,
-                                blurRadius: 5,
-                                offset: const Offset(0, 1),
-                              ),
-                            ],
+                        padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                        child: logo,
+                      )
+                    ],
+                  ),
+                  actions: <Widget>[
+                    // This widget is the point counter.
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                      child: Container(
+                        alignment: Alignment.center,
+                        width: 50,
+                        height: 37.5,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.black,
                           ),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(7)),
+                          color: Theme.of(context).primaryColor,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 3,
+                              blurRadius: 5,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 2.5),
                           child: Text(
                             '${context.watch<MyQuizState>().points}',
-                            style: TextStyle(
-                              fontSize: 27.5,
-                              fontFamily: GoogleFonts.courierPrime().fontFamily,
-                            ),
+                            style: Theme.of(context).textTheme.headlineLarge,
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                  // The bottom navigation bar of the app
-                  bottomNavigationBar: appBar,
-                  // The body of the app
-                  body: Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: page,
-                  ),
-                );
-        });
+                    ),
+                  ],
+                ),
+                // The bottom navigation bar of the app
+                bottomNavigationBar: appBar,
+                // The body of the app
+                body: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: page,
+                ),
+              );
+      },
+    );
   }
 }
 
@@ -183,11 +176,8 @@ class _MainPageState extends State<MainPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Text(
-              "This Week's Quizzes",
-              style:
-                  DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
-            ),
+            Text("This Week's Quizzes",
+                style: Theme.of(context).textTheme.displayLarge),
             const Padding(
               padding: EdgeInsets.all(5.0),
               child: Divider(),
@@ -198,12 +188,10 @@ class _MainPageState extends State<MainPage> {
               child: InkWellBox(
                 maxWidth: 800,
                 maxHeight: 200,
+                color: Theme.of(context).primaryColor,
                 child: Text(
-                  //context.read<MyQuizState>().quiz.name, TODO
-                  "Sample Quiz",
-                  style: DefaultTextStyle.of(context).style.apply(
-                      fontSizeFactor: 2.0,
-                      fontFamily: GoogleFonts.courierPrime().fontFamily),
+                  context.read<MyQuizState>().quiz.name,
+                  style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 onTap: () {
                   if (context.read<MyQuizState>().showSummary) {
@@ -233,6 +221,7 @@ class AddtoDB extends StatefulWidget {
   State<AddtoDB> createState() => _AddtoDBState();
 }
 
+// This class is a small widget at the end of the home page that enables users to write to the database.
 class _AddtoDBState extends State<AddtoDB> {
   final controller = TextEditingController();
 
@@ -261,6 +250,7 @@ class _AddtoDBState extends State<AddtoDB> {
   }
 }
 
+// This is a method that writes a question to the database.
 Future createQuestion(String question) async {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   final quiz2 = firestore.collection('quizzes').doc('quiz2');
@@ -270,16 +260,45 @@ Future createQuestion(String question) async {
   await quiz2.set(json);
 }
 
-// This is a text animation I want to use later in my code; possibly for the login/loading page.
-Widget useLater() {
-  return AnimatedTextKit(
-    isRepeatingAnimation: true,
-    repeatForever: false,
-    animatedTexts: [
-      TypewriterAnimatedText(
-        'some text',
-        cursor: '।',
-        speed: const Duration(milliseconds: 100),
+// This is the animated logo that is displayed on the main page.
+Widget animatedLogo(BuildContext context) {
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      AnimatedTextKit(
+        isRepeatingAnimation: false,
+        repeatForever: false,
+        animatedTexts: [
+          TypewriterAnimatedText(
+            '5 Minute',
+            textStyle: Theme.of(context).textTheme.headlineMedium,
+            cursor: '।',
+            speed: const Duration(milliseconds: 200),
+          ),
+        ],
+      ),
+      AnimatedTextKit(
+        pause: const Duration(milliseconds: 3000),
+        isRepeatingAnimation: false,
+        repeatForever: false,
+        animatedTexts: [
+          TyperAnimatedText(""),
+          TypewriterAnimatedText(
+            'संस्कृतम् ।',
+            textStyle: Theme.of(context).textTheme.displayMedium,
+            cursor: '।',
+            speed: const Duration(milliseconds: 200),
+          ),
+        ],
+      ),
+      const SizedBox(height: 10),
+      SizedBox(
+        width: 50,
+        height: 50,
+        child: CircularProgressIndicator(
+          color: Theme.of(context).primaryColor,
+        ),
       )
     ],
   );

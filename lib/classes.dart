@@ -34,3 +34,29 @@ class Quiz {
 
   const Quiz({required this.questions, required this.name});
 }
+
+const sampleQuiz = Quiz(
+  name: "Sample Quiz",
+  questions: [
+    Question(
+        question: "Question 1",
+        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        correctIndex: 0),
+    Question(
+        question: "Question 2",
+        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        correctIndex: 0),
+    Question(
+        question: "Question 3",
+        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        correctIndex: 0),
+    Question(
+        question: "Question 4",
+        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        correctIndex: 0),
+    Question(
+        question: "Question 5",
+        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        correctIndex: 0),
+  ],
+);

@@ -1,14 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'main.dart';
 import 'classes.dart';
-import 'themes.dart';
+import 'quiz_page_helpers.dart';
 
-// This class contains app states, specifically for the quiz, lifted out of the widget tree
+// This class contains app states, specifically for the quiz, lifted out of the widget tree.
 class MyQuizState extends ChangeNotifier {
+  late Quiz quiz;
+
   // A sample quiz.
   final sampleQuiz = const Quiz(
     name: "Sample Quiz",
@@ -36,47 +39,49 @@ class MyQuizState extends ChangeNotifier {
     ],
   );
 
-  late Quiz quiz;
-
-  // Future<Quiz> readQuiz() {
-  //   return Future.delayed(Duration(seconds: 5), () => quiz = sampleQuiz);
-  // }
   Future<Quiz> readQuiz() {
     late Map<String, dynamic> data;
+    late String name;
+
     final quiz1Doc =
         FirebaseFirestore.instance.collection('quizzes').doc('quiz1');
     return quiz1Doc.get().then(
-      (DocumentSnapshot doc) {
+      (DocumentSnapshot doc) async {
         data = doc.data() as Map<String, dynamic>;
         final List<Question> questions = [];
-        for (Map<String, dynamic> question in data.values) {
-          questions.add(Question.fromMap(question));
+        for (dynamic question in data.values) {
+          if (question is Map<String, dynamic>) {
+            questions.add(Question.fromMap(question));
+          } else {
+            name = question;
+          }
         }
 
-        quiz = Quiz(questions: questions, name: 'Quiz 1');
+        quiz = Quiz(questions: questions, name: name);
+        await Future.delayed(const Duration(seconds: 4), () {});
         return Future.value(quiz);
       },
     );
   }
 
-  int _selectedIndex = -1;
-  bool _ansSubmitted = false;
+  int selectedIndex = -1;
+  bool ansSubmitted = false;
   int currentQ = 0;
   int points = 0;
   int correctQs = 0;
   bool showSummary = false;
 
-  void _onAnsSelected(int index) {
-    _selectedIndex = index;
+  void onAnsSelected(int index) {
+    selectedIndex = index;
     notifyListeners();
   }
 
-  void _onAnsSubmitted(int numPoints) {
-    if (_selectedIndex == quiz.questions[currentQ].correctIndex) {
+  void onAnsSubmitted(int numPoints) {
+    if (selectedIndex == quiz.questions[currentQ].correctIndex) {
       points += numPoints;
       correctQs++;
     }
-    _ansSubmitted = true;
+    ansSubmitted = true;
     notifyListeners();
   }
 
@@ -85,12 +90,12 @@ class MyQuizState extends ChangeNotifier {
     if (currentQ == quiz.questions.length - 1) {
       showSummary = true;
     } else {
-      if (_ansSubmitted) {
+      if (ansSubmitted) {
         currentQ++;
       }
     }
-    _selectedIndex = -1;
-    _ansSubmitted = false;
+    selectedIndex = -1;
+    ansSubmitted = false;
     notifyListeners();
   }
 }
@@ -120,13 +125,23 @@ class _QuizPageState extends State<QuizPage> {
             child: IntrinsicHeight(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // The question.
-                  Text(watchState.quiz.questions[currentQ].question,
-                      style: DefaultTextStyle.of(context)
-                          .style
-                          .apply(fontSizeFactor: 1.25)),
-                  const SizedBox(height: 50),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 5.0, vertical: 25),
+                    child: Text(
+                      watchState.quiz.questions[currentQ].question,
+                      style: isSanskrit(
+                              watchState.quiz.questions[currentQ].question)
+                          ? Theme.of(context).textTheme.displayMedium!.copyWith(
+                              fontFamily: GoogleFonts.montserrat().fontFamily)
+                          : Theme.of(context).textTheme.displaySmall,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
 
                   // The four answers.
                   Expanded(
@@ -158,12 +173,12 @@ class _QuizPageState extends State<QuizPage> {
                         padding: const EdgeInsets.all(10.0),
                         child: OutlinedButton(
                           // If a question option isn't selected, you can't click submit.
-                          // If an option is selected, it will submit the answer and add 5 points if the it's is correct
+                          // If an option is selected, it will submit the answer and add 5 points if the it's is correct.
                           // If answer has already been submitted, this button will reset the question page and move on to the next question.
-                          onPressed: (watchState._selectedIndex == -1)
+                          onPressed: (watchState.selectedIndex == -1)
                               ? null
                               : () => {
-                                    if (readState._ansSubmitted)
+                                    if (readState.ansSubmitted)
                                       {
                                         readState.reset(),
                                         if (watchState.showSummary)
@@ -174,10 +189,10 @@ class _QuizPageState extends State<QuizPage> {
                                           }
                                       }
                                     else
-                                      {readState._onAnsSubmitted(5)}
+                                      {readState.onAnsSubmitted(5)}
                                   },
                           style: OutlinedButton.styleFrom(
-                            side: watchState._selectedIndex == -1
+                            side: watchState.selectedIndex == -1
                                 ? null
                                 : const BorderSide(width: 1.5),
                             shape: RoundedRectangleBorder(
@@ -185,7 +200,7 @@ class _QuizPageState extends State<QuizPage> {
                             ),
                           ),
                           child: Text(
-                            watchState._ansSubmitted ? "Next" : "Submit",
+                            watchState.ansSubmitted ? "Next" : "Submit",
                           ),
                         ),
                       ),
@@ -197,144 +212,6 @@ class _QuizPageState extends State<QuizPage> {
           ),
         );
       }),
-    );
-  }
-}
-
-// This is the framework of an answer tile.
-class AnswerTile extends StatelessWidget {
-  const AnswerTile({
-    super.key,
-    required this.index,
-    required this.option,
-  });
-
-  final int index;
-  final String option;
-
-  @override
-  Widget build(BuildContext context) {
-    var watchState = context.watch<MyQuizState>();
-    var readState = context.read<MyQuizState>();
-    Border border;
-
-    // Here, the border of an answer is set based on selection/submission.
-    if (watchState._selectedIndex == index) {
-      if (watchState._ansSubmitted) {
-        if (readState.quiz.questions[readState.currentQ].correctIndex ==
-            index) {
-          border = Border.all(
-            color: Colors.green[800]!,
-            width: 4.0,
-          );
-        } else {
-          border = Border.all(
-            color: Colors.red[900]!,
-            width: 4.0,
-          );
-        }
-      } else {
-        border = Border.all(
-          color: Theme.of(context).primaryColorDark,
-          width: 4.0,
-        );
-      }
-    } else {
-      if (watchState._ansSubmitted &&
-          readState.quiz.questions[readState.currentQ].correctIndex == index) {
-        border = Border.all(
-          color: Colors.green[800]!,
-          width: 4.0,
-        );
-      } else {
-        border = Border.all(color: Colors.black, width: 1.5);
-      }
-    }
-
-    // This is the widget that contains the answer.
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: MouseRegion(
-        cursor: watchState._ansSubmitted
-            ? SystemMouseCursors.basic
-            : SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: watchState._ansSubmitted
-              ? null
-              : () => readState._onAnsSelected(index),
-          child: Container(
-            decoration: BoxDecoration(
-              border: border,
-              borderRadius: const BorderRadius.all(Radius.circular(7)),
-              color: Theme.of(context).primaryColorLight,
-            ),
-            padding: const EdgeInsets.all(10.0),
-            alignment: Alignment.center,
-            child: Text(option),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// This is my summary page.
-class SummaryPage extends StatelessWidget {
-  const SummaryPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Text(
-              "उत्तमम् !",
-              style:
-                  DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(5.0),
-              child: Divider(),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Image(
-                image: AssetImage('assets/party-popper.png'),
-                height: 200,
-              ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: InkWellBox(
-                      maxWidth: 400,
-                      maxHeight: 200,
-                      child: Text(
-                          "${context.read<MyQuizState>().correctQs}/5 correct"),
-                      onTap: () {},
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: InkWellBox(
-                      maxWidth: 400,
-                      maxHeight: 200,
-                      child: Text(
-                          "${context.read<MyQuizState>().points} points earned"),
-                      onTap: () {},
-                    ),
-                  ),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
     );
   }
 }

@@ -11,8 +11,29 @@ final theme = ThemeData(
   primaryColorLight: const Color.fromARGB(255, 111, 168, 220),
   fontFamily: GoogleFonts.montserrat().fontFamily,
   navigationBarTheme: NavigationBarThemeData(
-      labelTextStyle:
-          MaterialStateProperty.all<TextStyle?>(GoogleFonts.courierPrime())),
+    labelTextStyle: MaterialStateProperty.all<TextStyle?>(
+      GoogleFonts.courierPrime(),
+    ),
+  ),
+  textTheme: TextTheme(
+      headlineLarge: TextStyle(
+          fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 27.5),
+      headlineMedium: TextStyle(
+          fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 25),
+      headlineSmall: TextStyle(
+          fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 18),
+      bodyLarge: TextStyle(
+          fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 16),
+      bodyMedium: TextStyle(
+          fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 14.5),
+      bodySmall: TextStyle(
+          fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 12),
+      displayLarge: TextStyle(
+          fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 29),
+      displayMedium:
+          TextStyle(fontFamily: GoogleFonts.baloo2().fontFamily, fontSize: 25),
+      displaySmall: TextStyle(
+          fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 19)),
 );
 
 // This is the main logo that I'm using for my app.
@@ -37,11 +58,13 @@ class InkWellBox extends StatelessWidget {
       required this.maxWidth,
       required this.maxHeight,
       required this.child,
+      required this.color,
       this.onTap});
 
   final double maxWidth;
   final double maxHeight;
   final Widget child;
+  final Color color;
   final void Function()? onTap;
 
   @override
@@ -56,7 +79,7 @@ class InkWellBox extends StatelessWidget {
             color: Colors.black,
           ),
           borderRadius: const BorderRadius.all(Radius.circular(7)),
-          color: Theme.of(context).primaryColor,
+          color: color,
         ),
         child: Container(
           constraints:
