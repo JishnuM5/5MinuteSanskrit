@@ -54,10 +54,11 @@ class QuizBar extends StatelessWidget {
           label: 'Home',
         ),
         Center(
-            child: Text(
-          'Sample Quiz',
-          style: TextStyle(fontFamily: GoogleFonts.courierPrime().fontFamily),
-        )),
+          child: Text(
+            context.watch<MyQuizState>().quiz.name,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+        ),
         Center(
           child: Container(
             alignment: Alignment.center,

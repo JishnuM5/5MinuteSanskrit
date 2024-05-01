@@ -1,18 +1,42 @@
 # To-Do List
- - Code cleanup: more classes, comments, rename Vars
- - Add logo and finalize fonts
- - Firebase authentication
- - Create a matching theme throughout the app
-    - Add default text style instead of fixed font size
- - Change how many points are added and when the summary page shows up
+ - Create quiz index for Quiz Page
+ - Put quizzes in an array and refactor quiz tile. 
+  - Show this array
+ - Create "show" boolean in database, access for each quiz, and add to home page quiz arraw based on boolean check
+ - Migrate variables to quiz page
+
+## Mutliple Quiz Formatting
+ - All visible quizzes are going to be in a home page, displayed with an array
+  - Whether a quiz is visible depends on its "show" value in the database
+    - This will be controlled by an admin account (to add later on)
+      - Admins can also write new quizzes to the database
+
+ - Quizzes can be completed (to add later on)
+  - To complete a quiz, the user will answer all questions correctly twice
+    - Only 5/10 questions can be done a day
+    - 5 points each time a question is answered correctly
+
+- There will be accounts to control students and admins (to add later on)
+  - Two types of accounts: students and admins
+    - Will need to add "classrooms" that students can join
+      - The same quizzes will be shown to all students in the same classroom
+      - Admins control a classroom
+  - Will need to create profiles for account 
+    - Log in and log out
+
+### Stretch Stretch Goals
+ - Add a clickable confetti animation to the summary page
+ - Give user extra points after mastering a question or competing a quiz
+ - Create a leaderboard
+ - Advanced UI
+
  <br /><br />
 
  # Notes
  ## State Management
 - ChangeNotifier class added to a state class to store fields for all widgets to access and methods with notifyListeners().
 - ChangeNotifierProvider is the widget that provides an instance of ChangeNotifier, added in the main method (MultiProvider if multiple classes needed).
-
-void main() {
+```void main() {
   runApp(
     ChangeNotifierProvider(
       create: (context) => MyAppState(),
@@ -20,6 +44,8 @@ void main() {
     ),
   );
 }
+```
+
 - MyAppState() is an example of a "model", which are similar to helper classes/objects in OOP.
 
 - These are different methods to use ChangeNotifier. Each one has tiny differences but many can be interchanged in most cases. Internet recommends using context.read() and context.watch().
