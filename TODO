@@ -1,9 +1,12 @@
 # To-Do List
- - Create quiz index for Quiz Page
- - Put quizzes in an array and refactor quiz tile. 
-  - Show this array
- - Create "show" boolean in database, access for each quiz, and add to home page quiz arraw based on boolean check
- - Migrate variables to quiz page
+- Create a profile page
+- Add accounts that saves points, which quizzes to show, quiz progress, etc
+  - Change the UI for the log-in page - give an error when password/email is wrong
+  - Add reset password (on login page) and change password (on profile page)
+- Skip the login page when user is already logged in
+- Create two types of accounts (student and teacher)
+- Standardize UI across app (buttons, etc.)
+- Write better rules for the app
 
 ## Mutliple Quiz Formatting
  - All visible quizzes are going to be in a home page, displayed with an array
@@ -85,7 +88,7 @@ Future<someType>.then((someType) {}) is an instance method allows for handling a
   ```FutureBuilder<String>(
     future: _fetchNetworkData, builder: (context, snapshot) {
       if (snapshot.hasError) {
-        print("There was an error :(");
+        print("There was an error");
 
       } else if (snapshot.hasData) {
         print("${snapshot.data}");
@@ -119,27 +122,22 @@ A Stream<T> like a Future<T> but it delivers 0+ values over time. This means its
 ## State Management
 - https://docs.flutter.dev/data-and-backend/state-mgmt/simple
 - https://flutterbyexample.com/lesson/change-notifier-provider 
-- https://stackoverflow.com/questions/62257064/is-provider-ofcontext-listen-false-equivalent-to-context-read
 
 ## Setting the UI
 - https://pub.dev/packages/google_fonts
-- https://stackoverflow.com/questions/56194440/flutter-default-font-size
 - https://infinum.com/blog/flutter-color-schemes/
+<br /><br />
 
-- Font Pairing: Courier New (+ Quicksand, Montserrat?)
+- Font Pairing: Courier New and Montserrat
 - Sanskrit Font: Baloo 2
 - Color Pallete: https://www.color-hex.com/color-palette/1041210
 - Logo/Cursor: https://en.wikipedia.org/wiki/Danda, https://pub.dev/documentation/animated_text_kit/latest/#typewriter
 
 ## Database:
-- https://stackoverflow.com/questions/40467777/how-do-i-store-excel-data-into-firebase
-- https://www.youtube.com/watch?v=uYgbwOrW-p4 (Sync Excel Data)
-
 - https://docs.flutter.dev/data-and-backend/serialization/json 
-- https://www.youtube.com/watch?v=sXBJZD0fBa4 (The Firebase Realtime Database and Flutter - Firecasts)
-- https://www.youtube.com/watch?v=ofedT-v6858 (A Guide on Flutter Realtime Database with Firebase - Flutterware)
-- https://firebase.google.com/docs/database/flutter/start
+- https://firebase.google.com/docs/firestore/query-data/get-data
+- https://firebase.google.com/docs/firestore/manage-data/export-import
+- https://firebase.google.com/docs/firestore/manage-data/add-data#dart_1
 
-- https://stackoverflow.com/questions/63492211/no-firebase-app-default-has-been-created-call-firebase-initializeapp-in
-- https://stackoverflow.com/questions/68624876/how-can-i-use-future-builder-with-provider
- <br /><br />
+### Authentication
+- https://www.youtube.com/watch?v=4vKiJZNPhss 

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'classes.dart';
 import 'quiz_page.dart';
 import 'themes.dart';
 
@@ -10,22 +11,24 @@ class AnswerTile extends StatelessWidget {
     super.key,
     required this.index,
     required this.option,
+    required this.currentQuiz,
   });
 
   final int index;
   final String option;
+  final int currentQuiz;
 
   @override
   Widget build(BuildContext context) {
     var watchState = context.watch<MyQuizState>();
     var readState = context.read<MyQuizState>();
+    Quiz quiz = readState.quizzes[currentQuiz];
     Border border;
 
     // Here, the border of an answer is set based on selection/submission.
     if (watchState.selectedIndex == index) {
       if (watchState.ansSubmitted) {
-        if (readState.quiz.questions[readState.currentQ].correctIndex ==
-            index) {
+        if (quiz.questions[quiz.currentQ].correctIndex == index) {
           border = Border.all(
             color: Colors.green[800]!,
             width: 4.0,
@@ -44,7 +47,7 @@ class AnswerTile extends StatelessWidget {
       }
     } else {
       if (watchState.ansSubmitted &&
-          readState.quiz.questions[readState.currentQ].correctIndex == index) {
+          quiz.questions[quiz.currentQ].correctIndex == index) {
         border = Border.all(
           color: Colors.green[800]!,
           width: 4.0,
@@ -92,14 +95,17 @@ class SummaryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Quiz quiz = context
+        .read<MyQuizState>()
+        .quizzes[context.read<MyQuizState>().currentQuiz];
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
             Text(
-              "उत्तमम् !",
+              "उत्तमम्!",
               style: Theme.of(context).textTheme.headlineLarge,
-              //TODO
             ),
             const Padding(
               padding: EdgeInsets.all(5.0),
@@ -122,8 +128,8 @@ class SummaryPage extends StatelessWidget {
                       maxWidth: 400,
                       maxHeight: 200,
                       child: Text(
-                        "${context.read<MyQuizState>().correctQs}/5 correct",
-                        style: Theme.of(context).textTheme.headlineSmall, //TODO
+                        "${quiz.correctQs}/${quiz.questions.length}",
+                        style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       onTap: () {},
                     ),
@@ -137,7 +143,7 @@ class SummaryPage extends StatelessWidget {
                       maxHeight: 200,
                       color: Theme.of(context).primaryColorLight,
                       child: Text(
-                        "${context.read<MyQuizState>().points} points earned",
+                        "${quiz.points} points earned",
                         style: Theme.of(context).textTheme.headlineSmall,
                         textAlign: TextAlign.center,
                       ),

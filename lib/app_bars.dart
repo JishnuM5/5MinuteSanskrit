@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'main.dart';
 import 'quiz_page.dart';
 
@@ -44,6 +43,10 @@ class QuizBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var currentQuiz = context
+        .watch<MyQuizState>()
+        .quizzes[context.watch<MyQuizState>().currentQuiz];
+
     return NavigationBar(
       selectedIndex: navBarIndex,
       onDestinationSelected: (int index) =>
@@ -55,7 +58,7 @@ class QuizBar extends StatelessWidget {
         ),
         Center(
           child: Text(
-            context.watch<MyQuizState>().quiz.name,
+            currentQuiz.name,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
         ),
@@ -81,10 +84,8 @@ class QuizBar extends StatelessWidget {
 
             // This is the question counter.
             child: Text(
-              '${context.watch<MyQuizState>().currentQ + 1}/5',
-              style: DefaultTextStyle.of(context).style.apply(
-                  fontSizeFactor: 1.5,
-                  fontFamily: GoogleFonts.courierPrime().fontFamily),
+              '${currentQuiz.currentQ + 1}/${currentQuiz.questions.length}',
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
         )
