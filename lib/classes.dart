@@ -26,35 +26,42 @@ class Question {
 }
 
 // The quiz class manages a list of questions.
-// It also contains the quiz name and the number of points earned for the quiz.
+// It also contains the quiz name and various variables that keep track of the quiz state.
 class Quiz {
   final List<Question> questions;
   final String name;
-  // int quizPoints = 0;
+  final bool show;
 
-  const Quiz({required this.questions, required this.name});
+  int points = 0;
+  bool showSummary = false;
+  int currentQ = 0;
+  int correctQs = 0;
+
+  Quiz({required this.questions, required this.name, required this.show});
 }
 
-const sampleQuiz = Quiz(
+// A sample quiz.
+Quiz sampleQuiz = Quiz(
   name: "Sample Quiz",
+  show: true,
   questions: [
-    Question(
+    const Question(
         question: "Question 1",
         answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
         correctIndex: 0),
-    Question(
+    const Question(
         question: "Question 2",
         answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
         correctIndex: 0),
-    Question(
+    const Question(
         question: "Question 3",
         answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
         correctIndex: 0),
-    Question(
+    const Question(
         question: "Question 4",
         answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
         correctIndex: 0),
-    Question(
+    const Question(
         question: "Question 5",
         answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
         correctIndex: 0),

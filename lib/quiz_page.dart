@@ -10,66 +10,39 @@ import 'quiz_page_helpers.dart';
 
 // This class contains app states, specifically for the quiz, lifted out of the widget tree.
 class MyQuizState extends ChangeNotifier {
-  late Quiz quiz;
+  List<Quiz> quizzes = [];
 
-  // A sample quiz.
-  final sampleQuiz = const Quiz(
-    name: "Sample Quiz",
-    questions: [
-      Question(
-          question: "Question 1",
-          answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
-          correctIndex: 0),
-      Question(
-          question: "Question 2",
-          answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
-          correctIndex: 0),
-      Question(
-          question: "Question 3",
-          answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
-          correctIndex: 0),
-      Question(
-          question: "Question 4",
-          answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
-          correctIndex: 0),
-      Question(
-          question: "Question 5",
-          answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
-          correctIndex: 0),
-    ],
-  );
-
-  Future<Quiz> readQuiz() {
+  Future<List<Quiz>> readQuiz() {
     late Map<String, dynamic> data;
     late String name;
+    late bool show;
 
-    final quiz1Doc =
-        FirebaseFirestore.instance.collection('quizzes').doc('quiz1');
-    return quiz1Doc.get().then(
-      (DocumentSnapshot doc) async {
+    final quizRef = FirebaseFirestore.instance.collection('quizzes');
+    return quizRef.get().then((value) async {
+      for (DocumentSnapshot doc in value.docs) {
         data = doc.data() as Map<String, dynamic>;
+
         final List<Question> questions = [];
+
         for (dynamic question in data.values) {
           if (question is Map<String, dynamic>) {
             questions.add(Question.fromMap(question));
+          } else if (question is bool) {
+            show = question;
           } else {
             name = question;
           }
         }
-
-        quiz = Quiz(questions: questions, name: name);
-        await Future.delayed(const Duration(seconds: 4), () {});
-        return Future.value(quiz);
-      },
-    );
+        quizzes.add(Quiz(questions: questions, name: name, show: show));
+        await Future.delayed(const Duration(seconds: 2), () {});
+      }
+      return Future.value(quizzes);
+    });
   }
 
+  int currentQuiz = -1;
   int selectedIndex = -1;
   bool ansSubmitted = false;
-  int currentQ = 0;
-  int points = 0;
-  int correctQs = 0;
-  bool showSummary = false;
 
   void onAnsSelected(int index) {
     selectedIndex = index;
@@ -77,9 +50,10 @@ class MyQuizState extends ChangeNotifier {
   }
 
   void onAnsSubmitted(int numPoints) {
-    if (selectedIndex == quiz.questions[currentQ].correctIndex) {
-      points += numPoints;
-      correctQs++;
+    Quiz quiz = quizzes[currentQuiz];
+    if (selectedIndex == quiz.questions[quiz.currentQ].correctIndex) {
+      quiz.points += numPoints;
+      quiz.correctQs++;
     }
     ansSubmitted = true;
     notifyListeners();
@@ -87,21 +61,28 @@ class MyQuizState extends ChangeNotifier {
 
   // This method resets the question page when entering the quiz or going to the next question.
   void reset() {
-    if (currentQ == quiz.questions.length - 1) {
-      showSummary = true;
+    Quiz quiz = quizzes[currentQuiz];
+    if (quiz.currentQ == quizzes[currentQuiz].questions.length - 1 &&
+        ansSubmitted) {
+      quiz.showSummary = true;
     } else {
       if (ansSubmitted) {
-        currentQ++;
+        quiz.currentQ++;
       }
     }
     selectedIndex = -1;
     ansSubmitted = false;
     notifyListeners();
   }
+
+  void setCurrentQuiz(int index) {
+    currentQuiz = index;
+  }
 }
 
 class QuizPage extends StatefulWidget {
-  const QuizPage({super.key});
+  const QuizPage({required this.currentQuiz, super.key});
+  final int currentQuiz;
 
   @override
   State<QuizPage> createState() => _QuizPageState();
@@ -113,7 +94,9 @@ class _QuizPageState extends State<QuizPage> {
   Widget build(BuildContext context) {
     var watchState = context.watch<MyQuizState>();
     var readState = context.read<MyQuizState>();
-    var currentQ = watchState.currentQ;
+    var quiz = watchState.quizzes[widget.currentQuiz];
+    var currentQ = quiz.currentQ;
+
     return Scaffold(
       // A scroll view of questions.
       body: LayoutBuilder(builder: (context, constraints) {
@@ -132,9 +115,8 @@ class _QuizPageState extends State<QuizPage> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 5.0, vertical: 25),
                     child: Text(
-                      watchState.quiz.questions[currentQ].question,
-                      style: isSanskrit(
-                              watchState.quiz.questions[currentQ].question)
+                      quiz.questions[currentQ].question,
+                      style: isSanskrit(quiz.questions[currentQ].question)
                           ? Theme.of(context).textTheme.displayMedium!.copyWith(
                               fontFamily: GoogleFonts.montserrat().fontFamily)
                           : Theme.of(context).textTheme.displaySmall,
@@ -146,24 +128,28 @@ class _QuizPageState extends State<QuizPage> {
                   // The four answers.
                   Expanded(
                       child: AnswerTile(
-                          option:
-                              watchState.quiz.questions[currentQ].answers[0],
-                          index: 0)),
+                    option: quiz.questions[currentQ].answers[0],
+                    index: 0,
+                    currentQuiz: widget.currentQuiz,
+                  )),
                   Expanded(
                       child: AnswerTile(
-                          option:
-                              watchState.quiz.questions[currentQ].answers[1],
-                          index: 1)),
+                    option: quiz.questions[currentQ].answers[1],
+                    index: 1,
+                    currentQuiz: widget.currentQuiz,
+                  )),
                   Expanded(
                       child: AnswerTile(
-                          option:
-                              watchState.quiz.questions[currentQ].answers[2],
-                          index: 2)),
+                    option: quiz.questions[currentQ].answers[2],
+                    index: 2,
+                    currentQuiz: widget.currentQuiz,
+                  )),
                   Expanded(
                       child: AnswerTile(
-                          option:
-                              watchState.quiz.questions[currentQ].answers[3],
-                          index: 3)),
+                    option: quiz.questions[currentQ].answers[3],
+                    index: 3,
+                    currentQuiz: widget.currentQuiz,
+                  )),
 
                   // This is the next/submit button.
                   Row(
@@ -181,7 +167,7 @@ class _QuizPageState extends State<QuizPage> {
                                     if (readState.ansSubmitted)
                                       {
                                         readState.reset(),
-                                        if (watchState.showSummary)
+                                        if (quiz.showSummary)
                                           {
                                             context
                                                 .read<MyAppState>()
