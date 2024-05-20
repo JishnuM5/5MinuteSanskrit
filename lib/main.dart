@@ -21,6 +21,8 @@ void main() async {
   runApp(const MyApp());
 }
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 // This widget is the root of my application.
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -34,6 +36,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<MyQuizState>(create: (context) => MyQuizState()),
       ],
       child: MaterialApp(
+        navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
         title: '5 Minute संस्कृतम्',
         theme: theme,
@@ -84,9 +87,6 @@ class _MyHomePageState extends State<MyHomePage> {
         page = const SummaryPage();
         appBar = const QuizBar(navBarIndex: 1);
         break;
-      // case 4:
-      //   page = const LoginPage();
-      //   appBar = null;
       default:
         throw UnimplementedError();
     }
@@ -300,9 +300,12 @@ Widget animatedLogo(BuildContext context, bool animate) {
                 ),
               ],
             )
-          : Text(
-              '5 Minute ',
-              style: Theme.of(context).textTheme.headlineMedium,
+          : Padding(
+              padding: const EdgeInsets.fromLTRB(6, 5, 0, 0),
+              child: Text(
+                '5 Minute ',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
             ),
       (animate)
           ? AnimatedTextKit(
@@ -319,8 +322,11 @@ Widget animatedLogo(BuildContext context, bool animate) {
                 ),
               ],
             )
-          : Text('संस्कृतम् । ',
-              style: Theme.of(context).textTheme.displayMedium),
+          : Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 4, 0),
+              child: Text('संस्कृतम् । ',
+                  style: Theme.of(context).textTheme.displayMedium),
+            ),
       const SizedBox(height: 10),
       SizedBox(
         width: 50,

@@ -15,6 +15,17 @@ final theme = ThemeData(
       GoogleFonts.courierPrime(),
     ),
   ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(7),
+      ),
+      minimumSize: const Size.fromHeight(40),
+      backgroundColor: const Color.fromARGB(255, 11, 83, 148),
+      foregroundColor: Colors.white,
+      //textStyle: const TextStyle(fontWeight: FontWeight.bold),
+    ),
+  ),
   textTheme: TextTheme(
       headlineLarge: TextStyle(
           fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 27.5),

@@ -12,31 +12,63 @@ import 'quiz_page_helpers.dart';
 class MyQuizState extends ChangeNotifier {
   List<Quiz> quizzes = [];
 
-  Future<List<Quiz>> readQuiz() {
+  // Future<List<Quiz>> readQuiz() {
+  //   late Map<String, dynamic> data;
+  //   late String name;
+  //   late bool show;
+
+  //   final quizRef = FirebaseFirestore.instance.collection('quizzes');
+  //   return quizRef.get().then((value) async {
+  //     for (DocumentSnapshot doc in value.docs) {
+  //       data = doc.data() as Map<String, dynamic>;
+
+  //       final List<Question> questions = [];
+
+  //       for (dynamic question in data.values) {
+  //         if (question is Map<String, dynamic>) {
+  //           questions.add(Question.fromMap(question));
+  //         } else if (question is bool) {
+  //           show = question;
+  //         } else {
+  //           name = question;
+  //         }
+  //       }
+  //       quizzes.add(Quiz(questions: questions, name: name, show: show));
+  //       await Future.delayed(const Duration(seconds: 2), () {});
+  //     }
+  //     return Future.value(quizzes);
+  //   });
+  Future readQuiz() {
     late Map<String, dynamic> data;
     late String name;
     late bool show;
 
     final quizRef = FirebaseFirestore.instance.collection('quizzes');
     return quizRef.get().then((value) async {
-      for (DocumentSnapshot doc in value.docs) {
-        data = doc.data() as Map<String, dynamic>;
+      try {
+        for (DocumentSnapshot doc in value.docs) {
+          data = doc.data() as Map<String, dynamic>;
 
-        final List<Question> questions = [];
+          final List<Question> questions = [];
 
-        for (dynamic question in data.values) {
-          if (question is Map<String, dynamic>) {
-            questions.add(Question.fromMap(question));
-          } else if (question is bool) {
-            show = question;
-          } else {
-            name = question;
+          for (dynamic question in data.values) {
+            if (question is Map<String, dynamic>) {
+              questions.add(Question.fromMap(question));
+            } else if (question is bool) {
+              show = question;
+            } else {
+              name = question;
+            }
           }
+          quizzes.add(Quiz(questions: questions, name: name, show: show));
+          await Future.delayed(const Duration(seconds: 2), () {});
         }
-        quizzes.add(Quiz(questions: questions, name: name, show: show));
-        await Future.delayed(const Duration(seconds: 2), () {});
+        return Future.value(quizzes);
+      } catch (e) {
+        return Future.error('$e');
       }
-      return Future.value(quizzes);
+    }).catchError((error) {
+      return Future.error('$error');
     });
   }
 
