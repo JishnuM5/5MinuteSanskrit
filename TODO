@@ -5,7 +5,6 @@
   - Add reset password (on login page) and change password (on profile page)
 - Skip the login page when user is already logged in
 - Create two types of accounts (student and teacher)
-- Standardize UI across app (buttons, etc.)
 - Write better rules for the app
 
 ## Mutliple Quiz Formatting
@@ -32,7 +31,8 @@
  - Give user extra points after mastering a question or competing a quiz
  - Create a leaderboard
  - Advanced UI
-
+ - Improve the optimization of loading/saving quizzes and users
+ - Saving cache to avoid reading the database every time
  <br /><br />
 
  # Notes
@@ -132,12 +132,15 @@ A Stream<T> like a Future<T> but it delivers 0+ values over time. This means its
 - Sanskrit Font: Baloo 2
 - Color Pallete: https://www.color-hex.com/color-palette/1041210
 - Logo/Cursor: https://en.wikipedia.org/wiki/Danda, https://pub.dev/documentation/animated_text_kit/latest/#typewriter
+- Container/Button Decor: radius of 15 for rounded borders, constant shadow; see themes.dart
 
 ## Database:
 - https://docs.flutter.dev/data-and-backend/serialization/json 
 - https://firebase.google.com/docs/firestore/query-data/get-data
 - https://firebase.google.com/docs/firestore/manage-data/export-import
 - https://firebase.google.com/docs/firestore/manage-data/add-data#dart_1
+
+- What's stored in the database: Quiz(questions, name, show), User(name, quizStates)
 
 ### Authentication
 - https://www.youtube.com/watch?v=4vKiJZNPhss 

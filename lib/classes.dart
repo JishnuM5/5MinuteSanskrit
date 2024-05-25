@@ -40,6 +40,16 @@ class Quiz {
   Quiz({required this.questions, required this.name, required this.show});
 }
 
+class QuizState {
+  final String quizName;
+  int points = 0;
+  bool showSummary = false;
+  int currentQ = 0;
+  int correctQs = 0;
+
+  QuizState({required this.quizName});
+}
+
 // A sample quiz.
 Quiz sampleQuiz = Quiz(
   name: "Sample Quiz",
@@ -67,3 +77,10 @@ Quiz sampleQuiz = Quiz(
         correctIndex: 0),
   ],
 );
+
+class User {
+  String name;
+  List<QuizState> quizStates;
+
+  User({required this.name, required this.quizStates});
+}

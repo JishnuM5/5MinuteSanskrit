@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import 'themes.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -24,21 +27,32 @@ class ProfilePage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+                  boxShadow: [shadow],
                 ),
                 child: Column(
                   children: [
-                    Text("Signed in as",
-                        style: Theme.of(context).textTheme.bodySmall),
-                    Text(user!.email!,
-                        style: Theme.of(context).textTheme.headlineSmall),
+                    Text(
+                      "Signed in as",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    FutureBuilder(
+                        future: getName(user!),
+                        initialData: "",
+                        builder: (context, snapshot) {
+                          return Text(
+                            snapshot.data ?? "Error retrieving data",
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          );
+                        }),
+                    const SizedBox(height: 20),
+                    Text(
+                      "Email",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    Text(
+                      user.email!,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
@@ -54,5 +68,12 @@ class ProfilePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<String> getName(User user) async {
+    final userRef =
+        FirebaseFirestore.instance.collection('users').doc(user.email);
+    final userDocSnap = await userRef.get();
+    return userDocSnap.data()!['name'];
   }
 }
