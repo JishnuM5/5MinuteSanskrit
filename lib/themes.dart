@@ -18,7 +18,7 @@ final theme = ThemeData(
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: OutlinedButton.styleFrom(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(7),
+        borderRadius: BorderRadius.circular(10),
       ),
       minimumSize: const Size.fromHeight(40),
       backgroundColor: const Color.fromARGB(255, 11, 83, 148),
@@ -63,6 +63,13 @@ final logo = RichText(
   ),
 );
 
+final shadow = BoxShadow(
+  color: Colors.grey.withOpacity(0.5),
+  spreadRadius: 2,
+  blurRadius: 5,
+  offset: const Offset(0, 3),
+);
+
 class InkWellBox extends StatelessWidget {
   const InkWellBox(
       {super.key,
@@ -86,10 +93,8 @@ class InkWellBox extends StatelessWidget {
       splashColor: Colors.blueGrey.withOpacity(0.5),
       child: Ink(
         decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.black,
-          ),
-          borderRadius: const BorderRadius.all(Radius.circular(7)),
+          boxShadow: [shadow],
+          borderRadius: BorderRadius.circular(10),
           color: color,
         ),
         child: Container(

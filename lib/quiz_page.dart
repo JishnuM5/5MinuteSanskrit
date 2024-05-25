@@ -12,55 +12,27 @@ import 'quiz_page_helpers.dart';
 class MyQuizState extends ChangeNotifier {
   List<Quiz> quizzes = [];
 
-  // Future<List<Quiz>> readQuiz() {
-  //   late Map<String, dynamic> data;
-  //   late String name;
-  //   late bool show;
-
-  //   final quizRef = FirebaseFirestore.instance.collection('quizzes');
-  //   return quizRef.get().then((value) async {
-  //     for (DocumentSnapshot doc in value.docs) {
-  //       data = doc.data() as Map<String, dynamic>;
-
-  //       final List<Question> questions = [];
-
-  //       for (dynamic question in data.values) {
-  //         if (question is Map<String, dynamic>) {
-  //           questions.add(Question.fromMap(question));
-  //         } else if (question is bool) {
-  //           show = question;
-  //         } else {
-  //           name = question;
-  //         }
-  //       }
-  //       quizzes.add(Quiz(questions: questions, name: name, show: show));
-  //       await Future.delayed(const Duration(seconds: 2), () {});
-  //     }
-  //     return Future.value(quizzes);
-  //   });
   Future readQuiz() {
-    late Map<String, dynamic> data;
-    late String name;
-    late bool show;
+    late Map<String, dynamic> quizData;
 
     final quizRef = FirebaseFirestore.instance.collection('quizzes');
     return quizRef.get().then((value) async {
       try {
-        for (DocumentSnapshot doc in value.docs) {
-          data = doc.data() as Map<String, dynamic>;
+        for (DocumentSnapshot<Map<String, dynamic>> doc in value.docs) {
+          quizData = doc.data()!;
 
           final List<Question> questions = [];
 
-          for (dynamic question in data.values) {
-            if (question is Map<String, dynamic>) {
-              questions.add(Question.fromMap(question));
-            } else if (question is bool) {
-              show = question;
-            } else {
-              name = question;
+          for (dynamic value in quizData.values) {
+            if (value is Map<String, dynamic>) {
+              questions.add(Question.fromMap(value));
             }
           }
-          quizzes.add(Quiz(questions: questions, name: name, show: show));
+          quizzes.add(Quiz(
+            questions: questions,
+            name: quizData["name"],
+            show: quizData["show"],
+          ));
           await Future.delayed(const Duration(seconds: 2), () {});
         }
         return Future.value(quizzes);
@@ -214,7 +186,7 @@ class _QuizPageState extends State<QuizPage> {
                                 ? null
                                 : const BorderSide(width: 1.5),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(7),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                           child: Text(

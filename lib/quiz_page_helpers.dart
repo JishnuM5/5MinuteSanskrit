@@ -23,7 +23,7 @@ class AnswerTile extends StatelessWidget {
     var watchState = context.watch<MyQuizState>();
     var readState = context.read<MyQuizState>();
     Quiz quiz = readState.quizzes[currentQuiz];
-    Border border;
+    Border? border;
 
     // Here, the border of an answer is set based on selection/submission.
     if (watchState.selectedIndex == index) {
@@ -53,7 +53,7 @@ class AnswerTile extends StatelessWidget {
           width: 4.0,
         );
       } else {
-        border = Border.all(color: Colors.black, width: 1.5);
+        border = null;
       }
     }
 
@@ -71,8 +71,9 @@ class AnswerTile extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               border: border,
-              borderRadius: const BorderRadius.all(Radius.circular(7)),
+              borderRadius: BorderRadius.circular(10),
               color: Theme.of(context).primaryColorLight,
+              boxShadow: [shadow],
             ),
             padding: const EdgeInsets.all(10.0),
             alignment: Alignment.center,
@@ -98,6 +99,7 @@ class SummaryPage extends StatelessWidget {
     Quiz quiz = context
         .read<MyQuizState>()
         .quizzes[context.read<MyQuizState>().currentQuiz];
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -105,7 +107,7 @@ class SummaryPage extends StatelessWidget {
           children: [
             Text(
               "उत्तमम्!",
-              style: Theme.of(context).textTheme.headlineLarge,
+              style: textTheme.headlineLarge,
             ),
             const Padding(
               padding: EdgeInsets.all(5.0),
@@ -127,9 +129,27 @@ class SummaryPage extends StatelessWidget {
                       color: Theme.of(context).primaryColorLight,
                       maxWidth: 400,
                       maxHeight: 200,
-                      child: Text(
-                        "${quiz.correctQs}/${quiz.questions.length}",
-                        style: Theme.of(context).textTheme.headlineSmall,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 30),
+                          Text(
+                            '${quiz.correctQs}/${quiz.questions.length}',
+                            style: textTheme.headlineLarge!.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                "questions answered correct",
+                                style: textTheme.headlineSmall,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       onTap: () {},
                     ),
@@ -142,10 +162,27 @@ class SummaryPage extends StatelessWidget {
                       maxWidth: 400,
                       maxHeight: 200,
                       color: Theme.of(context).primaryColorLight,
-                      child: Text(
-                        "${quiz.points} points earned",
-                        style: Theme.of(context).textTheme.headlineSmall,
-                        textAlign: TextAlign.center,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 30),
+                          Text(
+                            "${quiz.points}",
+                            style: textTheme.headlineLarge!.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                "points earned",
+                                style: textTheme.headlineSmall,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       onTap: () {},
                     ),

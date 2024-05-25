@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:sanskrit_web_app/login_page.dart';
+import 'auth_page.dart';
 
 import 'classes.dart';
 import 'firebase_options.dart';
@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: '5 Minute संस्कृतम्',
         theme: theme,
-        home: const LoginPage(),
+        home: const AuthNav(),
       ),
     );
   }
@@ -121,16 +121,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 border: Border.all(
                   color: Colors.black,
                 ),
-                borderRadius: const BorderRadius.all(Radius.circular(7)),
+                borderRadius: BorderRadius.circular(10),
                 color: Theme.of(context).primaryColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 3,
-                    blurRadius: 5,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
+                boxShadow: [shadow],
               ),
               child: Padding(
                 padding: const EdgeInsets.only(top: 2.5),

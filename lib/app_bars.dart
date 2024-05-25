@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'themes.dart';
 import 'main.dart';
 import 'quiz_page.dart';
 
@@ -71,16 +72,9 @@ class QuizBar extends StatelessWidget {
                 border: Border.all(
                   color: Colors.black,
                 ),
-                borderRadius: const BorderRadius.all(Radius.circular(7)),
+                borderRadius: BorderRadius.circular(10),
                 color: Theme.of(context).primaryColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 3,
-                    blurRadius: 5,
-                    offset: const Offset(0, 1),
-                  )
-                ]),
+                boxShadow: [shadow]),
 
             // This is the question counter.
             child: Text(
