@@ -11,16 +11,16 @@ class Question {
     required this.correctIndex,
   });
 
-  factory Question.fromMap(Map<String, dynamic> map) {
+  factory Question.fromMap(Map<String, dynamic> qMap) {
     List<String> mapAnswers = [];
-    for (dynamic answer in map["answers"]) {
+    for (dynamic answer in qMap["answers"]) {
       mapAnswers.add(answer.toString());
     }
 
     return Question(
-      question: map['question'],
+      question: qMap['question'],
       answers: mapAnswers,
-      correctIndex: map['correctIndex'],
+      correctIndex: qMap['correctIndex'],
     );
   }
 }
@@ -38,16 +38,45 @@ class Quiz {
   int correctQs = 0;
 
   Quiz({required this.questions, required this.name, required this.show});
+
+  factory Quiz.fromMap(Map<String, dynamic> quizMap) {
+    final List<Question> questions = [];
+
+    // Looks through all the values of quizData and adding all the maps as questions
+    for (dynamic value in quizMap.values) {
+      if (value is Map<String, dynamic>) {
+        questions.add(Question.fromMap(value));
+      }
+    }
+    return (Quiz(
+      questions: questions,
+      name: quizMap["name"],
+      show: quizMap["show"],
+    ));
+  }
 }
 
 class QuizState {
-  final String quizName;
   int points = 0;
   bool showSummary = false;
   int currentQ = 0;
   int correctQs = 0;
 
-  QuizState({required this.quizName});
+  QuizState({
+    required this.points,
+    required this.showSummary,
+    required this.currentQ,
+    required this.correctQs,
+  });
+
+  factory QuizState.fromMap(Map<String, dynamic> qSMap) {
+    return (QuizState(
+      points: qSMap["points"],
+      showSummary: qSMap["showSummary"],
+      currentQ: qSMap["currentQ"],
+      correctQs: qSMap["correctQ"],
+    ));
+  }
 }
 
 // A sample quiz.
@@ -78,9 +107,16 @@ Quiz sampleQuiz = Quiz(
   ],
 );
 
-class User {
+class AppUser {
   String name;
-  List<QuizState> quizStates;
+  Map<String, Map> quizStates;
 
-  User({required this.name, required this.quizStates});
+  AppUser.empty() : this(name: "", quizStates: {});
+
+  AppUser({required this.name, required this.quizStates});
+
+  factory AppUser.fromMap(Map<String, dynamic> userMap) {
+    return (AppUser(
+        name: userMap["name"], quizStates: Map.from(userMap["quizStates"])));
+  }
 }

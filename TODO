@@ -1,11 +1,17 @@
 # To-Do List
 - Create a profile page
 - Add accounts that saves points, which quizzes to show, quiz progress, etc
-  - Change the UI for the log-in page - give an error when password/email is wrong
   - Add reset password (on login page) and change password (on profile page)
-- Skip the login page when user is already logged in
+  - Save content when: user exits OR completes quiz
 - Create two types of accounts (student and teacher)
+
+
+
 - Write better rules for the app
+- Reformat questions into a list (or map?);
+- Direct users to home page after signing in, even after they sign out
+- Move setter/getter methods from MyQuizState to class?
+- Check if backend data is being called multiple times
 
 ## Mutliple Quiz Formatting
  - All visible quizzes are going to be in a home page, displayed with an array
@@ -115,6 +121,12 @@ A Stream<T> like a Future<T> but it delivers 0+ values over time. This means its
 - Error handling happens with a try-catch block.
  <br /><br />
 
+## Performance
+- Quizzes (LIST): iterating through all in fromMap, order semi-important, displaying all, each has index associated for page
+- Questions (LIST): iterating through all in fromMap, displaying all, order unimportant
+- QuizStates (MAP): associated with a quiz name, iterating through app, order unimportant, need to find and access by name
+- User (MAP): associated with an email
+
 
 # Links:
 - https://goo.gle/FlutterInFocus (YouTube playlist)
@@ -144,3 +156,7 @@ A Stream<T> like a Future<T> but it delivers 0+ values over time. This means its
 
 ### Authentication
 - https://www.youtube.com/watch?v=4vKiJZNPhss 
+
+# Known Errors
+- When readUser() throws an error, instead of being caught, the app freezes in the get method (in firestore.dart)
+- The android version of the app will not build. It seemed to be something with too many resources being used. Check all packages for compatibility.
