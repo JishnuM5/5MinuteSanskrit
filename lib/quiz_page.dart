@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -11,30 +11,18 @@ import 'quiz_page_helpers.dart';
 // This class contains app states, specifically for the quiz, lifted out of the widget tree.
 class MyQuizState extends ChangeNotifier {
   List<Quiz> quizzes = [];
+  AppUser appUser = AppUser.empty();
 
   Future readQuiz() {
-    late Map<String, dynamic> quizData;
-
     final quizRef = FirebaseFirestore.instance.collection('quizzes');
     return quizRef.get().then((value) async {
       try {
         for (DocumentSnapshot<Map<String, dynamic>> doc in value.docs) {
-          quizData = doc.data()!;
-
-          final List<Question> questions = [];
-
-          for (dynamic value in quizData.values) {
-            if (value is Map<String, dynamic>) {
-              questions.add(Question.fromMap(value));
-            }
-          }
-          quizzes.add(Quiz(
-            questions: questions,
-            name: quizData["name"],
-            show: quizData["show"],
-          ));
-          await Future.delayed(const Duration(seconds: 2), () {});
+          Map<String, dynamic> quizMap = doc.data()!;
+          quizzes.add(Quiz.fromMap(quizMap));
         }
+
+        await Future.delayed(const Duration(seconds: 4), () {});
         return Future.value(quizzes);
       } catch (e) {
         return Future.error('$e');
@@ -42,6 +30,20 @@ class MyQuizState extends ChangeNotifier {
     }).catchError((error) {
       return Future.error('$error');
     });
+  }
+
+  Future readUser() async {
+    final userRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.email);
+    try {
+      DocumentSnapshot<Map<String, dynamic>> value = await userRef.get();
+      Map<String, dynamic> userMap = value.data()!;
+
+      appUser = AppUser.fromMap(userMap);
+    } catch (e) {
+      return Future.error('$e');
+    }
   }
 
   int currentQuiz = -1;

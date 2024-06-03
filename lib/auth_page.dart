@@ -20,7 +20,7 @@ class _AuthNavState extends State<AuthNav> {
   @override
   void initState() {
     super.initState();
-    myFuture = Provider.of<MyQuizState>(context, listen: false).readQuiz();
+    myFuture = context.read<MyQuizState>().readQuiz();
   }
 
   @override
@@ -44,7 +44,12 @@ class _AuthNavState extends State<AuthNav> {
                       ConnectionState.waiting) {
                     return animatedLogo(context, false);
                   } else if (snapshot.hasData) {
-                    return const MyHomePage(title: '5 Minute संस्कृतम्');
+                    try {
+                      context.read<MyQuizState>().readUser();
+                      return const MyHomePage(title: '5 Minute संस्कृतम्');
+                    } catch (error) {
+                      return errorMessage(error);
+                    }
                   } else {
                     return const AuthPage();
                   }
@@ -108,9 +113,7 @@ class _AuthPageState extends State<AuthPage> {
                       boxShadow: [shadow],
                     ),
                     child: login
-                        ? LoginWidget(
-                            onClickedSignIn: toggle,
-                          )
+                        ? LoginWidget(onClickedSignIn: toggle)
                         : SignUpWidget(onClickedSignUp: toggle),
                   ),
                 ),

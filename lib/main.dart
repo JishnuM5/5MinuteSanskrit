@@ -247,7 +247,7 @@ class _AddtoDBState extends State<AddtoDB> {
       children: [
         SizedBox(
           height: 50,
-          width: 800,
+          width: 200,
           child: TextField(controller: controller),
         ),
         IconButton(
