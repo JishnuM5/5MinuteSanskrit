@@ -1,9 +1,8 @@
 // This is the framework of an answer tile.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'classes.dart';
-import 'quiz_page.dart';
+import 'my_app_state.dart';
 import 'themes.dart';
 
 class AnswerTile extends StatelessWidget {
@@ -20,8 +19,8 @@ class AnswerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var watchState = context.watch<MyQuizState>();
-    var readState = context.read<MyQuizState>();
+    var watchState = context.watch<MyAppState>();
+    var readState = context.read<MyAppState>();
     Quiz quiz = readState.quizzes[currentQuiz];
     Border? border;
 
@@ -97,8 +96,8 @@ class SummaryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Quiz quiz = context
-        .read<MyQuizState>()
-        .quizzes[context.read<MyQuizState>().currentQuiz];
+        .read<MyAppState>()
+        .quizzes[context.read<MyAppState>().currentQuiz];
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
@@ -106,7 +105,7 @@ class SummaryPage extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              "उत्तमम्!",
+              'उत्तमम्!',
               style: textTheme.headlineLarge,
             ),
             const Padding(
@@ -143,7 +142,7 @@ class SummaryPage extends StatelessWidget {
                             child: Align(
                               alignment: Alignment.center,
                               child: Text(
-                                "questions answered correct",
+                                'questions answered correct',
                                 style: textTheme.headlineSmall,
                                 textAlign: TextAlign.center,
                               ),
@@ -166,7 +165,7 @@ class SummaryPage extends StatelessWidget {
                         children: [
                           const SizedBox(height: 30),
                           Text(
-                            "${quiz.points}",
+                            '${quiz.points}',
                             style: textTheme.headlineLarge!.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -176,7 +175,7 @@ class SummaryPage extends StatelessWidget {
                             child: Align(
                               alignment: Alignment.center,
                               child: Text(
-                                "points earned",
+                                'points earned',
                                 style: textTheme.headlineSmall,
                                 textAlign: TextAlign.center,
                               ),

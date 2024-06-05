@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'auth_page.dart';
 
+import 'auth_page.dart';
 import 'classes.dart';
 import 'firebase_options.dart';
+import 'my_app_state.dart';
 import 'profile_page.dart';
 import 'quiz_page.dart';
 import 'app_bars.dart';
-import 'quiz_page_helpers.dart';
+import 'quiz_widgets.dart';
 import 'themes.dart';
 
 //This is the main method, from where the code runs.
@@ -31,9 +31,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // I have two Provider classes, which contain app states lifted out of the widget.
+        // I only have one provider class, but have kept the option of adding more
         ChangeNotifierProvider<MyAppState>(create: (context) => MyAppState()),
-        ChangeNotifierProvider<MyQuizState>(create: (context) => MyQuizState()),
       ],
       child: MaterialApp(
         navigatorKey: navigatorKey,
@@ -47,14 +46,6 @@ class MyApp extends StatelessWidget {
 }
 
 // This class contains app states lifted out of the widget tree.
-class MyAppState extends ChangeNotifier {
-  int _pageIndex = 0;
-
-  void onItemTapped(int index) {
-    _pageIndex = index;
-    notifyListeners();
-  }
-}
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -71,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     Widget page;
     Widget? appBar;
-    switch (context.watch<MyAppState>()._pageIndex) {
+    switch (context.watch<MyAppState>().pageIndex) {
       case 0:
         page = const MainPage();
         appBar = const NavBar(navBarIndex: 0);
@@ -81,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar = const NavBar(navBarIndex: 1);
         break;
       case 2:
-        page = QuizPage(currentQuiz: context.read<MyQuizState>().currentQuiz);
+        page = QuizPage(currentQuiz: context.read<MyAppState>().currentQuiz);
         appBar = const QuizBar(navBarIndex: 1);
       case 3:
         page = const SummaryPage();
@@ -92,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     int totalPoints = 0;
-    for (Quiz quiz in context.watch<MyQuizState>().quizzes) {
+    for (Quiz quiz in context.watch<MyAppState>().quizzes) {
       totalPoints += quiz.points;
     }
 
@@ -160,7 +151,7 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     List<Widget> quizList = [];
     int counter = 0;
-    for (Quiz quiz in context.watch<MyQuizState>().quizzes) {
+    for (Quiz quiz in context.watch<MyAppState>().quizzes) {
       if (quiz.show) {
         quizList.add(QuizTile(quiz: quiz, index: counter));
         counter++;
@@ -181,8 +172,6 @@ class _MainPageState extends State<MainPage> {
             Column(
               children: quizList,
             ),
-            const SizedBox(width: 300, height: 300),
-            const AddtoDB(),
           ],
         ),
       ),
@@ -213,66 +202,19 @@ class QuizTile extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         onTap: () {
-          context.read<MyQuizState>().setCurrentQuiz(index);
-          if (context.read<MyQuizState>().quizzes[index].showSummary) {
+          context.read<MyAppState>().setCurrentQuiz(index);
+          if (context.read<MyAppState>().quizzes[index].showSummary) {
             context.read<MyAppState>().onItemTapped(3);
           } else {
             context.read<MyAppState>().onItemTapped(2);
           }
-          context.read<MyQuizState>().reset();
+          context.read<MyAppState>().reset();
         },
       ),
     );
   }
 }
-
-class AddtoDB extends StatefulWidget {
-  const AddtoDB({
-    super.key,
-  });
-
-  @override
-  State<AddtoDB> createState() => _AddtoDBState();
-}
-
-// This class is a small widget at the end of the home page that enables users to write to the database.
-class _AddtoDBState extends State<AddtoDB> {
-  final controller = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          height: 50,
-          width: 200,
-          child: TextField(controller: controller),
-        ),
-        IconButton(
-          onPressed: () {
-            final question = controller.text;
-            createQuestion(question);
-          },
-          icon: const Icon(
-            Icons.add,
-          ),
-        )
-      ],
-    );
-  }
-}
-
-// This is a method that writes a question to the database.
-Future createQuestion(String question) async {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  final quiz2 = firestore.collection('quizzes').doc('quiz2');
-
-  final json = {'question': question};
-
-  await quiz2.set(json);
-}
+// This class is a small widget at the end of the home page that enables users to write to the database
 
 // This is the animated logo that is displayed on the main page.
 Widget animatedLogo(BuildContext context, bool animate) {
@@ -306,7 +248,7 @@ Widget animatedLogo(BuildContext context, bool animate) {
               isRepeatingAnimation: false,
               repeatForever: false,
               animatedTexts: [
-                TyperAnimatedText(""),
+                TyperAnimatedText(''),
                 TypewriterAnimatedText(
                   'संस्कृतम् ।',
                   textStyle: Theme.of(context).textTheme.displayMedium,
