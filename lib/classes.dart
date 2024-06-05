@@ -1,3 +1,5 @@
+import 'dart:math';
+
 // The question class manages each question.
 // It contains a question, a list of answers, and a correct answer index.
 class Question {
@@ -13,7 +15,7 @@ class Question {
 
   factory Question.fromMap(Map<String, dynamic> qMap) {
     List<String> mapAnswers = [];
-    for (dynamic answer in qMap["answers"]) {
+    for (dynamic answer in qMap['answers']) {
       mapAnswers.add(answer.toString());
     }
 
@@ -40,83 +42,74 @@ class Quiz {
   Quiz({required this.questions, required this.name, required this.show});
 
   factory Quiz.fromMap(Map<String, dynamic> quizMap) {
-    final List<Question> questions = [];
+    Map<String, Map<String, dynamic>> qMap = Map.from(quizMap['questions']);
+    int maxIndex =
+        qMap.keys.map((key) => int.parse(key.substring(1))).reduce(max);
 
-    // Looks through all the values of quizData and adding all the maps as questions
-    for (dynamic value in quizMap.values) {
-      if (value is Map<String, dynamic>) {
-        questions.add(Question.fromMap(value));
-      }
-    }
+    List<Question> questions = List.filled(
+      maxIndex,
+      const Question(answers: [], question: '', correctIndex: 0),
+      growable: true,
+    );
+
+    qMap.forEach((key, value) {
+      int index = int.parse(key.substring(1)) - 1;
+      questions[index] = Question.fromMap(value);
+    });
+
     return (Quiz(
       questions: questions,
-      name: quizMap["name"],
-      show: quizMap["show"],
+      name: quizMap['name'],
+      show: quizMap['show'],
     ));
   }
-}
 
-class QuizState {
-  int points = 0;
-  bool showSummary = false;
-  int currentQ = 0;
-  int correctQs = 0;
-
-  QuizState({
-    required this.points,
-    required this.showSummary,
-    required this.currentQ,
-    required this.correctQs,
-  });
-
-  factory QuizState.fromMap(Map<String, dynamic> qSMap) {
-    return (QuizState(
-      points: qSMap["points"],
-      showSummary: qSMap["showSummary"],
-      currentQ: qSMap["currentQ"],
-      correctQs: qSMap["correctQ"],
-    ));
+  void updateFromState(Map<String, dynamic> quizState) {
+    points = quizState['points'];
+    showSummary = quizState['showSummary'];
+    currentQ = quizState['currentQ'];
+    correctQs = quizState['correctQs'];
   }
 }
 
 // A sample quiz.
 Quiz sampleQuiz = Quiz(
-  name: "Sample Quiz",
+  name: 'Sample Quiz',
   show: true,
   questions: [
     const Question(
-        question: "Question 1",
-        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        question: 'Question 1',
+        answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctIndex: 0),
     const Question(
-        question: "Question 2",
-        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        question: 'Question 2',
+        answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctIndex: 0),
     const Question(
-        question: "Question 3",
-        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        question: 'Question 3',
+        answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctIndex: 0),
     const Question(
-        question: "Question 4",
-        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        question: 'Question 4',
+        answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctIndex: 0),
     const Question(
-        question: "Question 5",
-        answers: ["Answer 1", "Answer 2", "Answer 3", "Answer 4"],
+        question: 'Question 5',
+        answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctIndex: 0),
   ],
 );
 
 class AppUser {
   String name;
-  Map<String, Map> quizStates;
+  Map<String, Map<String, dynamic>> quizStates;
 
-  AppUser.empty() : this(name: "", quizStates: {});
+  AppUser.empty() : this(name: '', quizStates: {});
 
   AppUser({required this.name, required this.quizStates});
 
   factory AppUser.fromMap(Map<String, dynamic> userMap) {
     return (AppUser(
-        name: userMap["name"], quizStates: Map.from(userMap["quizStates"])));
+        name: userMap['name'], quizStates: Map.from(userMap['quizStates'])));
   }
 }

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'auth_page.dart';
 import 'main.dart';
 
 class LoginWidget extends StatefulWidget {
@@ -37,7 +38,7 @@ class _LoginWidgetState extends State<LoginWidget> {
         Row(
           children: [
             Text(
-              "Sign in",
+              'Sign in',
               style: Theme.of(context)
                   .textTheme
                   .displaySmall!
@@ -95,15 +96,29 @@ class _LoginWidgetState extends State<LoginWidget> {
                 ),
               ),
               const SizedBox(height: 10),
+              GestureDetector(
+                child: Text(
+                  'Forgot Password?',
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: Theme.of(context).primaryColorLight,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Theme.of(context).primaryColorLight,
+                      ),
+                ),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const ForgotPasswordPage(),
+                )),
+              ),
+              const SizedBox(height: 10),
               RichText(
                 text: TextSpan(
-                  text: "No account? ",
+                  text: 'No account? ',
                   style: Theme.of(context).textTheme.bodySmall,
                   children: [
                     TextSpan(
                       recognizer: TapGestureRecognizer()
                         ..onTap = widget.onClickedSignIn,
-                      text: "Sign up",
+                      text: 'Sign up',
                       style: TextStyle(
                         color: Theme.of(context).primaryColorLight,
                         decoration: TextDecoration.underline,
@@ -202,7 +217,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
         Row(
           children: [
             Text(
-              "Sign up",
+              'Sign up',
               style: Theme.of(context)
                   .textTheme
                   .displaySmall!
@@ -286,13 +301,13 @@ class _SignUpWidgetState extends State<SignUpWidget> {
               const SizedBox(height: 10),
               RichText(
                 text: TextSpan(
-                  text: "Already have an account? ",
+                  text: 'Already have an account? ',
                   style: Theme.of(context).textTheme.bodySmall,
                   children: [
                     TextSpan(
                       recognizer: TapGestureRecognizer()
                         ..onTap = widget.onClickedSignUp,
-                      text: "Sign in",
+                      text: 'Sign in',
                       style: TextStyle(
                         color: Theme.of(context).primaryColorLight,
                         decoration: TextDecoration.underline,

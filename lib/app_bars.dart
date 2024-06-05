@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'themes.dart';
 import 'main.dart';
-import 'quiz_page.dart';
+import 'my_app_state.dart';
+import 'themes.dart';
 
-//This is the navigation bar that will be displayed on the main page.
+// This is the navigation bar that will be displayed on the main page.
 class NavBar extends StatelessWidget {
   const NavBar({super.key, required this.navBarIndex});
 
@@ -13,11 +13,19 @@ class NavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NavigationBar(
-      //This method is passed as a callback function, so the parameter is implicit.
-      //Still, I'm explicitly calling it here with a lambda function for comprehensibility
+      // This method is passed as a callback function, so the parameter is implicit.
+      // Still, I'm explicitly calling it here with a lambda function for comprehensibility
       // I also don't need a currentIndex property because I don't need to access it.
-      onDestinationSelected: (int index) =>
-          context.read<MyAppState>().onItemTapped(index),
+      onDestinationSelected: (int index) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) =>
+              const Center(child: CircularProgressIndicator()),
+        );
+        context.read<MyAppState>().onItemTapped(index);
+        navigatorKey.currentState!.popUntil((route) => route.isFirst);
+      },
       selectedIndex: navBarIndex,
       destinations: const <Widget>[
         NavigationDestination(
@@ -45,8 +53,8 @@ class QuizBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var currentQuiz = context
-        .watch<MyQuizState>()
-        .quizzes[context.watch<MyQuizState>().currentQuiz];
+        .watch<MyAppState>()
+        .quizzes[context.watch<MyAppState>().currentQuiz];
 
     return NavigationBar(
       selectedIndex: navBarIndex,
@@ -55,7 +63,7 @@ class QuizBar extends StatelessWidget {
       destinations: <Widget>[
         const NavigationDestination(
           icon: Icon(Icons.arrow_back),
-          label: 'Home',
+          label: 'Save and Exit',
         ),
         Center(
           child: Text(

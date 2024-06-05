@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'auth_widgets.dart';
 import 'main.dart';
-import 'quiz_page.dart';
+import 'my_app_state.dart';
 import 'themes.dart';
 
 class AuthNav extends StatefulWidget {
@@ -20,7 +20,7 @@ class _AuthNavState extends State<AuthNav> {
   @override
   void initState() {
     super.initState();
-    myFuture = context.read<MyQuizState>().readQuiz();
+    myFuture = context.read<MyAppState>().readQuiz();
   }
 
   @override
@@ -44,12 +44,19 @@ class _AuthNavState extends State<AuthNav> {
                       ConnectionState.waiting) {
                     return animatedLogo(context, false);
                   } else if (snapshot.hasData) {
-                    try {
-                      context.read<MyQuizState>().readUser();
-                      return const MyHomePage(title: '5 Minute संस्कृतम्');
-                    } catch (error) {
-                      return errorMessage(error);
-                    }
+                    return FutureBuilder(
+                        future: context.read<MyAppState>().readUser(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return errorMessage(snapshot.error);
+                          } else if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return animatedLogo(context, false);
+                          } else {
+                            return const MyHomePage(
+                                title: '5 Minute संस्कृतम्');
+                          }
+                        });
                   } else {
                     return const AuthPage();
                   }
@@ -65,7 +72,7 @@ Widget errorMessage(Object? error) {
       padding: const EdgeInsets.all(10.0),
       child: Center(
         child: Text(
-          "Hmm. It looks like something went wrong. क्षम्यताम्!\nError: $error",
+          'Hmm. It looks like something went wrong. क्षम्यताम्!\nError: $error',
           textAlign: TextAlign.center,
         ),
       ),
@@ -95,7 +102,7 @@ class _AuthPageState extends State<AuthPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 25, 0, 5),
               child: Text(
-                "Welcome to ",
+                'Welcome to ',
                 style: Theme.of(context).textTheme.displayLarge,
               ),
             ),
@@ -105,13 +112,7 @@ class _AuthPageState extends State<AuthPage> {
                 alignment: Alignment.center,
                 child: Padding(
                   padding: const EdgeInsets.all(25),
-                  child: Container(
-                    padding: const EdgeInsets.all(20.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10.0),
-                      boxShadow: [shadow],
-                    ),
+                  child: FloatingBox(
                     child: login
                         ? LoginWidget(onClickedSignIn: toggle)
                         : SignUpWidget(onClickedSignUp: toggle),
@@ -144,6 +145,27 @@ class AnimatedTitle extends StatelessWidget {
           fadeOutBegin: double.maxFinite,
         ),
       ],
+    );
+  }
+}
+
+class ForgotPasswordPage extends StatefulWidget {
+  const ForgotPasswordPage({super.key});
+
+  @override
+  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
+}
+
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+  final formKey = GlobalKey<FormState>();
+  final emailController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(15),
+      ),
     );
   }
 }
