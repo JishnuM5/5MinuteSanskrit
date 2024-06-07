@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'main.dart';
 import 'my_app_state.dart';
 import 'themes.dart';
 
@@ -17,14 +16,7 @@ class NavBar extends StatelessWidget {
       // Still, I'm explicitly calling it here with a lambda function for comprehensibility
       // I also don't need a currentIndex property because I don't need to access it.
       onDestinationSelected: (int index) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) =>
-              const Center(child: CircularProgressIndicator()),
-        );
-        context.read<MyAppState>().onItemTapped(index);
-        navigatorKey.currentState!.popUntil((route) => route.isFirst);
+        context.read<MyAppState>().navigateTo(index);
       },
       selectedIndex: navBarIndex,
       destinations: const <Widget>[
@@ -58,12 +50,13 @@ class QuizBar extends StatelessWidget {
 
     return NavigationBar(
       selectedIndex: navBarIndex,
-      onDestinationSelected: (int index) =>
-          context.read<MyAppState>().onItemTapped(index),
+      onDestinationSelected: (int index) {
+        context.read<MyAppState>().navigateTo(index);
+      },
       destinations: <Widget>[
         const NavigationDestination(
           icon: Icon(Icons.arrow_back),
-          label: 'Save and Exit',
+          label: 'Save & Exit',
         ),
         Center(
           child: Text(
@@ -95,3 +88,23 @@ class QuizBar extends StatelessWidget {
     );
   }
 }
+
+// This was an attempted app bar for navigation from the error message page
+// AppBar(
+//   backgroundColor: Colors.transparent,
+//   elevation: 0,
+//   leading: InkWell(
+//     customBorder: const CircleBorder(),
+//     onTap: () {
+//       Navigator.pushAndRemoveUntil(
+//         context,
+//         MaterialPageRoute(
+//           builder: (context) => AuthPage(isNewUser: isNewUser),
+//         ),
+//         (Route<dynamic> route) => false,
+//       );
+//     },
+//     child: const Icon(Icons.arrow_back, color: Colors.black),
+//   ),
+// ),
+

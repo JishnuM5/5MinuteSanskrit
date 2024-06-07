@@ -1,8 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'auth_page.dart';
+import 'package:provider/provider.dart';
+import 'package:sanskrit_web_app/my_app_state.dart';
+import 'auth_pages.dart';
 import 'main.dart';
 
 class LoginWidget extends StatefulWidget {
@@ -90,26 +91,26 @@ class _LoginWidgetState extends State<LoginWidget> {
                     signIn();
                   }
                 },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10),
-                  child: Text('Sign in'),
-                ),
+                child: const Text('Sign in'),
               ),
               const SizedBox(height: 10),
-              GestureDetector(
-                child: Text(
-                  'Forgot Password?',
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        color: Theme.of(context).primaryColorLight,
-                        decoration: TextDecoration.underline,
-                        decorationColor: Theme.of(context).primaryColorLight,
-                      ),
+              MouseRegion(
+                cursor: MaterialStateMouseCursor.clickable,
+                child: GestureDetector(
+                  child: Text(
+                    'Forgot Password?',
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: Theme.of(context).primaryColorLight,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Theme.of(context).primaryColorLight,
+                        ),
+                  ),
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const ForgotPasswordPage(),
+                  )),
                 ),
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const ForgotPasswordPage(),
-                )),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 5),
               RichText(
                 text: TextSpan(
                   text: 'No account? ',
@@ -293,10 +294,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                     signUp();
                   }
                 },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10),
-                  child: Text('Sign up'),
-                ),
+                child: const Text('Sign up'),
               ),
               const SizedBox(height: 10),
               RichText(
@@ -336,11 +334,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      final userDoc = FirebaseFirestore.instance
-          .collection('users')
-          .doc(_emailController.text.trim());
-
-      await userDoc.set({'name': _nameController.text.trim()});
+      context.read<MyAppState>().createUser(_nameController.text.trim());
     } on FirebaseAuthException catch (e) {
       if (e.code == 'invalid-email') {
         setState(() {
@@ -366,5 +360,46 @@ class _SignUpWidgetState extends State<SignUpWidget> {
     }
 
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
+  }
+}
+
+class VerifiedHomePage extends StatefulWidget {
+  const VerifiedHomePage({super.key, required this.newUser});
+  final bool newUser;
+
+  @override
+  State<VerifiedHomePage> createState() => _VerifiedHomePageState();
+}
+
+class _VerifiedHomePageState extends State<VerifiedHomePage> {
+  late Future<List<dynamic>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = Future.wait([
+      context.read<MyAppState>().readQuiz(),
+      (widget.newUser)
+          ? context.read<MyAppState>().createUserInDB()
+          : context.read<MyAppState>().readUser()
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _future,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return errorMessage(snapshot.error, context);
+        } else if (snapshot.connectionState == ConnectionState.waiting) {
+          return animatedLogo(context, true);
+        } else {
+          return const MyHomePage(
+            title: '5 Minute संस्कृतम्',
+          );
+        }
+      },
+    );
   }
 }

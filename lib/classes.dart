@@ -64,7 +64,7 @@ class Quiz {
     ));
   }
 
-  void updateFromState(Map<String, dynamic> quizState) {
+  void readFromState(Map<String, dynamic> quizState) {
     points = quizState['points'];
     showSummary = quizState['showSummary'];
     currentQ = quizState['currentQ'];

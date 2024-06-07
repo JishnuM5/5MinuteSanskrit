@@ -95,7 +95,7 @@ class _QuizPageState extends State<QuizPage> {
                                           {
                                             context
                                                 .read<MyAppState>()
-                                                .onItemTapped(3)
+                                                .navigateTo(3)
                                           }
                                       }
                                     else
