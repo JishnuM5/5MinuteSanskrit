@@ -6,10 +6,12 @@ import 'package:sanskrit_web_app/my_app_state.dart';
 import 'auth_pages.dart';
 import 'main.dart';
 
+// This widget displays and handles login
 class LoginWidget extends StatefulWidget {
-  const LoginWidget({super.key, required this.onClickedSignIn});
+  const LoginWidget({super.key, required this.switchToSignUp});
 
-  final VoidCallback onClickedSignIn;
+  // This void call
+  final VoidCallback switchToSignUp;
 
   @override
   // ignore: library_private_types_in_public_api
@@ -21,6 +23,7 @@ class _LoginWidgetState extends State<LoginWidget> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  // These string variables are used to display error text below the username and password
   String _emailErrorMessage = '';
   String _passwordErrorMessage = '';
 
@@ -38,6 +41,7 @@ class _LoginWidgetState extends State<LoginWidget> {
       children: [
         Row(
           children: [
+            // This is the header
             Text(
               'Sign in',
               style: Theme.of(context)
@@ -51,6 +55,7 @@ class _LoginWidgetState extends State<LoginWidget> {
           key: _formKey,
           child: Column(
             children: [
+              // This is where the user enters their email
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -66,6 +71,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                   return null;
                 },
               ),
+              // This is where the user enters their password
               TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(
@@ -83,17 +89,18 @@ class _LoginWidgetState extends State<LoginWidget> {
                   return null;
                 },
               ),
+              // This is the sign in button
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // Sign in with Firebase Auth
                     signIn();
                   }
                 },
                 child: const Text('Sign in'),
               ),
               const SizedBox(height: 10),
+              // This is the forgot password button
               MouseRegion(
                 cursor: MaterialStateMouseCursor.clickable,
                 child: GestureDetector(
@@ -111,6 +118,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                 ),
               ),
               const SizedBox(height: 5),
+              // This is the button to switch to the sign up page
               RichText(
                 text: TextSpan(
                   text: 'No account? ',
@@ -118,7 +126,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                   children: [
                     TextSpan(
                       recognizer: TapGestureRecognizer()
-                        ..onTap = widget.onClickedSignIn,
+                        ..onTap = widget.switchToSignUp,
                       text: 'Sign up',
                       style: TextStyle(
                         color: Theme.of(context).primaryColorLight,
@@ -136,7 +144,9 @@ class _LoginWidgetState extends State<LoginWidget> {
     );
   }
 
+// This method allows the user to sign in
   Future<void> signIn() async {
+    // After this method starts running, a loading page is shown
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -144,23 +154,25 @@ class _LoginWidgetState extends State<LoginWidget> {
     );
 
     try {
+      // Here, the user is signed in Firebase Auth
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'invalid-email') {
+    } on FirebaseAuthException catch (error) {
+      // Here, an error message is shown based on the type of error given
+      if (error.code == 'invalid-email') {
         setState(() {
           _emailErrorMessage = 'The email address is badly formatted.';
           _passwordErrorMessage = '';
         });
-      } else if (e.code == 'invalid-credential') {
+      } else if (error.code == 'invalid-credential') {
         setState(() {
           _emailErrorMessage = '';
           _passwordErrorMessage =
               'No user found with the given combination of email and credentials.';
         });
-      } else if (e.code == 'user-disabled') {
+      } else if (error.code == 'user-disabled') {
         setState(() {
           _emailErrorMessage =
               'The user account associated with this email is disabled.';
@@ -169,7 +181,7 @@ class _LoginWidgetState extends State<LoginWidget> {
       } else {
         setState(() {
           _emailErrorMessage = '';
-          _passwordErrorMessage = e.message ?? 'An unknown error occurred.';
+          _passwordErrorMessage = error.message ?? 'An unknown error occurred.';
         });
       }
     } catch (error) {
@@ -179,14 +191,16 @@ class _LoginWidgetState extends State<LoginWidget> {
       });
     }
 
+    // Once this method is completed, the loading page is no longer shown
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
   }
 }
 
+// This widget displays and handles signing up
 class SignUpWidget extends StatefulWidget {
-  const SignUpWidget({super.key, required this.onClickedSignUp});
+  const SignUpWidget({super.key, required this.switchtoSignIn});
 
-  final VoidCallback onClickedSignUp;
+  final VoidCallback switchtoSignIn;
 
   @override
   State<SignUpWidget> createState() => _SignUpWidgetState();
@@ -217,6 +231,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
       children: [
         Row(
           children: [
+            // This is the header
             Text(
               'Sign up',
               style: Theme.of(context)
@@ -230,6 +245,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
           key: _formKey,
           child: Column(
             children: [
+              // This is where the user enters their name
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Name'),
@@ -240,6 +256,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                   return null;
                 },
               ),
+              // This is where the user enters their email
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -255,6 +272,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                   return null;
                 },
               ),
+              // This is where the user enters their passowrd
               TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(
@@ -272,6 +290,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                   return null;
                 },
               ),
+              // This is where the user confirms their password
               TextFormField(
                 controller: _confirmPasswordController,
                 decoration:
@@ -287,16 +306,17 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                 },
               ),
               const SizedBox(height: 30),
+              // This is the sign up button
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // Sign in with Firebase Auth
                     signUp();
                   }
                 },
                 child: const Text('Sign up'),
               ),
               const SizedBox(height: 10),
+              // This is the button to switch to logging in
               RichText(
                 text: TextSpan(
                   text: 'Already have an account? ',
@@ -304,7 +324,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                   children: [
                     TextSpan(
                       recognizer: TapGestureRecognizer()
-                        ..onTap = widget.onClickedSignUp,
+                        ..onTap = widget.switchtoSignIn,
                       text: 'Sign in',
                       style: TextStyle(
                         color: Theme.of(context).primaryColorLight,
@@ -322,7 +342,9 @@ class _SignUpWidgetState extends State<SignUpWidget> {
     );
   }
 
+// This method creates a new user account
   void signUp() async {
+    // After the method is called, a loading page is shown
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -330,18 +352,21 @@ class _SignUpWidgetState extends State<SignUpWidget> {
     );
 
     try {
+      // Here, a new account is created in Firebase Auth
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+      // Here, a new user document is created in Firebase Firestore
       context.read<MyAppState>().createUser(_nameController.text.trim());
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'invalid-email') {
+    } on FirebaseAuthException catch (error) {
+      // Here, an error message is shown based on the type of error given
+      if (error.code == 'invalid-email') {
         setState(() {
           _emailErrorMessage = 'The email address is badly formatted.';
           _passwordErrorMessage = '';
         });
-      } else if (e.code == 'email-already-in-use') {
+      } else if (error.code == 'email-already-in-use') {
         setState(() {
           _emailErrorMessage = 'This email is already in use.';
           _passwordErrorMessage = '';
@@ -349,7 +374,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
       } else {
         setState(() {
           _emailErrorMessage = '';
-          _passwordErrorMessage = e.message ?? 'An unknown error occurred.';
+          _passwordErrorMessage = error.message ?? 'An unknown error occurred.';
         });
       }
     } catch (error) {
@@ -359,10 +384,12 @@ class _SignUpWidgetState extends State<SignUpWidget> {
       });
     }
 
+    // Once this method is completed, the loading page is no longer shown
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
   }
 }
 
+// This is the class navigated to after a verified user logs in or a new user verifies their email
 class VerifiedHomePage extends StatefulWidget {
   const VerifiedHomePage({super.key, required this.newUser});
   final bool newUser;
@@ -374,12 +401,14 @@ class VerifiedHomePage extends StatefulWidget {
 class _VerifiedHomePageState extends State<VerifiedHomePage> {
   late Future<List<dynamic>> _future;
 
+  // An initState() is used so these methods are not called multiple times
   @override
   void initState() {
     super.initState();
     _future = Future.wait([
       context.read<MyAppState>().readQuiz(),
       (widget.newUser)
+          // Based on whether the user is new, a new account is created or user data is retrieved
           ? context.read<MyAppState>().createUserInDB()
           : context.read<MyAppState>().readUser()
     ]);
@@ -387,6 +416,8 @@ class _VerifiedHomePageState extends State<VerifiedHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // The future are called here
+    // Then, once the user and app are set up, the app navigates to the home page
     return FutureBuilder(
       future: _future,
       builder: (context, snapshot) {

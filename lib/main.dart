@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_core/firebase_core.dart';
-
 import 'auth_pages.dart';
 import 'classes.dart';
 import 'firebase_options.dart';
@@ -13,7 +12,7 @@ import 'app_bars.dart';
 import 'quiz_widgets.dart';
 import 'themes.dart';
 
-//This is the main method, from where the code runs.
+//This is the main method, from where the code runs
 void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -21,6 +20,8 @@ void main() async {
   runApp(const MyApp());
 }
 
+// These are global keys that can be accessed from anywhere
+// They are primarily for navigation and displaying dialogs/snack bars
 final navigatorKey = GlobalKey<NavigatorState>();
 final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
@@ -47,8 +48,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// This class contains app states lifted out of the widget tree.
-
+// This class manages the framework of the app
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
   final String title;
@@ -57,9 +57,8 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-// This class manages the framework of the app.
 class _MyHomePageState extends State<MyHomePage> {
-  // The selected index state manages page navigation.
+  // The selected index state manages page navigation
   @override
   Widget build(BuildContext context) {
     Widget page;
@@ -103,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
         actions: <Widget>[
-          // This widget is the point counter.
+          // This widget is the point counter
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
             child: Container(
@@ -179,6 +178,7 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
+// This widget is a quiz tile
 class QuizTile extends StatelessWidget {
   const QuizTile({
     required this.quiz,
@@ -192,7 +192,7 @@ class QuizTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
-      // A single quiz tile
+      // A single box tile
       child: InkWellBox(
         maxWidth: 800,
         maxHeight: 200,
@@ -201,6 +201,8 @@ class QuizTile extends StatelessWidget {
           quiz.name,
           style: Theme.of(context).textTheme.headlineLarge,
         ),
+        // When a quiz tile is pressed, the app navigates to the respective quiz
+        // Quiz page variables are set accordingly and previous temporary UI is reset
         onTap: () {
           context.read<MyAppState>().setCurrentQuiz(index);
           if (context.read<MyAppState>().quizzes[index].showSummary) {
@@ -214,7 +216,6 @@ class QuizTile extends StatelessWidget {
     );
   }
 }
-// This class is a small widget at the end of the home page that enables users to write to the database
 
 // This is the animated logo that is displayed on the main page.
 Widget animatedLogo(BuildContext context, bool animate) {
@@ -222,6 +223,7 @@ Widget animatedLogo(BuildContext context, bool animate) {
     mainAxisAlignment: MainAxisAlignment.center,
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
+      // The logo can be animated or static
       (animate)
           ? AnimatedTextKit(
               isRepeatingAnimation: false,

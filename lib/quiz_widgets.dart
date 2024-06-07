@@ -5,6 +5,7 @@ import 'classes.dart';
 import 'my_app_state.dart';
 import 'themes.dart';
 
+// This widget is an answer tile, shown on the quiz page with an answer option
 class AnswerTile extends StatelessWidget {
   const AnswerTile({
     super.key,
@@ -24,7 +25,7 @@ class AnswerTile extends StatelessWidget {
     Quiz quiz = readState.quizzes[currentQuiz];
     Border? border;
 
-    // Here, the border of an answer is set based on selection/submission.
+    // Here, the border of an answer is set based on selection/submission
     if (watchState.selectedIndex == index) {
       if (watchState.ansSubmitted) {
         if (quiz.questions[quiz.currentQ].correctIndex == index) {
@@ -56,7 +57,7 @@ class AnswerTile extends StatelessWidget {
       }
     }
 
-    // This is the widget that contains the answer.
+    // This is the widget that contains the answer
     return Padding(
       padding: const EdgeInsets.all(10),
       child: MouseRegion(
@@ -89,7 +90,7 @@ class AnswerTile extends StatelessWidget {
   }
 }
 
-// This is my summary page.
+// This is the summary page shown after the user answers all questions
 class SummaryPage extends StatelessWidget {
   const SummaryPage({super.key});
 
@@ -104,6 +105,7 @@ class SummaryPage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // A congraulatory message
             Text(
               'उत्तमम्!',
               style: textTheme.headlineLarge,
@@ -124,6 +126,7 @@ class SummaryPage extends StatelessWidget {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
+                    // A box showing the number of questions answered correctly
                     child: InkWellBox(
                       color: Theme.of(context).primaryColorLight,
                       maxWidth: 400,
@@ -142,7 +145,7 @@ class SummaryPage extends StatelessWidget {
                             child: Align(
                               alignment: Alignment.center,
                               child: Text(
-                                'questions answered correct',
+                                'questions answered correctly',
                                 style: textTheme.headlineSmall,
                                 textAlign: TextAlign.center,
                               ),
@@ -157,6 +160,7 @@ class SummaryPage extends StatelessWidget {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
+                    // A box showing the number of points earned from this quiz
                     child: InkWellBox(
                       maxWidth: 400,
                       maxHeight: 200,
@@ -196,6 +200,8 @@ class SummaryPage extends StatelessWidget {
   }
 }
 
+// This method returns whether text is in Sanskrit, or Devanagari script
+// If it is, the font size is slightly larger
 bool isSanskrit(String text) {
   var sanskrit = RegExp(r'[\u0900-\u097F]');
   return sanskrit.hasMatch(text);

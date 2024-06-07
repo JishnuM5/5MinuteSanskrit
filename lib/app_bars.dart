@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'my_app_state.dart';
 import 'themes.dart';
 
-// This is the navigation bar that will be displayed on the main page.
+// This is the navigation bar that will be displayed on the main page
 class NavBar extends StatelessWidget {
   const NavBar({super.key, required this.navBarIndex});
 
@@ -12,9 +12,6 @@ class NavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NavigationBar(
-      // This method is passed as a callback function, so the parameter is implicit.
-      // Still, I'm explicitly calling it here with a lambda function for comprehensibility
-      // I also don't need a currentIndex property because I don't need to access it.
       onDestinationSelected: (int index) {
         context.read<MyAppState>().navigateTo(index);
       },
@@ -33,7 +30,7 @@ class NavBar extends StatelessWidget {
   }
 }
 
-// This navigation bar is for the quiz page.
+// This navigation bar is for the quiz page
 class QuizBar extends StatelessWidget {
   const QuizBar({
     super.key,
@@ -54,10 +51,13 @@ class QuizBar extends StatelessWidget {
         context.read<MyAppState>().navigateTo(index);
       },
       destinations: <Widget>[
+        // This button navigates to the home page after saving quiz data
         const NavigationDestination(
           icon: Icon(Icons.arrow_back),
           label: 'Save & Exit',
         ),
+
+        // This is the current quiz name, displayed in the app bar
         Center(
           child: Text(
             currentQuiz.name,
@@ -77,7 +77,7 @@ class QuizBar extends StatelessWidget {
                 color: Theme.of(context).primaryColor,
                 boxShadow: [shadow]),
 
-            // This is the question counter.
+            // This is the question counter
             child: Text(
               '${currentQuiz.currentQ + 1}/${currentQuiz.questions.length}',
               style: Theme.of(context).textTheme.headlineSmall,
@@ -89,7 +89,7 @@ class QuizBar extends StatelessWidget {
   }
 }
 
-// This was an attempted app bar for navigation from the error message page
+// This was an attempted app header bar for navigation from the error message page
 // AppBar(
 //   backgroundColor: Colors.transparent,
 //   elevation: 0,

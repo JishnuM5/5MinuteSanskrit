@@ -1,8 +1,8 @@
 # To-Do List
 - Create two types of accounts (student and teacher)
 - Add better error handling, including option to navigate from error page
+  - Write down every possible place for error, and type of handling
 - Write better rules for the app
-- Reformat questions into a list (or map?);
 - Check if backend data is being called multiple times
 
 ## Mutliple Quiz Formatting
@@ -156,5 +156,6 @@ A Stream<T> like a Future<T> but it delivers 0+ values over time. This means its
   - Excel will give a script, and I can then copy-paste into another project that I use to write code.
 
 # Known Errors
-- The android version of the app will not build. It seemed to be something with too many resources being used. Check all packages for compatibility.
+- The Android version of the app will not build. It seemed to be something with too many resources being used. Check all packages for compatibility.
+- If user cancels the email verification page within 5 seconds of sending the email verification, then the app crashes (This is because of an async wait function running to avoid the user from spamming emails; will fix later).
 - COMMON FIX: Methods compile without () but causes problems

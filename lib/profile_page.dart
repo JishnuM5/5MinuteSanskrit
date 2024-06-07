@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:sanskrit_web_app/my_app_state.dart';
 import 'themes.dart';
 
+// This class is the profile page of the application
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -17,10 +18,12 @@ class _ProfilePageState extends State<ProfilePage> {
   late final TextEditingController _nameController;
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
   bool nameChange = false;
 
   @override
   Widget build(BuildContext context) {
+    // The name controller is inialized with the user's current name
     _nameController = TextEditingController(
       text: context.watch<MyAppState>().appUser.name,
     );
@@ -30,11 +33,14 @@ class _ProfilePageState extends State<ProfilePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // This is the header
             Text('Profile', style: Theme.of(context).textTheme.displayLarge),
             const Padding(
               padding: EdgeInsets.all(10.0),
               child: Divider(),
             ),
+            // This is the first section of the profile page, showing the current email
+            // It also gives the user the option to sign out
             Padding(
               padding: const EdgeInsets.all(20),
               child: FloatingBox(
@@ -49,6 +55,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 20),
+                    // This is the sign out button
                     ElevatedButton(
                       onPressed: () {
                         FirebaseAuth.instance.signOut();
@@ -60,6 +67,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
+            // This is the second section of the profile page, with updatable profile fields
             Padding(
               padding: const EdgeInsets.all(20),
               child: FloatingBox(
@@ -68,6 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Changing the user's name
                       Text(
                         'Name',
                         style: Theme.of(context).textTheme.labelSmall,
@@ -84,6 +93,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         },
                       ),
                       const SizedBox(height: 20),
+                      // Changing the user's password
                       Text(
                         'New Password',
                         style: Theme.of(context).textTheme.labelSmall,
@@ -102,6 +112,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         },
                       ),
                       const SizedBox(height: 20),
+                      // Confirming the new password if changed
                       Text(
                         'Confirm Password',
                         style: Theme.of(context).textTheme.labelSmall,
@@ -118,9 +129,13 @@ class _ProfilePageState extends State<ProfilePage> {
                         },
                       ),
                       const SizedBox(height: 25),
+                      // This button saves and updates the user's data when clicked
                       ElevatedButton(
                         onPressed: () async {
+                          // User fields are validated
                           if (_formKey.currentState!.validate()) {
+                            // Based on what the user has changed, data is updated
+                            // A snack bar is showed with either a success or error message
                             try {
                               String newPassword =
                                   _newPasswordController.text.trim();
@@ -150,6 +165,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
+            // This is the delete account button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
               child: ElevatedButton(
@@ -157,6 +173,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
+                      // This is a confirmation dialog
                       return AlertDialog(
                         title: const Text('Delete Account'),
                         content: const Text(
@@ -169,6 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             child: const Text('Cancel'),
                           ),
                           TextButton(
+                            // If they confirm, the user account and database data are deleted
                             onPressed: () async {
                               Future.wait([
                                 deleteUserData(),
@@ -211,6 +229,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // This is the input decouration used for text fields on the profile page
   InputDecoration denseInputDecor(String hintText) {
     return InputDecoration(
       hintText: hintText,
@@ -219,6 +238,8 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // This method deletes all the user's data from the database
+  // Errors are handled in the paret widget
   Future deleteUserData() async {
     try {
       String email = FirebaseAuth.instance.currentUser!.email!;

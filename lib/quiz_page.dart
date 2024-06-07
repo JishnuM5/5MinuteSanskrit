@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'my_app_state.dart';
 import 'quiz_widgets.dart';
 
+// This class is the quiz page of the application
 class QuizPage extends StatefulWidget {
   const QuizPage({required this.currentQuiz, super.key});
   final int currentQuiz;
@@ -12,7 +13,6 @@ class QuizPage extends StatefulWidget {
   State<QuizPage> createState() => _QuizPageState();
 }
 
-// This class is a quiz page.
 class _QuizPageState extends State<QuizPage> {
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class _QuizPageState extends State<QuizPage> {
     var currentQ = quiz.currentQ;
 
     return Scaffold(
-      // A scroll view of questions.
+      // This is a scroll view of questions
       body: LayoutBuilder(builder: (context, constraints) {
         return SingleChildScrollView(
           child: ConstrainedBox(
@@ -34,7 +34,7 @@ class _QuizPageState extends State<QuizPage> {
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // The question.
+                  // The question
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 5.0, vertical: 25),
@@ -49,7 +49,7 @@ class _QuizPageState extends State<QuizPage> {
                   ),
                   const SizedBox(height: 5),
 
-                  // The four answers.
+                  // The four answers
                   Expanded(
                       child: AnswerTile(
                     option: quiz.questions[currentQ].answers[0],
@@ -75,16 +75,16 @@ class _QuizPageState extends State<QuizPage> {
                     currentQuiz: widget.currentQuiz,
                   )),
 
-                  // This is the next/submit button.
+                  // This is the next/submit button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: OutlinedButton(
-                          // If a question option isn't selected, you can't click submit.
-                          // If an option is selected, it will submit the answer and add 5 points if the it's is correct.
-                          // If answer has already been submitted, this button will reset the question page and move on to the next question.
+                          // If a question option isn't selected, the user can't click submit
+                          // If an option is selected, it submits the answer
+                          // If answer has been submitted, it resets the page and move to the next question
                           onPressed: (watchState.selectedIndex == -1)
                               ? null
                               : () => {
