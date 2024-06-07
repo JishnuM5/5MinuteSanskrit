@@ -1,17 +1,20 @@
-// This class contains the theme, logo, and other important values/widgets used throughout the app
+// This file contains the theme, logo, and other important values/widgets used throughout the app
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'main.dart';
 
 // This theme variable is used to keep design consistent throughout the application
 final theme = ThemeData(
+  // These are the colors used
   colorScheme:
       ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 11, 83, 148)),
   useMaterial3: true,
   primaryColorLight: const Color.fromARGB(255, 111, 168, 220),
   fontFamily: GoogleFonts.montserrat().fontFamily,
+
+  // These are themes for various widgets in the app
   navigationBarTheme: NavigationBarThemeData(
     labelTextStyle: MaterialStateProperty.all<TextStyle?>(
       GoogleFonts.courierPrime(),
@@ -27,6 +30,8 @@ final theme = ThemeData(
       foregroundColor: Colors.white,
     ),
   ),
+
+  // These are the set text styles
   textTheme: TextTheme(
     headlineLarge: TextStyle(
         fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 27.5),
@@ -51,7 +56,7 @@ final theme = ThemeData(
   ),
 );
 
-// This is the main logo that I'm using for my app.
+// This is the main logo used in the app
 final logo = RichText(
   text: TextSpan(
     style: TextStyle(
@@ -67,6 +72,7 @@ final logo = RichText(
   ),
 );
 
+// This is the standard shadow used throughout the app
 final shadow = BoxShadow(
   color: Colors.grey.withOpacity(0.5),
   spreadRadius: 2,
@@ -74,6 +80,7 @@ final shadow = BoxShadow(
   offset: const Offset(0, 3),
 );
 
+// This is a custom box widget used throughout the app
 class InkWellBox extends StatelessWidget {
   const InkWellBox(
       {super.key,
@@ -113,6 +120,7 @@ class InkWellBox extends StatelessWidget {
   }
 }
 
+// This is a custom box widget used throughout the app
 class FloatingBox extends StatelessWidget {
   const FloatingBox({super.key, required this.child});
   final Widget child;
@@ -131,8 +139,31 @@ class FloatingBox extends StatelessWidget {
   }
 }
 
+// This is a method for showing a snack bar without a local BuildContext
 showTextSnackBar(String message) {
   scaffoldMessengerKey.currentState?.showSnackBar(SnackBar(
     content: Text(message),
   ));
+}
+
+// An animation for the title I was playing with but never implemented
+class AnimatedTitle extends StatelessWidget {
+  const AnimatedTitle({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedTextKit(
+      isRepeatingAnimation: false,
+      animatedTexts: [
+        FadeAnimatedText(
+          'Welcome to',
+          textStyle: Theme.of(context).textTheme.displayLarge,
+          fadeInEnd: 2,
+          fadeOutBegin: double.maxFinite,
+        ),
+      ],
+    );
+  }
 }

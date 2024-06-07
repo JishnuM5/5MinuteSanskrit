@@ -1,3 +1,5 @@
+// This file contains all pages and features for the profile page
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:sanskrit_web_app/my_app_state.dart';
 import 'themes.dart';
 
+// This class is the profile page of the application
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -17,10 +20,12 @@ class _ProfilePageState extends State<ProfilePage> {
   late final TextEditingController _nameController;
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
   bool nameChange = false;
 
   @override
   Widget build(BuildContext context) {
+    // The name controller is inialized with the user's current name
     _nameController = TextEditingController(
       text: context.watch<MyAppState>().appUser.name,
     );
@@ -30,11 +35,14 @@ class _ProfilePageState extends State<ProfilePage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // This is the header
             Text('Profile', style: Theme.of(context).textTheme.displayLarge),
             const Padding(
               padding: EdgeInsets.all(10.0),
               child: Divider(),
             ),
+            // This is the first section of the profile page, showing the current email
+            // It also gives the user the option to sign out
             Padding(
               padding: const EdgeInsets.all(20),
               child: FloatingBox(
@@ -49,9 +57,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 20),
+                    // This is the sign out button
                     ElevatedButton(
-                      onPressed: () {
-                        FirebaseAuth.instance.signOut();
+                      onPressed: () async {
+                        await FirebaseAuth.instance.signOut();
                         context.read<MyAppState>().navigateTo(0);
                       },
                       child: const Text('Sign out'),
@@ -60,6 +69,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
+            // This is the second section of the profile page, with updatable profile fields
             Padding(
               padding: const EdgeInsets.all(20),
               child: FloatingBox(
@@ -68,6 +78,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Changing the user's name
                       Text(
                         'Name',
                         style: Theme.of(context).textTheme.labelSmall,
@@ -84,6 +95,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         },
                       ),
                       const SizedBox(height: 20),
+                      // Changing the user's password
                       Text(
                         'New Password',
                         style: Theme.of(context).textTheme.labelSmall,
@@ -102,6 +114,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         },
                       ),
                       const SizedBox(height: 20),
+                      // Confirming the new password if changed
                       Text(
                         'Confirm Password',
                         style: Theme.of(context).textTheme.labelSmall,
@@ -118,9 +131,13 @@ class _ProfilePageState extends State<ProfilePage> {
                         },
                       ),
                       const SizedBox(height: 25),
+                      // This button saves and updates the user's data when clicked
                       ElevatedButton(
                         onPressed: () async {
+                          // User fields are validated
                           if (_formKey.currentState!.validate()) {
+                            // Based on what the user has changed, data is updated
+                            // A snack bar is showed with either a success or error message
                             try {
                               String newPassword =
                                   _newPasswordController.text.trim();
@@ -150,6 +167,48 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
+            // This is the about screen
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+              child: ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text('About Project'),
+                        content: const SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Jishnu Mehta\nAdvanced Programming Topics\nPeriod 2\nJune 7, 2024',
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                '5 Minute संस्कृतम् ।\nA quiz application to supplement Sanskrit learning\nCreated with Flutter, using Github, Firebase, and VS Code',
+                              ),
+                            ],
+                          ),
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Close'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: const Text('About Project'),
+              ),
+            ),
+            // This is the delete account button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
               child: ElevatedButton(
@@ -157,6 +216,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
+                      // This is a confirmation dialog
                       return AlertDialog(
                         title: const Text('Delete Account'),
                         content: const Text(
@@ -169,22 +229,20 @@ class _ProfilePageState extends State<ProfilePage> {
                             child: const Text('Cancel'),
                           ),
                           TextButton(
-                            onPressed: () async {
-                              Future.wait([
-                                deleteUserData(),
-                                FirebaseAuth.instance.currentUser!.delete(),
-                              ])
+                            // If they confirm, the user account and database data are deleted
+                            onPressed: () {
+                              deleteUserData()
                                   .then(
-                                    (value) => (
-                                      showTextSnackBar("User account deleted"),
-                                    ),
-                                  )
-                                  .catchError(
-                                    (error) => (
-                                      showTextSnackBar(
-                                          "Error deleting user: $error"),
-                                    ),
-                                  );
+                                (value) =>
+                                    (showTextSnackBar("User account deleted")),
+                              )
+                                  .catchError((error) {
+                                (
+                                  showTextSnackBar(
+                                      "Error deleting user: $error"),
+                                );
+                              });
+                              Navigator.of(context).pop();
                             },
                             child: Text(
                               'Delete',
@@ -211,6 +269,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // This is the input decouration used for text fields on the profile page
   InputDecoration denseInputDecor(String hintText) {
     return InputDecoration(
       hintText: hintText,
@@ -219,11 +278,18 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Future deleteUserData() async {
+  // This method deletes all the user's data from the database
+  // Errors are handled in the paret widget
+  Future deleteUserData() {
     try {
       String email = FirebaseAuth.instance.currentUser!.email!;
       final userRef = FirebaseFirestore.instance.collection('users').doc(email);
-      await userRef.delete();
+      return FirebaseAuth.instance.currentUser!
+          .delete()
+          .then((value) => userRef.delete())
+          .catchError(
+            (error) => Future.error("Error deleting user: $error"),
+          );
     } catch (error) {
       return Future.error('$error');
     }

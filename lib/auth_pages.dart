@@ -1,11 +1,13 @@
+// This file contains the main pages used in user authentication
+
 import 'dart:async';
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'auth_widgets.dart';
 import 'main.dart';
 import 'themes.dart';
 
+// This class manages root authentication navigation.
 class AuthNav extends StatefulWidget {
   const AuthNav({super.key});
 
@@ -14,25 +16,24 @@ class AuthNav extends StatefulWidget {
 }
 
 class _AuthNavState extends State<AuthNav> {
-  Future? myFuture;
-  bool newUser = false;
-  void isNewUser() => (newUser = !newUser);
-
   @override
   Widget build(BuildContext context) {
+    // Root-level navigation depends on a stream of user authentication state changes
     return StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
+            // If there's an error, display the error message page
             return errorMessage(snapshot.error, context);
           } else if (snapshot.connectionState == ConnectionState.waiting) {
+            // If waiting, display a non-animated-logo loading page
             return animatedLogo(context, false);
           } else if (snapshot.hasData) {
-            return VerifyEmailPage(newUser: newUser);
+            // If the user is signed in, send navigation to the verify email page
+            return const VerifyEmailPage();
           } else {
-            return AuthPage(
-              isNewUser: isNewUser,
-            );
+            // Else, take the user to the authentication page (log in or sign up)
+            return const AuthPage();
           }
         });
     // }
@@ -40,6 +41,8 @@ class _AuthNavState extends State<AuthNav> {
   }
 }
 
+// This is the error message page
+// TODO: update page UI and make it more user-friendly (user can't exit page right now)
 Widget errorMessage(Object? error, BuildContext context) {
   return Scaffold(
     body: Padding(
@@ -54,19 +57,19 @@ Widget errorMessage(Object? error, BuildContext context) {
   );
 }
 
+// This is the authentication page, where the user can log in, create a new account, etc.
 class AuthPage extends StatefulWidget {
-  const AuthPage({super.key, required this.isNewUser});
-  final VoidCallback isNewUser;
+  const AuthPage({super.key});
 
   @override
   State<AuthPage> createState() => _AuthPageState();
 }
 
 class _AuthPageState extends State<AuthPage> {
+  // The variable and method manage state based on whether the user is logging in or signing up
   bool login = true;
   void toggle() => setState(() {
         login = !login;
-        widget.isNewUser();
       });
 
   @override
@@ -75,6 +78,7 @@ class _AuthPageState extends State<AuthPage> {
       body: Center(
         child: Column(
           children: [
+            // This is the welcome message and logo
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 25, 0, 5),
               child: Text(
@@ -83,6 +87,7 @@ class _AuthPageState extends State<AuthPage> {
               ),
             ),
             logo,
+            // This is the center box that will either contain the log in or sign up widget
             Expanded(
               child: Align(
                 alignment: Alignment.center,
@@ -90,8 +95,8 @@ class _AuthPageState extends State<AuthPage> {
                   padding: const EdgeInsets.all(25),
                   child: FloatingBox(
                     child: login
-                        ? LoginWidget(onClickedSignIn: toggle)
-                        : SignUpWidget(onClickedSignUp: toggle),
+                        ? LoginWidget(switchToSignUp: toggle)
+                        : SignUpWidget(switchtoSignIn: toggle),
                   ),
                 ),
               ),
@@ -103,28 +108,7 @@ class _AuthPageState extends State<AuthPage> {
   }
 }
 
-// An animation for the title I was playing with but never implemented.
-class AnimatedTitle extends StatelessWidget {
-  const AnimatedTitle({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedTextKit(
-      isRepeatingAnimation: false,
-      animatedTexts: [
-        FadeAnimatedText(
-          'Welcome to',
-          textStyle: Theme.of(context).textTheme.displayLarge,
-          fadeInEnd: 2,
-          fadeOutBegin: double.maxFinite,
-        ),
-      ],
-    );
-  }
-}
-
+// This is the forgot password page
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
 
@@ -145,6 +129,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // A simple app bar that lets the user go back
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -166,6 +151,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 20),
+                    // This is where the user enters their email to send the reset password link to.
                     TextFormField(
                       controller: _emailController,
                       decoration: const InputDecoration(
@@ -194,6 +180,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     );
   }
 
+// This method sends a link to the user's email to reset their password
   Future resetPassword() async {
     showDialog(
       context: context,
@@ -201,6 +188,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       builder: (context) => const Center(child: CircularProgressIndicator()),
     );
 
+    // A snackbar is shown based on whether the operation is successful
     try {
       await FirebaseAuth.instance
           .sendPasswordResetEmail(email: _emailController.text.trim());
@@ -211,24 +199,28 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       showTextSnackBar(
         "Error sending email: $error",
       );
+      // Navigating back to the authentication page
       navigatorKey.currentState!.pop();
     }
   }
 }
 
+// Tis is the verify email page
 class VerifyEmailPage extends StatefulWidget {
-  const VerifyEmailPage({super.key, required this.newUser});
-  final bool newUser;
+  const VerifyEmailPage({super.key});
 
   @override
   State<VerifyEmailPage> createState() => _VerifyEmailPageState();
 }
 
 class _VerifyEmailPageState extends State<VerifyEmailPage> {
+  bool newUser = false;
   bool emailVerified = false;
   bool canResendEmail = false;
   Timer? timer;
 
+  // Here, values are initialized, and an initial verification email is sent
+  // The timer checks whether the user's email has been verified every 5 seconds
   @override
   void initState() {
     super.initState();
@@ -253,8 +245,11 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   @override
   Widget build(BuildContext context) {
     return (emailVerified)
-        ? VerifiedHomePage(newUser: widget.newUser)
+        // If the email is verified, then they are sent to the verified page, with further navigation logic
+        ? VerifiedHomePage(newUser: newUser)
+        // Else, a simple page is shown, where users can resend a verification email or cancel
         : Scaffold(
+            // A simple app bar that lets the user go back
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
@@ -280,6 +275,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                       const SizedBox(height: 20),
                       ElevatedButton.icon(
                         onPressed:
+                            // Users can only send a verification email every 5 seconds
                             canResendEmail ? sendVerificationEmail : null,
                         icon: const Icon(Icons.email),
                         label: const Text('Resend Email'),
@@ -287,6 +283,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                       const SizedBox(height: 10),
                       TextButton(
                         onPressed: () {
+                          // The cancel button just signs the user out, but an account is created
                           FirebaseAuth.instance.signOut();
                         },
                         child: const Text('Cancel'),
@@ -299,10 +296,13 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
           );
   }
 
+// This method sends the user a verification email
+// If an error comes up, it displays a snack bar
   Future sendVerificationEmail() async {
     try {
       await FirebaseAuth.instance.currentUser!.sendEmailVerification();
 
+      // After an email is sent, the user must wait 5 seconds before sending another one
       setState(() => canResendEmail = false);
       await Future.delayed(const Duration(seconds: 5));
       setState(() => canResendEmail = true);
@@ -311,10 +311,13 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
     }
   }
 
+// This method checks whether the user is verified
+// It reloads the current user's data, and if they are verfied, cancels the timer
   Future checkEmailVerified() async {
     await FirebaseAuth.instance.currentUser!.reload();
     setState(() {
       emailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
+      newUser = true;
     });
 
     if (emailVerified) {
