@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-import 'auth_page.dart';
+import 'auth_pages.dart';
 import 'classes.dart';
 import 'firebase_options.dart';
 import 'my_app_state.dart';
@@ -22,6 +22,7 @@ void main() async {
 }
 
 final navigatorKey = GlobalKey<NavigatorState>();
+final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 // This widget is the root of my application.
 class MyApp extends StatelessWidget {
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         navigatorKey: navigatorKey,
+        scaffoldMessengerKey: scaffoldMessengerKey,
         debugShowCheckedModeBanner: false,
         title: '5 Minute संस्कृतम्',
         theme: theme,
@@ -152,10 +154,8 @@ class _MainPageState extends State<MainPage> {
     List<Widget> quizList = [];
     int counter = 0;
     for (Quiz quiz in context.watch<MyAppState>().quizzes) {
-      if (quiz.show) {
-        quizList.add(QuizTile(quiz: quiz, index: counter));
-        counter++;
-      }
+      quizList.add(QuizTile(quiz: quiz, index: counter));
+      counter++;
     }
 
     return Scaffold(
@@ -204,9 +204,9 @@ class QuizTile extends StatelessWidget {
         onTap: () {
           context.read<MyAppState>().setCurrentQuiz(index);
           if (context.read<MyAppState>().quizzes[index].showSummary) {
-            context.read<MyAppState>().onItemTapped(3);
+            context.read<MyAppState>().navigateTo(3);
           } else {
-            context.read<MyAppState>().onItemTapped(2);
+            context.read<MyAppState>().navigateTo(2);
           }
           context.read<MyAppState>().reset();
         },

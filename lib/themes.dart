@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'main.dart';
+
 // This theme variable is used to keep design consistent throughout the application
 final theme = ThemeData(
   colorScheme:
@@ -20,31 +22,33 @@ final theme = ThemeData(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
-      minimumSize: const Size.fromHeight(40),
+      minimumSize: const Size.fromHeight(42.5),
       backgroundColor: const Color.fromARGB(255, 11, 83, 148),
       foregroundColor: Colors.white,
-      //textStyle: const TextStyle(fontWeight: FontWeight.bold),
     ),
   ),
   textTheme: TextTheme(
-      headlineLarge: TextStyle(
-          fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 27.5),
-      headlineMedium: TextStyle(
-          fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 25),
-      headlineSmall: TextStyle(
-          fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 18),
-      bodyLarge: TextStyle(
-          fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 16),
-      bodyMedium: TextStyle(
-          fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 14.5),
-      bodySmall: TextStyle(
-          fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 12),
-      displayLarge: TextStyle(
-          fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 29),
-      displayMedium:
-          TextStyle(fontFamily: GoogleFonts.baloo2().fontFamily, fontSize: 25),
-      displaySmall: TextStyle(
-          fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 19)),
+    headlineLarge: TextStyle(
+        fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 27.5),
+    headlineMedium: TextStyle(
+        fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 25),
+    headlineSmall: TextStyle(
+        fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 18),
+    bodyLarge: TextStyle(
+        fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 16),
+    bodyMedium: TextStyle(
+        fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 14.5),
+    bodySmall: TextStyle(
+        fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 13),
+    displayLarge: TextStyle(
+        fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 29),
+    displayMedium:
+        TextStyle(fontFamily: GoogleFonts.baloo2().fontFamily, fontSize: 25),
+    displaySmall: TextStyle(
+        fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 19),
+    labelSmall: TextStyle(
+        fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 13),
+  ),
 );
 
 // This is the main logo that I'm using for my app.
@@ -125,4 +129,10 @@ class FloatingBox extends StatelessWidget {
       child: child,
     );
   }
+}
+
+showTextSnackBar(String message) {
+  scaffoldMessengerKey.currentState?.showSnackBar(SnackBar(
+    content: Text(message),
+  ));
 }
