@@ -1,3 +1,5 @@
+// This file contains all pages and features for the profile page
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -57,8 +59,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 20),
                     // This is the sign out button
                     ElevatedButton(
-                      onPressed: () {
-                        FirebaseAuth.instance.signOut();
+                      onPressed: () async {
+                        await FirebaseAuth.instance.signOut();
                         context.read<MyAppState>().navigateTo(0);
                       },
                       child: const Text('Sign out'),
@@ -165,6 +167,47 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
+            // This is the about screen
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+              child: ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text('About Project'),
+                        content: const SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Jishnu Mehta\nAdvanced Programming Topics\nPeriod 2\nJune 7, 2024',
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                '5 Minute संस्कृतम् ।\nA quiz application to supplement Sanskrit learning\nCreated with Flutter, using Github, Firebase, and VS Code',
+                              ),
+                            ],
+                          ),
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Close'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: const Text('About Project'),
+              ),
+            ),
             // This is the delete account button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
@@ -187,22 +230,19 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           TextButton(
                             // If they confirm, the user account and database data are deleted
-                            onPressed: () async {
-                              Future.wait([
-                                deleteUserData(),
-                                FirebaseAuth.instance.currentUser!.delete(),
-                              ])
+                            onPressed: () {
+                              deleteUserData()
                                   .then(
-                                    (value) => (
-                                      showTextSnackBar("User account deleted"),
-                                    ),
-                                  )
-                                  .catchError(
-                                    (error) => (
-                                      showTextSnackBar(
-                                          "Error deleting user: $error"),
-                                    ),
-                                  );
+                                (value) =>
+                                    (showTextSnackBar("User account deleted")),
+                              )
+                                  .catchError((error) {
+                                (
+                                  showTextSnackBar(
+                                      "Error deleting user: $error"),
+                                );
+                              });
+                              Navigator.of(context).pop();
                             },
                             child: Text(
                               'Delete',
@@ -240,11 +280,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // This method deletes all the user's data from the database
   // Errors are handled in the paret widget
-  Future deleteUserData() async {
+  Future deleteUserData() {
     try {
       String email = FirebaseAuth.instance.currentUser!.email!;
       final userRef = FirebaseFirestore.instance.collection('users').doc(email);
-      await userRef.delete();
+      return FirebaseAuth.instance.currentUser!
+          .delete()
+          .then((value) => userRef.delete())
+          .catchError(
+            (error) => Future.error("Error deleting user: $error"),
+          );
     } catch (error) {
       return Future.error('$error');
     }

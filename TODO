@@ -4,6 +4,8 @@
   - Write down every possible place for error, and type of handling
 - Write better rules for the app
 - Check if backend data is being called multiple times
+- Add reauthentication before changing password or deleting account
+- Don't write to database if no questions answered
 
 ## Mutliple Quiz Formatting
  - All visible quizzes are going to be in a home page, displayed with an array
@@ -24,7 +26,7 @@
   - Will need to create profiles for account 
     - Log in and log out
 
-### Stretch Stretch Goals
+## Stretch Stretch Goals
  - Add a clickable confetti animation to the summary page
  - Give user extra points after mastering a question or competing a quiz
  - Create a leaderboard
@@ -153,7 +155,7 @@ A Stream<T> like a Future<T> but it delivers 0+ values over time. This means its
 - https://codebeautify.org/csv-to-xml-json
 - https://learn.microsoft.com/en-us/office/dev/scripts/resources/samples/get-table-data
 - https://support.microsoft.com/en-us/office/introduction-to-office-scripts-in-excel-9fbe283d-adb8-4f13-a75b-a81c6baf163a
-  - Excel will give a script, and I can then copy-paste into another project that I use to write code.
+  - Excel will give an output from script, and I can then copy-paste into another project that I use to write code.
 
 # Known Errors
 - The Android version of the app will not build. It seemed to be something with too many resources being used. Check all packages for compatibility.

@@ -1,4 +1,5 @@
-// This is the framework of an answer tile.
+// This class contains other widgets used on the quiz page
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'classes.dart';

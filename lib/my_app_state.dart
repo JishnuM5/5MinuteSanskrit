@@ -1,3 +1,5 @@
+// This file contains the MyAppState ChangeNotifier class for state management
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -119,7 +121,7 @@ class MyAppState extends ChangeNotifier {
         }
       }
 
-      await Future.delayed(const Duration(seconds: 4), () {});
+      await Future.delayed(const Duration(seconds: 2), () {});
       return Future.value(quizzes);
     } catch (error) {
       return Future.error('(From readQuiz()) $error');

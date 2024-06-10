@@ -1,3 +1,5 @@
+// This file contains smaller widgets used during the user authentication flow
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

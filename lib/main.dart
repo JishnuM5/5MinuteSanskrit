@@ -1,3 +1,5 @@
+// This is the main file of the project
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';

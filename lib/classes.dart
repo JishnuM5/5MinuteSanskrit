@@ -1,3 +1,5 @@
+// This file contains all of the custom classes used in the project
+
 import 'dart:math';
 
 // The question class manages each question
