@@ -60,13 +60,19 @@ final theme = ThemeData(
 final logo = RichText(
   text: TextSpan(
     style: TextStyle(
-        fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 25),
+      fontFamily: GoogleFonts.courierPrime().fontFamily,
+      fontSize: 25,
+      color: Colors.black,
+    ),
     children: <TextSpan>[
       const TextSpan(text: '5 Minute '),
       TextSpan(
         text: 'संस्कृतम् ।',
         style: TextStyle(
-            fontFamily: GoogleFonts.baloo2().fontFamily, fontSize: 25),
+          fontFamily: GoogleFonts.baloo2().fontFamily,
+          fontSize: 25,
+          color: Colors.black,
+        ),
       ),
     ],
   ),
@@ -166,4 +172,11 @@ class AnimatedTitle extends StatelessWidget {
       ],
     );
   }
+}
+
+// This method returns whether text is in Sanskrit, or Devanagari script
+// If it is, the font size is slightly larger
+bool isSanskrit(String text) {
+  var sanskrit = RegExp(r'[\u0900-\u097F]');
+  return sanskrit.hasMatch(text);
 }

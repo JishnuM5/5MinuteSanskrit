@@ -17,7 +17,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _nameController;
+  late TextEditingController _nameController;
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
@@ -61,7 +61,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     ElevatedButton(
                       onPressed: () async {
                         await FirebaseAuth.instance.signOut();
-                        context.read<MyAppState>().navigateTo(0);
                       },
                       child: const Text('Sign out'),
                     ),
@@ -169,98 +168,100 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             // This is the about screen
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-              child: ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: const Text('About Project'),
-                        content: const SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Jishnu Mehta\nAdvanced Programming Topics\nPeriod 2\nJune 7, 2024',
+              padding: const EdgeInsets.all(20),
+              child: FloatingBox(
+                child: Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('About Project'),
+                              content: const SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Jishnu Mehta\nAdv. Programming Topics\nYLSP Program\nReleased June 7, 2024',
+                                    ),
+                                    SizedBox(height: 10),
+                                    Text(
+                                      '5 Minute संस्कृतम् ।\nA quiz application to supplement Sanskrit learning\nCreated with Flutter, using Github, Firebase, and VS Code',
+                                    ),
+                                  ],
+                                ),
                               ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                '5 Minute संस्कृतम् ।\nA quiz application to supplement Sanskrit learning\nCreated with Flutter, using Github, Firebase, and VS Code',
-                              ),
-                            ],
-                          ),
-                        ),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('Close'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                child: const Text('About Project'),
-              ),
-            ),
-            // This is the delete account button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-              child: ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      // This is a confirmation dialog
-                      return AlertDialog(
-                        title: const Text('Delete Account'),
-                        content: const Text(
-                            'Are you sure you want to delete your account? This action cannot be undone.'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            // If they confirm, the user account and database data are deleted
-                            onPressed: () {
-                              deleteUserData()
-                                  .then(
-                                (value) =>
-                                    (showTextSnackBar("User account deleted")),
-                              )
-                                  .catchError((error) {
-                                (
-                                  showTextSnackBar(
-                                      "Error deleting user: $error"),
-                                );
-                              });
-                              Navigator.of(context).pop();
-                            },
-                            child: Text(
-                              'Delete',
-                              style: TextStyle(
-                                color: Colors.red[800],
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red[800],
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Close'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: const Text('About Project'),
+                    ),
+                    const SizedBox(height: 7.5),
+                    // This is the delete account button
+                    ElevatedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            // This is a confirmation dialog
+                            return AlertDialog(
+                              title: const Text('Delete Account'),
+                              content: const Text(
+                                  'Are you sure you want to delete your account? This action cannot be undone.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  // If they confirm, the user account and database data are deleted
+                                  onPressed: () {
+                                    deleteUserData()
+                                        .then(
+                                      (value) => (showTextSnackBar(
+                                          "User account deleted")),
+                                    )
+                                        .catchError((error) {
+                                      (
+                                        showTextSnackBar(
+                                            "Error deleting user: $error"),
+                                      );
+                                    });
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text(
+                                    'Delete',
+                                    style: TextStyle(
+                                      color: Colors.red[800],
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red[800],
+                      ),
+                      child: const Text('Delete Account'),
+                    ),
+                  ],
                 ),
-                child: const Text('Delete Account'),
               ),
             )
           ],

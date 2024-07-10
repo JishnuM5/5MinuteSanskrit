@@ -9,7 +9,12 @@ class Question {
   final List<String> answers;
   final int correctIndex;
 
-  const Question({
+  int timesCorrect = 0;
+  int timesAnswered = 0;
+  DateTime? lastShown;
+  DateTime? lastAnswered;
+
+  Question({
     required this.question,
     required this.answers,
     required this.correctIndex,
@@ -28,6 +33,24 @@ class Question {
       correctIndex: qMap['correctIndex'],
     );
   }
+
+  void readFromState(Map<String, dynamic> qState) {
+    timesCorrect = qState['timesCorrect'];
+    timesAnswered = qState['timesAnswered'];
+
+    final lSState = qState['lastShown'];
+    if (lSState != null) {
+      lastShown = lSState.toDate();
+    }
+    final lAState = qState['lastAnswered'];
+    if (lAState != null) {
+      lastAnswered = lAState.toDate();
+    }
+
+    print(
+      'Correct: $timesCorrect/$timesAnswered, Last Answered: $lastAnswered, Last Shown: $lastShown',
+    );
+  }
 }
 
 // The quiz class manages a list of questions
@@ -36,13 +59,20 @@ class Quiz {
   final List<Question> questions;
   final String name;
   final bool show;
+  //TODO: implement
+  final DateTime start;
 
+  bool mastered = false;
   int points = 0;
   bool showSummary = false;
   int currentQ = 0;
   int correctQs = 0;
 
-  Quiz({required this.questions, required this.name, required this.show});
+  Quiz(
+      {required this.questions,
+      required this.name,
+      required this.show,
+      required this.start});
 
   // This constructor creates a quiz from a map, with questions ordered in a list
   factory Quiz.fromMap(Map<String, dynamic> quizMap) {
@@ -52,7 +82,7 @@ class Quiz {
         qMap.keys.map((key) => int.parse(key.substring(1))).reduce(max);
     List<Question> questions = List.filled(
       maxNum,
-      const Question(answers: [], question: '', correctIndex: 0),
+      Question(answers: [], question: '', correctIndex: 0),
       growable: true,
     );
 
@@ -66,6 +96,7 @@ class Quiz {
       questions: questions,
       name: quizMap['name'],
       show: quizMap['show'],
+      start: quizMap['start'].toDate(),
     ));
   }
 
@@ -75,6 +106,14 @@ class Quiz {
     showSummary = quizState['showSummary'];
     currentQ = quizState['currentQ'];
     correctQs = quizState['correctQs'];
+
+    // Reading the state for all the questions
+    for (int i = 0; i < questions.length; i++) {
+      Map<String, dynamic>? qState = quizState['qStates']['q$i'];
+      if (qState != null) {
+        questions[i].readFromState(qState);
+      }
+    }
   }
 }
 
@@ -82,24 +121,25 @@ class Quiz {
 Quiz sampleQuiz = Quiz(
   name: 'Sample Quiz',
   show: true,
+  start: DateTime.fromMicrosecondsSinceEpoch(0),
   questions: [
-    const Question(
+    Question(
         question: 'Question 1',
         answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctIndex: 0),
-    const Question(
+    Question(
         question: 'Question 2',
         answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctIndex: 0),
-    const Question(
+    Question(
         question: 'Question 3',
         answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctIndex: 0),
-    const Question(
+    Question(
         question: 'Question 4',
         answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctIndex: 0),
-    const Question(
+    Question(
         question: 'Question 5',
         answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
         correctIndex: 0),

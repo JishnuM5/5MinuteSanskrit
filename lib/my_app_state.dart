@@ -35,18 +35,37 @@ class MyAppState extends ChangeNotifier {
 
   // This is the list of quizzes for this user and the current app user
   List<Quiz> quizzes = [];
+  //TODO: implement
+  List<String> masteredQuizzes = ['String 1', 'String 2', 'String 3'];
   AppUser appUser = AppUser.empty();
 
   // This method updates the user's quiz data in the database
   // When an error is thrown, a snack bar is shown
   Future updateUserStates() async {
     for (Quiz quiz in quizzes) {
+      final Map<String, Map<String, dynamic>> qStates = {};
+      for (int i = 0; i < quiz.questions.length; i++) {
+        qStates['q$i'] = {};
+        qStates['q$i']!['timesCorrect'] = quiz.questions[i].timesCorrect;
+        qStates['q$i']!['timesAnswered'] = quiz.questions[i].timesAnswered;
+
+        if (quiz.questions[i].lastShown != null) {
+          qStates['q$i']!['lastShown'] =
+              Timestamp.fromDate(quiz.questions[i].lastShown!);
+        }
+        if (quiz.questions[i].lastAnswered != null) {
+          qStates['q$i']!['lastAnswered'] =
+              Timestamp.fromDate(quiz.questions[i].lastAnswered!);
+        }
+      }
+
       try {
         await userRef.update({
           'quizStates.${quiz.name}.correctQs': quiz.correctQs,
           'quizStates.${quiz.name}.currentQ': quiz.currentQ,
           'quizStates.${quiz.name}.points': quiz.points,
           'quizStates.${quiz.name}.showSummary': quiz.showSummary,
+          'quizStates.${quiz.name}.qStates': qStates
         });
       } catch (error) {
         showTextSnackBar('Error saving data: $error');
@@ -55,13 +74,13 @@ class MyAppState extends ChangeNotifier {
   }
 
   // This method updates the user's name locally. It is called when a new user account is created
-  void createUser(String name) {
+  void updateUserName(String name) {
     appUser.name = name;
   }
 
-  // This method updates the usuer's name locally and in the database
+  // This method updates the user's name locally and in the database
   Future updateUser(String name) async {
-    createUser(name);
+    updateUserName(name);
     try {
       await (userRef.update({'name': name}));
     } on Exception catch (error) {
@@ -69,7 +88,7 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  // This method creates a user document in the database with the quiz name
+  // This method creates a user document in the database with quiz name
   // Errors from this method are handled in the parent widget
   Future createUserInDB() async {
     print('Creating user in database...');
@@ -116,7 +135,10 @@ class MyAppState extends ChangeNotifier {
       for (DocumentSnapshot<Map<String, dynamic>> doc in value.docs) {
         Map<String, dynamic> quizMap = doc.data()!;
         Quiz quiz = Quiz.fromMap(quizMap);
-        if (quiz.show) {
+        if (quiz.show && DateTime.now().isAfter(quiz.start)) {
+          for (Question question in quiz.questions) {
+            question.lastShown = DateTime.now();
+          }
           quizzes.add(quiz);
         }
       }
@@ -141,12 +163,18 @@ class MyAppState extends ChangeNotifier {
 
   // This method updates the quiz page when an answer is selected
   // It gives the user points if the answer is corrent
-  void onAnsSubmitted(int numPoints) {
+  void onAnsSubmitted() {
     Quiz quiz = quizzes[currentQuiz];
-    if (selectedIndex == quiz.questions[quiz.currentQ].correctIndex) {
-      quiz.points += numPoints;
+    Question question = quiz.questions[quiz.currentQ];
+
+    if (selectedIndex == question.correctIndex) {
+      quiz.points += (question.timesCorrect == 0) ? 5 : 10;
       quiz.correctQs++;
+      question.timesCorrect++;
     }
+    question.lastAnswered = DateTime.now();
+    question.timesAnswered++;
+
     ansSubmitted = true;
     notifyListeners();
   }
@@ -155,8 +183,7 @@ class MyAppState extends ChangeNotifier {
   void reset() {
     Quiz quiz = quizzes[currentQuiz];
     // The user is either taken to the summary page or the next question
-    if (quiz.currentQ == quizzes[currentQuiz].questions.length - 1 &&
-        ansSubmitted) {
+    if (quiz.currentQ == quiz.questions.length - 1 && ansSubmitted) {
       quiz.showSummary = true;
     } else {
       if (ansSubmitted) {

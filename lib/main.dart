@@ -16,6 +16,7 @@ import 'themes.dart';
 
 //This is the main method, from where the code runs
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -173,6 +174,28 @@ class _MainPageState extends State<MainPage> {
             Column(
               children: quizList,
             ),
+            const SizedBox(height: 15),
+            ExpansionTile(
+              shape: const Border(),
+              title: const Text('See mastered quizzes'),
+              children: context
+                  .watch<MyAppState>()
+                  .masteredQuizzes
+                  .map((quiz) => Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 5, 10, 2.5),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.check_circle_rounded,
+                              color: Colors.green,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(quiz),
+                          ],
+                        ),
+                      ))
+                  .toList(),
+            )
           ],
         ),
       ),
@@ -201,7 +224,11 @@ class QuizTile extends StatelessWidget {
         color: Theme.of(context).primaryColor,
         child: Text(
           quiz.name,
-          style: Theme.of(context).textTheme.headlineLarge,
+          style: (isSanskrit(quiz.name))
+              ? Theme.of(context).textTheme.displayMedium!.copyWith(
+                    fontSize: 27.5,
+                  )
+              : Theme.of(context).textTheme.headlineLarge,
         ),
         // When a quiz tile is pressed, the app navigates to the respective quiz
         // Quiz page variables are set accordingly and previous temporary UI is reset
@@ -221,59 +248,63 @@ class QuizTile extends StatelessWidget {
 
 // This is the animated logo that is displayed on the main page.
 Widget animatedLogo(BuildContext context, bool animate) {
-  return Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-      // The logo can be animated or static
-      (animate)
-          ? AnimatedTextKit(
-              isRepeatingAnimation: false,
-              repeatForever: false,
-              animatedTexts: [
-                TypewriterAnimatedText(
-                  '5 Minute',
-                  textStyle: Theme.of(context).textTheme.headlineMedium,
-                  cursor: '।',
-                  speed: const Duration(milliseconds: 200),
+  return Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // The logo can be animated or static
+          (animate)
+              ? AnimatedTextKit(
+                  isRepeatingAnimation: false,
+                  repeatForever: false,
+                  animatedTexts: [
+                    TypewriterAnimatedText(
+                      '5 Minute',
+                      textStyle: Theme.of(context).textTheme.headlineMedium,
+                      cursor: '।',
+                      speed: const Duration(milliseconds: 200),
+                    ),
+                  ],
+                )
+              : Padding(
+                  padding: const EdgeInsets.fromLTRB(6, 5, 0, 0),
+                  child: Text(
+                    '5 Minute ',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
                 ),
-              ],
-            )
-          : Padding(
-              padding: const EdgeInsets.fromLTRB(6, 5, 0, 0),
-              child: Text(
-                '5 Minute ',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-            ),
-      (animate)
-          ? AnimatedTextKit(
-              pause: const Duration(milliseconds: 3000),
-              isRepeatingAnimation: false,
-              repeatForever: false,
-              animatedTexts: [
-                TyperAnimatedText(''),
-                TypewriterAnimatedText(
-                  'संस्कृतम् ।',
-                  textStyle: Theme.of(context).textTheme.displayMedium,
-                  cursor: '।',
-                  speed: const Duration(milliseconds: 200),
+          (animate)
+              ? AnimatedTextKit(
+                  pause: const Duration(milliseconds: 3000),
+                  isRepeatingAnimation: false,
+                  repeatForever: false,
+                  animatedTexts: [
+                    TyperAnimatedText(''),
+                    TypewriterAnimatedText(
+                      'संस्कृतम् ।',
+                      textStyle: Theme.of(context).textTheme.displayMedium,
+                      cursor: '।',
+                      speed: const Duration(milliseconds: 200),
+                    ),
+                  ],
+                )
+              : Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 4, 0),
+                  child: Text('संस्कृतम् । ',
+                      style: Theme.of(context).textTheme.displayMedium),
                 ),
-              ],
-            )
-          : Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 4, 0),
-              child: Text('संस्कृतम् । ',
-                  style: Theme.of(context).textTheme.displayMedium),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: 50,
+            height: 50,
+            child: CircularProgressIndicator(
+              color: Theme.of(context).primaryColor,
             ),
-      const SizedBox(height: 10),
-      SizedBox(
-        width: 50,
-        height: 50,
-        child: CircularProgressIndicator(
-          color: Theme.of(context).primaryColor,
-        ),
-      )
-    ],
+          ),
+        ],
+      ),
+    ),
   );
 }

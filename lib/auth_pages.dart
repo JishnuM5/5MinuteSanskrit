@@ -7,7 +7,7 @@ import 'auth_widgets.dart';
 import 'main.dart';
 import 'themes.dart';
 
-// This class manages root authentication navigation.
+// This class manages root authentication navigation
 class AuthNav extends StatefulWidget {
   const AuthNav({super.key});
 
@@ -36,21 +36,52 @@ class _AuthNavState extends State<AuthNav> {
             return const AuthPage();
           }
         });
-    // }
-    // });
   }
 }
 
 // This is the error message page
-// TODO: update page UI and make it more user-friendly (user can't exit page right now)
 Widget errorMessage(Object? error, BuildContext context) {
   return Scaffold(
-    body: Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Center(
-        child: Text(
-          'Hmm. It looks like something went wrong. क्षम्यताम्!\nError: $error',
-          textAlign: TextAlign.center,
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(25.0),
+        child: FloatingBox(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 64,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Oops! Something went wrong.',
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'क्षम्यताम्! We apologize for the inconvenience.',
+                style: Theme.of(context).textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Error: $error',
+                style: Theme.of(context).textTheme.bodySmall,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton.icon(
+                onPressed: () {
+                  FirebaseAuth.instance.signOut();
+                },
+                icon: const Icon(Icons.arrow_back),
+                label: const Text('Return to Login'),
+              ),
+            ],
+          ),
         ),
       ),
     ),

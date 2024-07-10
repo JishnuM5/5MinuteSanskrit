@@ -4,19 +4,34 @@
   - Write down every possible place for error, and type of handling
 - Write better rules for the app
 - Check if backend data is being called multiple times
-- Add reauthentication before changing password or deleting account
 - Don't write to database if no questions answered
+- Add bug testers
+
+- Save all the mastery values to database
+
 
 ## Mutliple Quiz Formatting
  - All visible quizzes are going to be in a home page, displayed with an array
-  - Whether a quiz is visible depends on its "show" value in the database
+  - Whether a quiz is visible depends on its "show" value in the database and whether the quiz is mastered
     - This will be controlled by an admin account (to add later on)
       - Admins can also write new quizzes to the database
 
- - Quizzes can be completed (to add later on)
+ - Quizzes can be mastered
   - To complete a quiz, the user will answer all questions correctly twice
     - Only 5/10 questions can be done a day
-    - 5 points each time a question is answered correctly
+    - 5 points each time a question is answered correctly, and an extra 5 points when it's mastered
+  - The quiz is first shown at a given set time, with the first 5 quesions, and the next 5 questions are shown a day later
+    - Afterwards, a question is shown if it was last shown two days ago (2 "12:00 pm"s have passed), last answered a day ago (1 "12:00 pm"), and NOT already answered 2 times
+      - It should also have been answered (check if a question is hidden)
+    - The last shown time for each question updates during database retrieval, and last answered time updates after a question is answered
+
+ - The session system: the total number of times a question is answered is stored as a variable. Each time comes to the home page from the quiz page, an algorithm is run to see which questions should be shown.
+  - The algorithm first checks a boolean flag to see whether the first or second 5 questions will be shown.
+    - Then the current question value is adjusted to the shown questions
+    - Then, if a question was answered 0 times, it is shown
+    - When going to the next question, if the question has been answered twice, it is skipped
+ - The home page will show the number of questions remaining in a session (number) and the number of questions mastered (progress bar).
+ - The summary page is shown after every session (5 questions). It is slightly different when a quiz is mastered.
 
 - There will be accounts to control students and admins (to add later on)
   - Two types of accounts: students and admins
@@ -27,12 +42,12 @@
     - Log in and log out
 
 ## Stretch Stretch Goals
- - Add a clickable confetti animation to the summary page
- - Give user extra points after mastering a question or competing a quiz
  - Create a leaderboard
  - Advanced UI
  - Improve the optimization of loading/saving quizzes and users
  - Saving cache to avoid reading the database every time
+ - An advanced points system
+ - Add reauthentication before changing password or deleting account
  <br /><br />
 
  # Notes
@@ -52,68 +67,86 @@
 - MyAppState() is an example of a "model", which are similar to helper classes/objects in OOP.
 
 - These are different methods to use ChangeNotifier. Each one has tiny differences but many can be interchanged in most cases. Internet recommends using context.read() and context.watch().
-final model = context.read<MyAppState>();
+<br /><br />
+```
+final model = context.read\<MyAppState\>();
+```
 - This returns the Model without listening for any changes.
 - Used when CHANGING a state but not ACCESSING it (or only accessing it once).
+<br /><br />
 
-final model = context.watch<MyAppState>();
+```
+final model = context.watch\<MyAppState\>();
+```
 - This makes the widget listen for changes on the Model.
 - Used to ACCESS state throughout changes.
+<br /><br />
 
-final model = Provider.of<MyAppState>(context, listen: false);
-- This works the same as context.read<MyAppState>();
+```
+final model = Provider.of\<MyAppState\>(context, listen: false);
+```
+- This works the same as context.read\<MyAppState\>();
+<br /><br />
 
-final model = Provider.of<MyAppState>(context);
-- This works the same as context.watch<MyAppState>();
+```
+final model = Provider.of\<MyAppState\>(context);
+```
+- This works the same as context.watch\<MyAppState\>();
+<br /><br />
 
-Consumer<MyAppState>(
+```
+Consumer\<MyAppState\>(
     builder: (context, stateVar, child) {
         return Text('${stateVar.value}');
     }
 )
-- This works the same as context.watch<MyAppState>();
+```
+- This works the same as context.watch\<MyAppState\>();
 
 ## Asynchronous Coding:
-Asynchronous (Async) coding allows a Flutter App to run while waiting on that section of the code to finish. For example, if a method was downloading an image, Flutter can continue running other code while the image downloads, then comeback to finishing that method.
-- Such methods use Future<T> values. Future values have two states: uncompleted and completed (with a value or an error). Aysnc coding is about handling these different states. Future values can be manually coded, but they are generally returned with packages/APIs.
+Asynchronous (async) coding allows a Flutter App to run while waiting on that section of the code to finish. For example, if a method was downloading an image, Flutter can continue running other code while the image downloads, then comeback to finishing that method.
+- Such methods use Future\<T\> values. Future values have two states: uncompleted and completed (with a value or an error). Aysnc coding is about handling these different states. Future values can be manually coded, but they are generally returned with packages/APIs.
+<br /><br />
 
-Future<someType>.then((someType) {}) is an instance method allows for handling after the Future is commpleted with a value. 
-- The .then() method takes a function that can take a value of <sometype> and perform operations directly on the value. Afterwards, the .then will return another Future<someOtherType> or just void.
-  - This means .then() methods can be chained since they all return a Future<T>, even if they're different ones.
+Future\<someType\>.then((someType) {}) is an instance method allows for handling after the Future is commpleted with a value. 
+- The .then() method takes a function that can take a value of \<sometype\> and perform operations directly on the value. Afterwards, the .then will return another Future\<someOtherType\> or just void.
+  - This means .then() methods can be chained since they all return a Future\<T\>, even if they're different ones.
 - To handle errors, there's also a .catchError(), which is like .then() but with an error. There is also a .whenCompleted(), similar to the `finally` in a try-catch block.
 
-- FutureBuilder<T>(future Future<T>, builder (context, snapshot) {}) is a builder than rebuilds when the Future<T> is completed. This allows Futures to be used in widgets. Futures are *one use async fuctions*, so they'll only run once.
+- FutureBuilder\<T\>(future Future\<T\>, builder (context, snapshot) {}) is a builder than rebuilds when the Future\<T\> is completed. This allows Futures to be used in widgets. Futures are *one use async fuctions*, so they'll only run once.
   - A snapshot is the current state of the Future.
   - Example: 
-  ```FutureBuilder<String>(
-    future: _fetchNetworkData, builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        print("There was an error");
+```FutureBuilder<String>(
+  future: _fetchNetworkData, builder: (context, snapshot) {
+    if (snapshot.hasError) {
+      print("There was an error");
 
-      } else if (snapshot.hasData) {
-        print("${snapshot.data}");
+    } else if (snapshot.hasData) {
+      print("${snapshot.data}");
 
-      } else {
-        print("Still waiting on a value");
+    } else {
+      print("Still waiting on a value");
 
-      }
-    })
+    }
+  })
+  ```
+<br /><br />
 
-A Stream<T> like a Future<T> but it delivers 0+ values over time. This means its states are 0 values, 1 value, 2 values (and/or errors)... ...completed.
-- You can "subscribe" to a Stream<someType> with a listener variable, like `final subscripition = Stream<T>.listen((someType) {})`, where the function inside .listen() is performced on every value that it delivers instead of just 1 in .then().
+A Stream\<T\> like a Future\<T\> but it delivers 0+ values over time. This means its states are 0 values, 1 value, 2 values (and/or errors)... ...completed.
+- You can "subscribe" to a Stream\<someType\> with a listener variable, like `final subscripition = Stream\<T\>.listen((someType) {})`, where the function inside .listen() is performced on every value that it delivers instead of just 1 in .then().
   - .listen() takes an optional onError method of (error) {} to handle errors (*this exists with .then() too, so two options there*) and an onDone method when the Stream finishes (which it doens't always do, depending on the situation).
-  - .listen() returns a StreamSubscription<T>, not Stream<T>, which is unlike .then(), which also returns Future<T>.
+  - .listen() returns a StreamSubscription\<T\>, not Stream\<T\>, which is unlike .then(), which also returns Future\<T\>.
 - You can also .pause(), .resume(), and .cancel() data flow with the listener variable (subscription)
 
-- Various methods can be attatched to a Stream<T>, such as .where() to return data that meets a boolean test or .map() to turn the Stream<T> into a Stream<R> of different values.
-- A StreamBuilder<T>(stream Stream<T>, builder (context, builder) {}) is like a FutureBuilder but it rebuilds every time a new value is delivered.
+- Various methods can be attatched to a Stream\<T\>, such as .where() to return data that meets a boolean test or .map() to turn the Stream\<T\> into a Stream<R> of different values.
+- A StreamBuilder\<T\>(stream Stream\<T\>, builder (context, builder) {}) is like a FutureBuilder but it rebuilds every time a new value is delivered.
   - snapshot.connectionState is a field of the Snapshot has to see whether the stream is still waiting, finished, etc.
+<br /><br />
 
 'aysnc' and 'await' are keywords that let to make aysnchronous code more readable and like synchronous code.
 - async goes just before the opening brace of the function that will use await.
-- await goes before every Future<T> the function waits for.
+- await goes before every Future\<T\> the function waits for.
 - Error handling happens with a try-catch block.
- <br /><br />
 
 ## Performance
 - Quizzes (LIST): iterating through all in fromMap, order semi-important, displaying all, each has index associated for page
@@ -121,6 +154,16 @@ A Stream<T> like a Future<T> but it delivers 0+ values over time. This means its
 - QuizStates (MAP): associated with a quiz name, iterating through app, order unimportant, need to find and access by name
 - User (MAP): associated with an email
 
+## Things I Did Well and Future Advice
+- (Advice) Organize: this TODO file, lots of time spent standardizing UI, refactoring code, and this improved my speed and avoided so many errors (One of the recent larger bugs was actually fixed w/ refactoring and improved app architecture)
+  - (Advice) Planning: the planning at the start really helped, and I'd created "MVP"s for each future section
+- (Challenge) Balancing Learning and Creating: most of the learning happens as you go, but there were some things I learned beforehard, like async, database connections, JSON, and state management
+  - I revisited a lot of my old methods and improved them once I better understood my work
+- Debugging (Advice & Process): there are multiple tools in Flutter, DevTools great for UI, lots of debugPrints, debug console helpful most of the time but a few errors that I could not find anything for
+
+- I'd reccomend working with Flutter and React Native because they have good documentation (especially Flutter) and a low learning curve
+- This project was actually smooth overall (setup was a little hard), I struggled a lot more with my FBLA app
+  - Going to continue working on this project, developing a pilot and question collection program (show script)
 
 # Links:
 - https://goo.gle/FlutterInFocus (YouTube playlist)
@@ -146,7 +189,7 @@ A Stream<T> like a Future<T> but it delivers 0+ values over time. This means its
 - https://firebase.google.com/docs/firestore/manage-data/export-import
 - https://firebase.google.com/docs/firestore/manage-data/add-data#dart_1
 
-- What's stored in the database: Quiz(questions, name, show), User(name, quizStates)
+- What's stored in the database: Quiz(questions, name, show, mastery), User(name, quizStates)
 
 ### Authentication
 - https://www.youtube.com/watch?v=4vKiJZNPhss 
@@ -154,10 +197,8 @@ A Stream<T> like a Future<T> but it delivers 0+ values over time. This means its
 ### Converting Data to a File
 - https://codebeautify.org/csv-to-xml-json
 - https://learn.microsoft.com/en-us/office/dev/scripts/resources/samples/get-table-data
-- https://support.microsoft.com/en-us/office/introduction-to-office-scripts-in-excel-9fbe283d-adb8-4f13-a75b-a81c6baf163a
   - Excel will give an output from script, and I can then copy-paste into another project that I use to write code.
 
 # Known Errors
-- The Android version of the app will not build. It seemed to be something with too many resources being used. Check all packages for compatibility.
 - If user cancels the email verification page within 5 seconds of sending the email verification, then the app crashes (This is because of an async wait function running to avoid the user from spamming emails; will fix later).
-- COMMON FIX: Methods compile without () but causes problems
+- COMMON FIX: Methods compile without () but cause problems
