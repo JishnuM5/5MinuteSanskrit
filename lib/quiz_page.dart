@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'my_app_state.dart';
 import 'quiz_widgets.dart';
+import 'themes.dart';
 
 // This class is the quiz page of the application
 class QuizPage extends StatefulWidget {
@@ -89,20 +90,16 @@ class _QuizPageState extends State<QuizPage> {
                           // If answer has been submitted, it resets the page and move to the next question
                           onPressed: (watchState.selectedIndex == -1)
                               ? null
-                              : () => {
-                                    if (readState.ansSubmitted)
-                                      {
-                                        readState.reset(),
-                                        if (quiz.showSummary)
-                                          {
-                                            context
-                                                .read<MyAppState>()
-                                                .navigateTo(3)
-                                          }
-                                      }
-                                    else
-                                      {readState.onAnsSubmitted(5)}
-                                  },
+                              : () {
+                                  if (readState.ansSubmitted) {
+                                    readState.reset();
+                                    if (quiz.showSummary) {
+                                      context.read<MyAppState>().navigateTo(3);
+                                    }
+                                  } else {
+                                    readState.onAnsSubmitted();
+                                  }
+                                },
                           style: OutlinedButton.styleFrom(
                             side: watchState.selectedIndex == -1
                                 ? null

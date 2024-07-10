@@ -1,5 +1,8 @@
 // This class contains other widgets used on the quiz page
 
+import 'dart:ui';
+
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'classes.dart';
@@ -92,8 +95,35 @@ class AnswerTile extends StatelessWidget {
 }
 
 // This is the summary page shown after the user answers all questions
-class SummaryPage extends StatelessWidget {
+class SummaryPage extends StatefulWidget {
   const SummaryPage({super.key});
+
+  @override
+  State<SummaryPage> createState() => _SummaryPageState();
+}
+
+class _SummaryPageState extends State<SummaryPage> {
+  final _confettiController = ConfettiController();
+  bool isHovering = false;
+
+  @override
+  void initState() {
+    super.initState();
+    playConfettiAnimation();
+  }
+
+  void playConfettiAnimation() {
+    _confettiController.play();
+    Future.delayed(const Duration(milliseconds: 200), () {
+      _confettiController.stop();
+    });
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,106 +134,160 @@ class SummaryPage extends StatelessWidget {
 
     return Scaffold(
       body: SingleChildScrollView(
-        child: Column(
+        child: Stack(
+          alignment: Alignment.topCenter,
           children: [
-            // A congraulatory message
-            Text(
-              'उत्तमम्!',
-              style: textTheme.headlineLarge,
-            ),
-            const Padding(
-              padding: EdgeInsets.all(5.0),
-              child: Divider(),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Image(
-                image: AssetImage('assets/party-popper.png'),
-                height: 200,
-              ),
-            ),
-            Row(
+            Column(
               children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    // A box showing the number of questions answered correctly
-                    child: InkWellBox(
-                      color: Theme.of(context).primaryColorLight,
-                      maxWidth: 400,
-                      maxHeight: 200,
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 30),
-                          Text(
-                            '${quiz.correctQs}/${quiz.questions.length}',
-                            style: textTheme.headlineLarge!.copyWith(
-                              fontWeight: FontWeight.bold,
+                // A congraulatory message
+                Text(
+                  'उत्तमम्!',
+                  style: textTheme.headlineLarge,
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: Divider(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: MouseRegion(
+                    onEnter: (event) => setState(() {
+                      isHovering = true;
+                    }),
+                    onExit: (event) => setState(() {
+                      isHovering = false;
+                    }),
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                        onTap: playConfettiAnimation,
+                        child: SizedBox(
+                          height: 210,
+                          width: 210,
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Stack(
+                              children: <Widget>[
+                                Transform.translate(
+                                  offset: const Offset(5, 5),
+                                  child: ImageFiltered(
+                                    imageFilter:
+                                        ImageFilter.blur(sigmaY: 7, sigmaX: 7),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.transparent,
+                                          width: 0,
+                                        ),
+                                      ),
+                                      child: Opacity(
+                                        opacity: 0.4,
+                                        child: ColorFiltered(
+                                          colorFilter: const ColorFilter.mode(
+                                              Colors.black, BlendMode.srcATop),
+                                          child: Image(
+                                            image: const AssetImage(
+                                              'assets/party-popper.png',
+                                            ),
+                                            height: (isHovering) ? 210 : 200,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Image(
+                                  image: const AssetImage(
+                                      'assets/party-popper.png'),
+                                  height: (isHovering) ? 210 : 200,
+                                ),
+                              ],
                             ),
-                            textAlign: TextAlign.center,
                           ),
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: Text(
-                                'questions answered correctly',
-                                style: textTheme.headlineSmall,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      onTap: () {},
-                    ),
+                        )),
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    // A box showing the number of points earned from this quiz
-                    child: InkWellBox(
-                      maxWidth: 400,
-                      maxHeight: 200,
-                      color: Theme.of(context).primaryColorLight,
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 30),
-                          Text(
-                            '${quiz.points}',
-                            style: textTheme.headlineLarge!.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: Text(
-                                'points earned',
-                                style: textTheme.headlineSmall,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        // A box showing the number of questions answered correctly
+                        child: InkWellBox(
+                          color: Theme.of(context).primaryColorLight,
+                          maxWidth: 400,
+                          maxHeight: 200,
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 30),
+                              Text(
+                                '${quiz.correctQs}/${quiz.questions.length}',
+                                style: textTheme.headlineLarge!.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                                 textAlign: TextAlign.center,
                               ),
-                            ),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'questions answered correctly',
+                                    style: textTheme.headlineSmall,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                          onTap: () {},
+                        ),
                       ),
-                      onTap: () {},
                     ),
-                  ),
-                ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        // A box showing the number of points earned from this quiz
+                        child: InkWellBox(
+                          maxWidth: 400,
+                          maxHeight: 200,
+                          color: Theme.of(context).primaryColorLight,
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 30),
+                              Text(
+                                '${quiz.points}',
+                                style: textTheme.headlineLarge!.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'points earned',
+                                    style: textTheme.headlineSmall,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          onTap: () {},
+                        ),
+                      ),
+                    ),
+                  ],
+                )
               ],
-            )
+            ),
+            ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              emissionFrequency: 0.2,
+            ),
           ],
         ),
       ),
     );
   }
-}
-
-// This method returns whether text is in Sanskrit, or Devanagari script
-// If it is, the font size is slightly larger
-bool isSanskrit(String text) {
-  var sanskrit = RegExp(r'[\u0900-\u097F]');
-  return sanskrit.hasMatch(text);
 }

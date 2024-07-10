@@ -40,6 +40,7 @@ dependencies:
   firebase_core: ^2.27.2
   cloud_firestore: ^4.16.1
   firebase_auth: ^4.19.4
+  confetti: ^0.7.0
 
 
 dev_dependencies:

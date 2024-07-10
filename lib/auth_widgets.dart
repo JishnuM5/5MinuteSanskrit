@@ -359,8 +359,8 @@ class _SignUpWidgetState extends State<SignUpWidget> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      // Here, a new user document is created in Firebase Firestore
-      context.read<MyAppState>().createUser(_nameController.text.trim());
+      // Here, a new user is created locally
+      context.read<MyAppState>().updateUserName(_nameController.text.trim());
     } on FirebaseAuthException catch (error) {
       // Here, an error message is shown based on the type of error given
       if (error.code == 'invalid-email') {
@@ -410,10 +410,12 @@ class _VerifiedHomePageState extends State<VerifiedHomePage> {
     _future = Future.wait([
       context.read<MyAppState>().readQuiz(),
       (widget.newUser)
-          // Based on whether the user is new, a new account is created or user data is retrieved
           ? context.read<MyAppState>().createUserInDB()
-          : context.read<MyAppState>().readUser()
-    ]);
+          : context.read<MyAppState>().readUser(),
+    ]).then((_) {
+      context.read<MyAppState>().navigateTo(0);
+      return Future.value([]);
+    });
   }
 
   @override
