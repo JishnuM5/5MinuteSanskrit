@@ -408,7 +408,7 @@ class _VerifiedHomePageState extends State<VerifiedHomePage> {
   void initState() {
     super.initState();
     _future = Future.wait([
-      context.read<MyAppState>().readQuiz(),
+      context.read<MyAppState>().readQuizzes(),
       (widget.newUser)
           ? context.read<MyAppState>().createUserInDB()
           : context.read<MyAppState>().readUser(),

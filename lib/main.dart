@@ -1,6 +1,7 @@
 // This is the main file of the project
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -89,6 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
     int totalPoints = 0;
     for (Quiz quiz in context.watch<MyAppState>().quizzes) {
       totalPoints += quiz.points;
+      totalPoints += context.watch<MyAppState>().masteredQuizPoints;
     }
 
     return Scaffold(
@@ -107,10 +109,9 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: <Widget>[
           // This widget is the point counter
           Padding(
-            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Container(
               alignment: Alignment.center,
-              width: 50,
               height: 37.5,
               decoration: BoxDecoration(
                 border: Border.all(
@@ -121,10 +122,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 boxShadow: [shadow],
               ),
               child: Padding(
-                padding: const EdgeInsets.only(top: 2.5),
-                child: Text(
-                  '$totalPoints',
-                  style: Theme.of(context).textTheme.headlineLarge,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 7.5, vertical: 2.5),
+                child: Row(
+                  children: [
+                    const Image(
+                      image: AssetImage('assets/star.png'),
+                      height: 15,
+                    ),
+                    const SizedBox(width: 5),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2.5),
+                      child: Text(
+                        '$totalPoints',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -154,10 +168,10 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     List<Widget> quizList = [];
-    int counter = 0;
+    int i = 0;
     for (Quiz quiz in context.watch<MyAppState>().quizzes) {
-      quizList.add(QuizTile(quiz: quiz, index: counter));
-      counter++;
+      quizList.add(QuizTile(quiz: quiz, index: i));
+      i++;
     }
 
     return Scaffold(
@@ -215,32 +229,85 @@ class QuizTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<MyAppState>().quizzes[index].currentSesh;
+    int remainingQs = context.read<MyAppState>().remainingQs(index);
+    double pctMastered = context.read<MyAppState>().pctMastered(index);
+
     return Padding(
       padding: const EdgeInsets.all(10.0),
-      // A single box tile
-      child: InkWellBox(
-        maxWidth: 800,
-        maxHeight: 200,
-        color: Theme.of(context).primaryColor,
-        child: Text(
-          quiz.name,
-          style: (isSanskrit(quiz.name))
-              ? Theme.of(context).textTheme.displayMedium!.copyWith(
-                    fontSize: 27.5,
-                  )
-              : Theme.of(context).textTheme.headlineLarge,
+      child: SizedBox(
+        height: 155,
+        child: Stack(
+          children: [
+            Positioned(
+              left: 10,
+              right: 10,
+              bottom: 0,
+              height: 55,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColorLight,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.fromLTRB(7.5, 25, 7.5, 7.5),
+                child: Row(
+                  children: [
+                    Text(
+                      'Mastery:',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: LinearProgressIndicator(
+                        minHeight: 10,
+                        value: pctMastered,
+                        backgroundColor: Colors.white.withOpacity(0.3),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(context).primaryColor),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            Material(
+              clipBehavior: Clip.antiAlias,
+              borderRadius: BorderRadius.circular(10),
+              child: InkWellBox(
+                maxWidth: double.maxFinite,
+                maxHeight: 120,
+                color: Theme.of(context).primaryColor,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      quiz.name,
+                      style: (isSanskrit(quiz.name))
+                          ? Theme.of(context).textTheme.displayMedium!.copyWith(
+                                fontSize: 27.5,
+                              )
+                          : Theme.of(context).textTheme.headlineLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      (remainingQs == 0)
+                          ? "New Session!"
+                          : "$remainingQs question(s) remaining this session",
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  ],
+                ),
+                onTap: () {
+                  context.read<MyAppState>().setCurrentQuiz(index);
+                  context.read<MyAppState>().navigateTo(2);
+                  context.read<MyAppState>().reset();
+                },
+              ),
+            ),
+          ],
         ),
-        // When a quiz tile is pressed, the app navigates to the respective quiz
-        // Quiz page variables are set accordingly and previous temporary UI is reset
-        onTap: () {
-          context.read<MyAppState>().setCurrentQuiz(index);
-          if (context.read<MyAppState>().quizzes[index].showSummary) {
-            context.read<MyAppState>().navigateTo(3);
-          } else {
-            context.read<MyAppState>().navigateTo(2);
-          }
-          context.read<MyAppState>().reset();
-        },
       ),
     );
   }
