@@ -12,7 +12,7 @@
 - Create a way to connect Sheets data with app
 
 
-## Mutliple Quiz Formatting, Quiz Mastery, and Other Plans
+## Multiple Quiz Formatting, Quiz Mastery, and Other Plans
 - All visible quizzes are going to be in a home page, displayed with an array
   - Whether a quiz is visible depends on its "show" value in the database and whether the quiz is mastered
     - This will be controlled by an admin account (to add later on)
@@ -22,7 +22,7 @@
   - To complete a quiz, the user will answer all questions correctly twice
     - Only 5/10 questions can be done a day
     - 5 points each time a question is answered correctly, and an extra 5 points when it's mastered
-  - The quiz is first shown at a given set time, with the first 5 quesions, and the next 5 questions are shown a day later
+  - The quiz is first shown at a given set time, with the first 5 questions, and the next 5 questions are shown a day later
     - Afterwards, a question is shown if it was last shown two days ago (2 "12:00 pm"s have passed), last answered a day ago (1 "12:00 pm"), and NOT already answered correctly 2 times
       - It should also have been answered (check if a question is hidden)
     - The last shown time for each question updates during database retrieval, and last answered time updates after a question is answered
@@ -45,7 +45,7 @@
 - Improve the optimization of loading/saving quizzes and users (don't change database if no Qs answered)
 - Saving cache to avoid reading the database every time
 - An advanced points system
-- Add reauthentication before changing password or deleting account
+- Reauthenticate before changing password or deleting account
 - Allow custom number of questions in quizzes and sessions
  <br /><br />
 
@@ -104,15 +104,15 @@ Consumer\<MyAppState\>(
 
 ## Asynchronous Coding:
 Asynchronous (async) coding allows a Flutter App to run while waiting on that section of the code to finish. For example, if a method was downloading an image, Flutter can continue running other code while the image downloads, then comeback to finishing that method.
-- Such methods use Future\<T\> values. Future values have two states: uncompleted and completed (with a value or an error). Aysnc coding is about handling these different states. Future values can be manually coded, but they are generally returned with packages/APIs.
+- Such methods use Future\<T\> values. Future values have two states: uncompleted and completed (with a value or an error). Async coding is about handling these different states. Future values can be manually coded, but they are generally returned with packages/APIs.
 <br /><br />
 
-Future\<someType\>.then((someType) {}) is an instance method allows for handling after the Future is commpleted with a value. 
-- The .then() method takes a function that can take a value of \<sometype\> and perform operations directly on the value. Afterwards, the .then will return another Future\<someOtherType\> or just void.
+Future\<someType\>.then((someType) {}) is an instance method allows for handling after the Future is completed with a value. 
+- The .then() method takes a function that can take a value of \<someType\> and perform operations directly on the value. Afterwards, the .then will return another Future\<someOtherType\> or just void.
   - This means .then() methods can be chained since they all return a Future\<T\>, even if they're different ones.
 - To handle errors, there's also a .catchError(), which is like .then() but with an error. There is also a .whenCompleted(), similar to the `finally` in a try-catch block.
 
-- FutureBuilder\<T\>(future Future\<T\>, builder (context, snapshot) {}) is a builder than rebuilds when the Future\<T\> is completed. This allows Futures to be used in widgets. Futures are *one use async fuctions*, so they'll only run once.
+- FutureBuilder\<T\>(future Future\<T\>, builder (context, snapshot) {}) is a builder than rebuilds when the Future\<T\> is completed. This allows Futures to be used in widgets. Futures are *one use async functions*, so they'll only run once.
   - A snapshot is the current state of the Future.
   - Example: 
 ```FutureBuilder<String>(
@@ -132,17 +132,17 @@ Future\<someType\>.then((someType) {}) is an instance method allows for handling
 <br /><br />
 
 A Stream\<T\> like a Future\<T\> but it delivers 0+ values over time. This means its states are 0 values, 1 value, 2 values (and/or errors)... ...completed.
-- You can "subscribe" to a Stream\<someType\> with a listener variable, like `final subscripition = Stream\<T\>.listen((someType) {})`, where the function inside .listen() is performced on every value that it delivers instead of just 1 in .then().
-  - .listen() takes an optional onError method of (error) {} to handle errors (*this exists with .then() too, so two options there*) and an onDone method when the Stream finishes (which it doens't always do, depending on the situation).
+- You can "subscribe" to a Stream\<someType\> with a listener variable, like `final subscription = Stream\<T\>.listen((someType) {})`, where the function inside .listen() is performed on every value that it delivers instead of just 1 in .then().
+  - .listen() takes an optional onError method of (error) {} to handle errors (*this exists with .then() too, so two options there*) and an onDone method when the Stream finishes (which it doesn't always do, depending on the situation).
   - .listen() returns a StreamSubscription\<T\>, not Stream\<T\>, which is unlike .then(), which also returns Future\<T\>.
 - You can also .pause(), .resume(), and .cancel() data flow with the listener variable (subscription)
 
-- Various methods can be attatched to a Stream\<T\>, such as .where() to return data that meets a boolean test or .map() to turn the Stream\<T\> into a Stream<R> of different values.
+- Various methods can be attached to a Stream\<T\>, such as .where() to return data that meets a boolean test or .map() to turn the Stream\<T\> into a Stream<R> of different values.
 - A StreamBuilder\<T\>(stream Stream\<T\>, builder (context, builder) {}) is like a FutureBuilder but it rebuilds every time a new value is delivered.
   - snapshot.connectionState is a field of the Snapshot has to see whether the stream is still waiting, finished, etc.
 <br /><br />
 
-'aysnc' and 'await' are keywords that let to make aysnchronous code more readable and like synchronous code.
+'async' and 'await' are keywords that let to make asynchronous code more readable and like synchronous code.
 - async goes just before the opening brace of the function that will use await.
 - await goes before every Future\<T\> the function waits for.
 - Error handling happens with a try-catch block.
@@ -156,18 +156,21 @@ A Stream\<T\> like a Future\<T\> but it delivers 0+ values over time. This means
 ## Things I Did Well and Future Advice
 - (Advice) Organize: this TODO file, lots of time spent standardizing UI, refactoring code, and this improved my speed and avoided so many errors (One of the recent larger bugs was actually fixed w/ refactoring and improved app architecture)
   - (Advice) Planning: the planning at the start really helped, and I'd created "MVP"s for each future section
-- (Challenge) Balancing Learning and Creating: most of the learning happens as you go, but there were some things I learned beforehard, like async, database connections, JSON, and state management
+- (Challenge) Balancing Learning and Creating: most of the learning happens as you go, but there were some things I learned beforehand, like async, database connections, JSON, and state management
   - I revisited a lot of my old methods and improved them once I better understood my work
 - Debugging (Advice & Process): there are multiple tools in Flutter, DevTools great for UI, lots of debugPrints, debug console helpful most of the time but a few errors that I could not find anything for
 
-- I'd reccomend working with Flutter and React Native because they have good documentation (especially Flutter) and a low learning curve
+- I'd recommend working with Flutter and React Native because they have good documentation (especially Flutter) and a low learning curve
 - This project was actually smooth overall (setup was a little hard), I struggled a lot more with my FBLA app
   - Going to continue working on this project, developing a pilot and question collection program (show script)
 
 # Links:
 - https://goo.gle/FlutterInFocus (YouTube playlist)
 
-## State Management
+## Programming Concept References
+- https://stackoverflow.com/questions/60249996/difference-between-getter-and-a-regular-method-in-dart  
+
+### State Management
 - https://docs.flutter.dev/data-and-backend/state-mgmt/simple
 - https://flutterbyexample.com/lesson/change-notifier-provider 
 
@@ -178,7 +181,7 @@ A Stream\<T\> like a Future\<T\> but it delivers 0+ values over time. This means
 
 - Font Pairing: Courier New and Montserrat
 - Sanskrit Font: Baloo 2
-- Color Pallete: https://www.color-hex.com/color-palette/1041210
+- Color Palette: https://www.color-hex.com/color-palette/1041210
 - Logo/Cursor: https://en.wikipedia.org/wiki/Danda, https://pub.dev/documentation/animated_text_kit/latest/#typewriter
 - Container/Button Decor: radius of 15 for rounded borders, constant shadow; see themes.dart
 
@@ -194,12 +197,12 @@ A Stream\<T\> like a Future\<T\> but it delivers 0+ values over time. This means
 - https://www.youtube.com/watch?v=4vKiJZNPhss 
 
 ### Converting Data to a File
-- https://codebeautify.org/csv-to-xml-json
 - https://learn.microsoft.com/en-us/office/dev/scripts/resources/samples/get-table-data
   - Excel will give an output from script, and I can then copy-paste into another project that I use to write code.
 
 # Questions to Consider and Known Errors
 - If user cancels the email verification page within 5 seconds of sending the email verification, then the app crashes (This is because of an async wait function running to avoid the user from spamming emails; will fix later).
 - The app only works with 10 questions and sessions of 5
-- When the quizzes are partially mastered, the QuizTile says "0 questions remaining" (partially fixed with "New Session!" message).
+- checkRemainingQs() "cheats" by running same code as new session algorithm, can be inefficient
+- After 12 p.m. passes, the page needs to be manually rebuilt before the next session is available
 - COMMON FIX: Methods compile without () but cause problems

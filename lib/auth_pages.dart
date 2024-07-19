@@ -127,7 +127,7 @@ class _AuthPageState extends State<AuthPage> {
                   child: FloatingBox(
                     child: login
                         ? LoginWidget(switchToSignUp: toggle)
-                        : SignUpWidget(switchtoSignIn: toggle),
+                        : SignUpWidget(switchToSignIn: toggle),
                   ),
                 ),
               ),
@@ -178,7 +178,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 child: Column(
                   children: [
                     Text(
-                      'Recieve an email to\nreset your password',
+                      'Receive an email to\nreset your password',
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 20),
@@ -343,7 +343,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   }
 
 // This method checks whether the user is verified
-// It reloads the current user's data, and if they are verfied, cancels the timer
+// It reloads the current user's data, and if they are verified, cancels the timer
   Future checkEmailVerified() async {
     await FirebaseAuth.instance.currentUser!.reload();
     setState(() {

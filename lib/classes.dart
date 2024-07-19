@@ -44,14 +44,12 @@ class Quiz {
   final List<Question> questions;
   final String name;
   final bool show;
-  //TODO: implement
   final DateTime start;
 
   bool mastered = false;
   int points = 0;
   bool showSummary = false;
   bool ansSubmitted = false;
-  bool newSesh = true;
   int currentQ = 0;
   int correctQs = 0;
   // TODO: hardcoded to sessions of 5
@@ -95,7 +93,6 @@ class Quiz {
     points = quizState['points'];
     showSummary = quizState['showSummary'];
     ansSubmitted = quizState['ansSubmitted'];
-    newSesh = quizState['newSesh'];
     currentQ = quizState['currentQ'];
     correctQs = quizState['correctQs'];
 
@@ -164,8 +161,6 @@ class Session {
   int currentQ;
   int correctQs;
   int points;
-
-  DateTime? lastShown;
   DateTime? lastAnswered;
 
   Session(
@@ -176,10 +171,6 @@ class Session {
       this.points = 0});
 
   void readFromState(Map<String, dynamic> seshState) {
-    final lSState = seshState['lastShown'];
-    if (lSState != null) {
-      lastShown = lSState.toDate();
-    }
     final lAState = seshState['lastAnswered'];
     if (lAState != null) {
       lastAnswered = lAState.toDate();

@@ -31,18 +31,15 @@ class MyAppState extends ChangeNotifier {
       quizzes[currentQuiz].currentSesh.elapsedMS +=
           DateTime.now().millisecondsSinceEpoch - startMS;
       await updateUserStates();
-    }
-    if (pageIndex == 3) {
+
       // Schedule update quiz method to be called after navigation
       WidgetsBinding.instance.addPostFrameCallback((_) {
         updateMasteredQuizzes();
       });
     }
+
     if (index == 2) {
       startMS = DateTime.now().millisecondsSinceEpoch;
-    }
-    if (index == 0 && pageIndex != 1) {
-      updateQuizSessions();
     }
 
     pageIndex = index;
@@ -96,10 +93,7 @@ class MyAppState extends ChangeNotifier {
         'correctQs': quiz.currentSesh.correctQs,
         'points': quiz.currentSesh.points,
       };
-      if (quiz.currentSesh.lastShown != null) {
-        seshState['lastShown'] =
-            Timestamp.fromDate(quiz.currentSesh.lastShown!);
-      }
+
       if (quiz.currentSesh.lastAnswered != null) {
         seshState['lastAnswered'] =
             Timestamp.fromDate(quiz.currentSesh.lastAnswered!);
@@ -113,7 +107,6 @@ class MyAppState extends ChangeNotifier {
         'mastered': quiz.mastered,
         'showSummary': quiz.showSummary,
         'ansSubmitted': quiz.ansSubmitted,
-        'newSesh': quiz.newSesh,
         'qStates': qStates,
         'currentSesh': seshState,
       };
@@ -209,6 +202,12 @@ class MyAppState extends ChangeNotifier {
     return appUser.quizStates[currentQuizName]!;
   }
 
+  bool lastQAnswered(int index) {
+    Quiz quiz = quizzes[index];
+    bool onLastQ = quiz.currentSesh.currentQ == quiz.currentSesh.totalQs - 1;
+    return onLastQ && quiz.ansSubmitted;
+  }
+
   int selectedIndex = -1;
 
   // This method updates the currently selected answer
@@ -218,7 +217,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   // This method updates the quiz page when an answer is selected
-  // It gives the user points if the answer is corrent
+  // It gives the user points if the answer is correct
   void onAnsSubmitted() {
     Quiz quiz = quizzes[currentQuiz];
     Question question = quiz.questions[quiz.currentQ];
@@ -239,7 +238,7 @@ class MyAppState extends ChangeNotifier {
   }
 
   // This method resets the question page when entering the quiz or going to the next question
-  Future<void> reset() async {
+  Future<void> reset({bool newSesh = false}) async {
     Quiz quiz = quizzes[currentQuiz];
     // TODO: hardcoded to sessions of 5
     bool isLastSeshQ() {
@@ -254,19 +253,15 @@ class MyAppState extends ChangeNotifier {
       if (isLastSeshQ()) {
         quiz.showSummary = true;
       } else {
-        if (!quiz.newSesh) {
+        if (!newSesh) {
           quiz.currentQ++;
           quiz.currentSesh.currentQ++;
-        } else {
-          quiz.newSesh = false;
         }
         int skipCount = 0;
         while (quiz.questions[quiz.currentQ].timesCorrect == 2) {
           skipCount++;
-          quiz.currentSesh.totalQs--;
           if (isLastSeshQ()) {
             if (skipCount == 5) {
-              print("new session, because skipCount == 5");
               quiz.currentSesh = Session(totalQs: 5);
               // TODO: hardcoded to session of 5
               if (quiz.currentQ == 4) {
@@ -277,9 +272,12 @@ class MyAppState extends ChangeNotifier {
               continue;
             } else {
               quiz.showSummary = true;
+              quiz.currentSesh.totalQs--;
+              quiz.currentSesh.currentQ--;
               break;
             }
           }
+          quiz.currentSesh.totalQs--;
           quiz.currentQ++;
         }
       }
@@ -294,48 +292,49 @@ class MyAppState extends ChangeNotifier {
   }
 
   // This method sets the current quiz on the quiz page
-  void setCurrentQuiz(int index) {
+  bool setCurrentQuiz(int index) {
+    bool newSesh = false;
     currentQuiz = index;
     currentQuizName = quizzes[index].name;
-    notifyListeners();
-  }
+    final quiz = quizzes[currentQuiz];
 
-  void updateQuizSessions() {
-    for (Quiz quiz in quizzes) {
-      bool newSesh = false;
-      bool onLastQ = quiz.currentSesh.currentQ == quiz.currentSesh.totalQs - 1;
+    if (lastQAnswered(index)) {
+      quiz.showSummary = false;
 
-      if (onLastQ && quiz.ansSubmitted) {
-        quiz.showSummary = false;
-        // TODO: hardcoded to sessions of 5
-        quiz.currentQ = (quiz.currentQ == quiz.questions.length - 1) ? 0 : 5;
-        print('new sesh, because updateQuizSessions');
-
-        quiz.currentSesh = Session(totalQs: 5);
-        newSesh = true;
-      }
-      quiz.newSesh = newSesh;
+      // TODO: hardcoded to sessions of 5
+      quiz.currentQ = (quiz.currentQ == quiz.questions.length - 1) ? 0 : 5;
+      quiz.currentSesh = Session(totalQs: 5);
+      newSesh = true;
     }
+    notifyListeners();
+    return newSesh;
   }
 
   int remainingQs(int index) {
     int remaining = 0;
     Quiz quiz = quizzes[index];
-    final end = (quiz.currentQ < 5) ? 5 : 10;
-    for (int i = quiz.currentQ; i < end; i++) {
+    int tempCurrentQ = quiz.currentQ;
+
+    if (lastQAnswered(index)) {
+      tempCurrentQ = (tempCurrentQ == quiz.questions.length - 1) ? 0 : 5;
+    }
+
+    final end = (tempCurrentQ < 5) ? 5 : 10;
+    for (int i = tempCurrentQ; i < end; i++) {
       if (quiz.questions[i].timesCorrect < 2) {
         remaining++;
       }
     }
 
     if (remaining == 0) {
-      final start = (quiz.currentQ < 5) ? 5 : 0;
+      int start = (quiz.currentQ < 5) ? 5 : 0;
       for (int i = start; i < start + 5; i++) {
-        if (quiz.questions[i].timesAnswered < 2) {
+        if (quiz.questions[i].timesCorrect < 2) {
           remaining++;
         }
       }
     }
+
     return remaining;
   }
 

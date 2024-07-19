@@ -1,7 +1,6 @@
 // This is the main file of the project
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -229,9 +228,19 @@ class QuizTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    context.watch<MyAppState>().quizzes[index].currentSesh;
+    var currentSesh = context.watch<MyAppState>().quizzes[index].currentSesh;
     int remainingQs = context.read<MyAppState>().remainingQs(index);
     double pctMastered = context.read<MyAppState>().pctMastered(index);
+
+    bool showSesh = true;
+    if (context.read<MyAppState>().lastQAnswered(index)) {
+      DateTime now = DateTime.now();
+      final noonToday = DateTime(now.year, now.month, now.day, 12, 0, 0);
+      final lastAns = currentSesh.lastAnswered!;
+      if (lastAns.isAfter(noonToday) || DateTime.now().isBefore(noonToday)) {
+        showSesh = false;
+      }
+    }
 
     return Padding(
       padding: const EdgeInsets.all(10.0),
@@ -292,17 +301,23 @@ class QuizTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      (remainingQs == 0)
-                          ? "New Session!"
-                          : "$remainingQs question(s) remaining this session",
+                      (showSesh)
+                          ? "$remainingQs question(s) remaining this session"
+                          : "Session complete!",
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                   ],
                 ),
                 onTap: () {
-                  context.read<MyAppState>().setCurrentQuiz(index);
-                  context.read<MyAppState>().navigateTo(2);
-                  context.read<MyAppState>().reset();
+                  if (showSesh) {
+                    bool newSesh =
+                        context.read<MyAppState>().setCurrentQuiz(index);
+                    context.read<MyAppState>().navigateTo(2);
+                    context.read<MyAppState>().reset(newSesh: newSesh);
+                  } else {
+                    showTextSnackBar(
+                        'Session completed! A new session will be available after 12 p.m.');
+                  }
                 },
               ),
             ),

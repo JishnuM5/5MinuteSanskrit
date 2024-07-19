@@ -200,9 +200,9 @@ class _LoginWidgetState extends State<LoginWidget> {
 
 // This widget displays and handles signing up
 class SignUpWidget extends StatefulWidget {
-  const SignUpWidget({super.key, required this.switchtoSignIn});
+  const SignUpWidget({super.key, required this.switchToSignIn});
 
-  final VoidCallback switchtoSignIn;
+  final VoidCallback switchToSignIn;
 
   @override
   State<SignUpWidget> createState() => _SignUpWidgetState();
@@ -274,7 +274,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                   return null;
                 },
               ),
-              // This is where the user enters their passowrd
+              // This is where the user enters their password
               TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(
@@ -326,7 +326,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                   children: [
                     TextSpan(
                       recognizer: TapGestureRecognizer()
-                        ..onTap = widget.switchtoSignIn,
+                        ..onTap = widget.switchToSignIn,
                       text: 'Sign in',
                       style: TextStyle(
                         color: Theme.of(context).primaryColorLight,
