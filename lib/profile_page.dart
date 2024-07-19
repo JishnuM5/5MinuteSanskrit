@@ -1,5 +1,7 @@
 // This file contains all pages and features for the profile page
 
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -260,6 +262,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       child: const Text('Delete Account'),
                     ),
+                    const SizedBox(height: 7.5),
+                    const AddQuizWidget(),
                   ],
                 ),
               ),
@@ -267,15 +271,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
       ),
-    );
-  }
-
-  // This is the input decouration used for text fields on the profile page
-  InputDecoration denseInputDecor(String hintText) {
-    return InputDecoration(
-      hintText: hintText,
-      isDense: true,
-      contentPadding: const EdgeInsets.only(bottom: 5, top: 3),
     );
   }
 
@@ -295,4 +290,65 @@ class _ProfilePageState extends State<ProfilePage> {
       return Future.error('$error');
     }
   }
+}
+
+class AddQuizWidget extends StatefulWidget {
+  const AddQuizWidget({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _AddQuizWidgetState createState() => _AddQuizWidgetState();
+}
+
+class _AddQuizWidgetState extends State<AddQuizWidget> {
+  final TextEditingController _jsonController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> _addQuizToFirebase() async {
+    try {
+      // Parse the JSON data
+      final jsonData = json.decode(_jsonController.text);
+
+      // Add the quiz to Firebase
+      await _firestore.collection('quizzes').doc('Quiz 2').set(jsonData);
+
+      // Show success message
+      showTextSnackBar('Quiz added successfully!');
+
+      // Clear the text field
+      _jsonController.clear();
+    } catch (e) {
+      // Show error message
+      showTextSnackBar('Error adding quiz: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: TextFormField(
+            controller: _jsonController,
+            maxLines: 10,
+            decoration: denseInputDecor('Paste your JSON data here...'),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: _addQuizToFirebase,
+          child: const Text('Add Quiz to Firebase'),
+        ),
+      ],
+    );
+  }
+}
+
+// This is the input decouration used for text fields on the profile page
+InputDecoration denseInputDecor(String hintText) {
+  return InputDecoration(
+    hintText: hintText,
+    isDense: true,
+    contentPadding: const EdgeInsets.only(bottom: 5, top: 3),
+  );
 }

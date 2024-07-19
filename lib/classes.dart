@@ -11,8 +11,6 @@ class Question {
 
   int timesCorrect = 0;
   int timesAnswered = 0;
-  DateTime? lastShown;
-  DateTime? lastAnswered;
 
   Question({
     required this.question,
@@ -37,19 +35,6 @@ class Question {
   void readFromState(Map<String, dynamic> qState) {
     timesCorrect = qState['timesCorrect'];
     timesAnswered = qState['timesAnswered'];
-
-    final lSState = qState['lastShown'];
-    if (lSState != null) {
-      lastShown = lSState.toDate();
-    }
-    final lAState = qState['lastAnswered'];
-    if (lAState != null) {
-      lastAnswered = lAState.toDate();
-    }
-
-    print(
-      'Correct: $timesCorrect/$timesAnswered, Last Answered: $lastAnswered, Last Shown: $lastShown',
-    );
   }
 }
 
@@ -59,14 +44,16 @@ class Quiz {
   final List<Question> questions;
   final String name;
   final bool show;
-  //TODO: implement
   final DateTime start;
 
   bool mastered = false;
   int points = 0;
   bool showSummary = false;
+  bool ansSubmitted = false;
   int currentQ = 0;
   int correctQs = 0;
+  // TODO: hardcoded to sessions of 5
+  Session currentSesh = Session(totalQs: 5);
 
   Quiz(
       {required this.questions,
@@ -102,10 +89,15 @@ class Quiz {
 
   // This method updates the quiz state variables based on a map
   void readFromState(Map<String, dynamic> quizState) {
+    mastered = quizState['mastered'];
     points = quizState['points'];
     showSummary = quizState['showSummary'];
+    ansSubmitted = quizState['ansSubmitted'];
     currentQ = quizState['currentQ'];
     correctQs = quizState['correctQs'];
+
+    Map<String, dynamic> seshState = Map.from(quizState['currentSesh']);
+    currentSesh.readFromState(seshState);
 
     // Reading the state for all the questions
     for (int i = 0; i < questions.length; i++) {
@@ -160,5 +152,34 @@ class AppUser {
   factory AppUser.fromMap(Map<String, dynamic> userMap) {
     return (AppUser(
         name: userMap['name'], quizStates: Map.from(userMap['quizStates'])));
+  }
+}
+
+class Session {
+  int elapsedMS;
+  int totalQs;
+  int currentQ;
+  int correctQs;
+  int points;
+  DateTime? lastAnswered;
+
+  Session(
+      {required this.totalQs,
+      this.elapsedMS = 0,
+      this.currentQ = 0,
+      this.correctQs = 0,
+      this.points = 0});
+
+  void readFromState(Map<String, dynamic> seshState) {
+    final lAState = seshState['lastAnswered'];
+    if (lAState != null) {
+      lastAnswered = lAState.toDate();
+    }
+
+    elapsedMS = seshState['elapsedMS'];
+    totalQs = seshState['totalQs'];
+    currentQ = seshState['currentQ'];
+    correctQs = seshState['correctQs'];
+    points = seshState['points'];
   }
 }

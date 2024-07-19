@@ -31,7 +31,7 @@ class AnswerTile extends StatelessWidget {
 
     // Here, the border of an answer is set based on selection/submission
     if (watchState.selectedIndex == index) {
-      if (watchState.ansSubmitted) {
+      if (watchState.quizzes[currentQuiz].ansSubmitted) {
         if (quiz.questions[quiz.currentQ].correctIndex == index) {
           border = Border.all(
             color: Colors.green[800]!,
@@ -50,7 +50,7 @@ class AnswerTile extends StatelessWidget {
         );
       }
     } else {
-      if (watchState.ansSubmitted &&
+      if (watchState.quizzes[currentQuiz].ansSubmitted &&
           quiz.questions[quiz.currentQ].correctIndex == index) {
         border = Border.all(
           color: Colors.green[800]!,
@@ -65,11 +65,11 @@ class AnswerTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: MouseRegion(
-        cursor: watchState.ansSubmitted
+        cursor: watchState.quizzes[currentQuiz].ansSubmitted
             ? SystemMouseCursors.basic
             : SystemMouseCursors.click,
         child: GestureDetector(
-          onTap: watchState.ansSubmitted
+          onTap: watchState.quizzes[currentQuiz].ansSubmitted
               ? null
               : () => readState.onAnsSelected(index),
           child: Container(
@@ -127,10 +127,10 @@ class _SummaryPageState extends State<SummaryPage> {
 
   @override
   Widget build(BuildContext context) {
-    Quiz quiz = context
-        .read<MyAppState>()
-        .quizzes[context.read<MyAppState>().currentQuiz];
     final textTheme = Theme.of(context).textTheme;
+    int currentQuiz = context.read<MyAppState>().currentQuiz;
+    Session currentSesh =
+        context.read<MyAppState>().quizzes[currentQuiz].currentSesh;
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -208,73 +208,17 @@ class _SummaryPageState extends State<SummaryPage> {
                 ),
                 Row(
                   children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        // A box showing the number of questions answered correctly
-                        child: InkWellBox(
-                          color: Theme.of(context).primaryColorLight,
-                          maxWidth: 400,
-                          maxHeight: 200,
-                          child: Column(
-                            children: [
-                              const SizedBox(height: 30),
-                              Text(
-                                '${quiz.correctQs}/${quiz.questions.length}',
-                                style: textTheme.headlineLarge!.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              Expanded(
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    'questions answered correctly',
-                                    style: textTheme.headlineSmall,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          onTap: () {},
-                        ),
-                      ),
+                    StatsBox(
+                      stat: '${currentSesh.correctQs}/${currentSesh.totalQs}',
+                      label: 'correct this session',
                     ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        // A box showing the number of points earned from this quiz
-                        child: InkWellBox(
-                          maxWidth: 400,
-                          maxHeight: 200,
-                          color: Theme.of(context).primaryColorLight,
-                          child: Column(
-                            children: [
-                              const SizedBox(height: 30),
-                              Text(
-                                '${quiz.points}',
-                                style: textTheme.headlineLarge!.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              Expanded(
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    'points earned',
-                                    style: textTheme.headlineSmall,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          onTap: () {},
-                        ),
-                      ),
+                    StatsBox(
+                      stat: formatMilliseconds(currentSesh.elapsedMS),
+                      label: 'time spent',
+                    ),
+                    StatsBox(
+                      stat: '${currentSesh.points}',
+                      label: 'points earned this session',
                     ),
                   ],
                 )
@@ -286,6 +230,66 @@ class _SummaryPageState extends State<SummaryPage> {
               emissionFrequency: 0.2,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  String formatMilliseconds(int milliseconds) {
+    int seconds = milliseconds ~/ 1000;
+    int minutes = seconds ~/ 60;
+    seconds = seconds % 60;
+
+    String minutesStr = minutes.toString().padLeft(2, '0');
+    String secondsStr = seconds.toString().padLeft(2, '0');
+
+    return '$minutesStr:$secondsStr';
+  }
+}
+
+class StatsBox extends StatelessWidget {
+  const StatsBox({
+    super.key,
+    required this.stat,
+    required this.label,
+  });
+
+  final String stat;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        // A box showing the number of points earned from this quiz
+        child: InkWellBox(
+          maxWidth: 400,
+          maxHeight: 200,
+          color: Theme.of(context).primaryColorLight,
+          child: Column(
+            children: [
+              const SizedBox(height: 30),
+              Text(
+                stat,
+                style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          onTap: () {},
         ),
       ),
     );

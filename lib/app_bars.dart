@@ -69,7 +69,7 @@ class QuizBar extends StatelessWidget {
         Center(
           child: Container(
             alignment: Alignment.center,
-            width: 50,
+            width: 70,
             height: 40,
             decoration: BoxDecoration(
                 border: Border.all(
@@ -90,23 +90,3 @@ class QuizBar extends StatelessWidget {
     );
   }
 }
-
-// This was an attempted app header bar for navigation from the error message page
-// AppBar(
-//   backgroundColor: Colors.transparent,
-//   elevation: 0,
-//   leading: InkWell(
-//     customBorder: const CircleBorder(),
-//     onTap: () {
-//       Navigator.pushAndRemoveUntil(
-//         context,
-//         MaterialPageRoute(
-//           builder: (context) => AuthPage(isNewUser: isNewUser),
-//         ),
-//         (Route<dynamic> route) => false,
-//       );
-//     },
-//     child: const Icon(Icons.arrow_back, color: Colors.black),
-//   ),
-// ),
-

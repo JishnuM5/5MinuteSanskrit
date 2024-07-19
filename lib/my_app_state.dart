@@ -10,6 +10,7 @@ import 'classes.dart';
 // This class contains app states, lifted out of the widget tree. It uses the Provider model
 class MyAppState extends ChangeNotifier {
   int pageIndex = 0;
+  int startMS = 0;
   // This is a reference to the current user's doc in the database
   final userRef = FirebaseFirestore.instance.collection('users').doc(
         FirebaseAuth.instance.currentUser!.email!,
@@ -17,56 +18,101 @@ class MyAppState extends ChangeNotifier {
 
   // This method navigates to another page in the application
   // Errors are handled within the methods called
-  void navigateTo(int index) async {
+  Future<void> navigateTo(int index) async {
     if (pageIndex == 2) {
-      // If the app is navigating out from the quiz page, quiz progress is saved
       showDialog(
         context: navigatorKey.currentContext!,
         barrierDismissible: false,
         builder: (context) => const Center(child: CircularProgressIndicator()),
       );
+      if (checkQuizMastery()) {
+        quizzes[currentQuiz].mastered = true;
+      }
+      quizzes[currentQuiz].currentSesh.elapsedMS +=
+          DateTime.now().millisecondsSinceEpoch - startMS;
       await updateUserStates();
+
+      // Schedule update quiz method to be called after navigation
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        updateMasteredQuizzes();
+      });
     }
+
+    if (index == 2) {
+      startMS = DateTime.now().millisecondsSinceEpoch;
+    }
+
     pageIndex = index;
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
-
     notifyListeners();
   }
 
   // This is the list of quizzes for this user and the current app user
   List<Quiz> quizzes = [];
-  //TODO: implement
-  List<String> masteredQuizzes = ['String 1', 'String 2', 'String 3'];
+  List<String> masteredQuizzes = [];
+  int masteredQuizPoints = 0;
   AppUser appUser = AppUser.empty();
+
+  void updateMasteredQuizzes() {
+    for (int i = quizzes.length - 1; i >= 0; i--) {
+      if (quizzes[i].mastered) {
+        masteredQuizzes.add(quizzes[i].name);
+        masteredQuizPoints += (quizzes[i].points);
+        quizzes.removeAt(i);
+      }
+    }
+  }
+
+  bool checkQuizMastery() {
+    for (Question question in quizzes[currentQuiz].questions) {
+      if (question.timesCorrect < 2) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   // This method updates the user's quiz data in the database
   // When an error is thrown, a snack bar is shown
   Future updateUserStates() async {
     for (Quiz quiz in quizzes) {
+      // Turning question data into a map
       final Map<String, Map<String, dynamic>> qStates = {};
       for (int i = 0; i < quiz.questions.length; i++) {
-        qStates['q$i'] = {};
-        qStates['q$i']!['timesCorrect'] = quiz.questions[i].timesCorrect;
-        qStates['q$i']!['timesAnswered'] = quiz.questions[i].timesAnswered;
-
-        if (quiz.questions[i].lastShown != null) {
-          qStates['q$i']!['lastShown'] =
-              Timestamp.fromDate(quiz.questions[i].lastShown!);
-        }
-        if (quiz.questions[i].lastAnswered != null) {
-          qStates['q$i']!['lastAnswered'] =
-              Timestamp.fromDate(quiz.questions[i].lastAnswered!);
-        }
+        qStates['q$i'] = {
+          'timesCorrect': quiz.questions[i].timesCorrect,
+          'timesAnswered': quiz.questions[i].timesAnswered,
+        };
       }
 
+      // Turning session data into a map
+      Map<String, dynamic> seshState = {
+        'elapsedMS': quiz.currentSesh.elapsedMS,
+        'totalQs': quiz.currentSesh.totalQs,
+        'currentQ': quiz.currentSesh.currentQ,
+        'correctQs': quiz.currentSesh.correctQs,
+        'points': quiz.currentSesh.points,
+      };
+
+      if (quiz.currentSesh.lastAnswered != null) {
+        seshState['lastAnswered'] =
+            Timestamp.fromDate(quiz.currentSesh.lastAnswered!);
+      }
+
+      // Putting all quiz data into a single map
+      Map<String, dynamic> quizState = {
+        'correctQs': quiz.correctQs,
+        'currentQ': quiz.currentQ,
+        'points': quiz.points,
+        'mastered': quiz.mastered,
+        'showSummary': quiz.showSummary,
+        'ansSubmitted': quiz.ansSubmitted,
+        'qStates': qStates,
+        'currentSesh': seshState,
+      };
+      appUser.quizStates[quiz.name] = quizState;
       try {
-        await userRef.update({
-          'quizStates.${quiz.name}.correctQs': quiz.correctQs,
-          'quizStates.${quiz.name}.currentQ': quiz.currentQ,
-          'quizStates.${quiz.name}.points': quiz.points,
-          'quizStates.${quiz.name}.showSummary': quiz.showSummary,
-          'quizStates.${quiz.name}.qStates': qStates
-        });
+        await userRef.update({'quizStates.${quiz.name}': quizState});
       } catch (error) {
         showTextSnackBar('Error saving data: $error');
       }
@@ -116,6 +162,8 @@ class MyAppState extends ChangeNotifier {
           quiz.readFromState(quizState);
         }
       }
+      updateMasteredQuizzes();
+
       return Future.value(appUser);
     } catch (error) {
       return Future.error('(From readUser()) $error');
@@ -124,7 +172,7 @@ class MyAppState extends ChangeNotifier {
 
   // This method retrieves quiz data from the Firebase Firestore database
   // Errors from this method are handled in the parent widget
-  Future readQuiz() async {
+  Future readQuizzes() async {
     try {
       final quizRef = FirebaseFirestore.instance.collection('quizzes');
       // This snapshot is of the entire quiz collection
@@ -136,9 +184,6 @@ class MyAppState extends ChangeNotifier {
         Map<String, dynamic> quizMap = doc.data()!;
         Quiz quiz = Quiz.fromMap(quizMap);
         if (quiz.show && DateTime.now().isAfter(quiz.start)) {
-          for (Question question in quiz.questions) {
-            question.lastShown = DateTime.now();
-          }
           quizzes.add(quiz);
         }
       }
@@ -152,8 +197,18 @@ class MyAppState extends ChangeNotifier {
 
   // These variables are for the quiz page's UI
   int currentQuiz = -1;
+  String currentQuizName = "";
+  Map<String, dynamic> get currentQuizState {
+    return appUser.quizStates[currentQuizName]!;
+  }
+
+  bool lastQAnswered(int index) {
+    Quiz quiz = quizzes[index];
+    bool onLastQ = quiz.currentSesh.currentQ == quiz.currentSesh.totalQs - 1;
+    return onLastQ && quiz.ansSubmitted;
+  }
+
   int selectedIndex = -1;
-  bool ansSubmitted = false;
 
   // This method updates the currently selected answer
   void onAnsSelected(int index) {
@@ -162,43 +217,134 @@ class MyAppState extends ChangeNotifier {
   }
 
   // This method updates the quiz page when an answer is selected
-  // It gives the user points if the answer is corrent
+  // It gives the user points if the answer is correct
   void onAnsSubmitted() {
     Quiz quiz = quizzes[currentQuiz];
     Question question = quiz.questions[quiz.currentQ];
 
     if (selectedIndex == question.correctIndex) {
-      quiz.points += (question.timesCorrect == 0) ? 5 : 10;
+      int addPoints = (question.timesCorrect == 0) ? 5 : 10;
+      quiz.points += addPoints;
+      quiz.currentSesh.points += addPoints;
       quiz.correctQs++;
+      quiz.currentSesh.correctQs++;
       question.timesCorrect++;
     }
-    question.lastAnswered = DateTime.now();
+    quiz.currentSesh.lastAnswered = DateTime.now();
     question.timesAnswered++;
 
-    ansSubmitted = true;
+    quiz.ansSubmitted = true;
     notifyListeners();
   }
 
   // This method resets the question page when entering the quiz or going to the next question
-  void reset() {
+  Future<void> reset({bool newSesh = false}) async {
     Quiz quiz = quizzes[currentQuiz];
-    // The user is either taken to the summary page or the next question
-    if (quiz.currentQ == quiz.questions.length - 1 && ansSubmitted) {
-      quiz.showSummary = true;
-    } else {
-      if (ansSubmitted) {
-        quiz.currentQ++;
-      }
+    // TODO: hardcoded to sessions of 5
+    bool isLastSeshQ() {
+      return quiz.currentQ == quiz.questions.length - 1 || quiz.currentQ == 4;
     }
+
     // Quiz UI is reset
     selectedIndex = -1;
-    ansSubmitted = false;
+
+    // The user is either taken to the summary page or the next question
+    if (quiz.ansSubmitted) {
+      if (isLastSeshQ()) {
+        quiz.showSummary = true;
+      } else {
+        if (!newSesh) {
+          quiz.currentQ++;
+          quiz.currentSesh.currentQ++;
+        }
+        int skipCount = 0;
+        while (quiz.questions[quiz.currentQ].timesCorrect == 2) {
+          skipCount++;
+          if (isLastSeshQ()) {
+            if (skipCount == 5) {
+              quiz.currentSesh = Session(totalQs: 5);
+              // TODO: hardcoded to session of 5
+              if (quiz.currentQ == 4) {
+                quiz.currentQ++;
+              } else {
+                quiz.currentQ = 0;
+              }
+              continue;
+            } else {
+              quiz.showSummary = true;
+              quiz.currentSesh.totalQs--;
+              quiz.currentSesh.currentQ--;
+              break;
+            }
+          }
+          quiz.currentSesh.totalQs--;
+          quiz.currentQ++;
+        }
+      }
+    }
+
+    if (quiz.showSummary) {
+      await navigateTo(3);
+    } else {
+      quiz.ansSubmitted = false;
+    }
     notifyListeners();
   }
 
   // This method sets the current quiz on the quiz page
-  void setCurrentQuiz(int index) {
+  bool setCurrentQuiz(int index) {
+    bool newSesh = false;
     currentQuiz = index;
+    currentQuizName = quizzes[index].name;
+    final quiz = quizzes[currentQuiz];
+
+    if (lastQAnswered(index)) {
+      quiz.showSummary = false;
+
+      // TODO: hardcoded to sessions of 5
+      quiz.currentQ = (quiz.currentQ == quiz.questions.length - 1) ? 0 : 5;
+      quiz.currentSesh = Session(totalQs: 5);
+      newSesh = true;
+    }
     notifyListeners();
+    return newSesh;
+  }
+
+  int remainingQs(int index) {
+    int remaining = 0;
+    Quiz quiz = quizzes[index];
+    int tempCurrentQ = quiz.currentQ;
+
+    if (lastQAnswered(index)) {
+      tempCurrentQ = (tempCurrentQ == quiz.questions.length - 1) ? 0 : 5;
+    }
+
+    final end = (tempCurrentQ < 5) ? 5 : 10;
+    for (int i = tempCurrentQ; i < end; i++) {
+      if (quiz.questions[i].timesCorrect < 2) {
+        remaining++;
+      }
+    }
+
+    if (remaining == 0) {
+      int start = (quiz.currentQ < 5) ? 5 : 0;
+      for (int i = start; i < start + 5; i++) {
+        if (quiz.questions[i].timesCorrect < 2) {
+          remaining++;
+        }
+      }
+    }
+
+    return remaining;
+  }
+
+  double pctMastered(int index) {
+    double mastered = 0.0;
+    for (Question question in quizzes[index].questions) {
+      if (question.timesCorrect == 2) {
+        mastered++;
+      }
+    }
+    return mastered / quizzes[index].questions.length;
   }
 }

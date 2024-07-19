@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'classes.dart';
 import 'my_app_state.dart';
 import 'quiz_widgets.dart';
 import 'themes.dart';
@@ -21,8 +22,9 @@ class _QuizPageState extends State<QuizPage> {
   Widget build(BuildContext context) {
     var watchState = context.watch<MyAppState>();
     var readState = context.read<MyAppState>();
-    var quiz = watchState.quizzes[widget.currentQuiz];
-    var currentQ = quiz.currentQ;
+    Quiz quiz = watchState.quizzes[widget.currentQuiz];
+    //var currentQ = watchState.showQs[sesh.currentQ - watchState.offsetIndex];
+    var currentQ = quiz.questions[quiz.currentQ];
 
     return Scaffold(
       // This is a scroll view of questions
@@ -42,8 +44,8 @@ class _QuizPageState extends State<QuizPage> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 5.0, vertical: 25),
                     child: Text(
-                      quiz.questions[currentQ].question,
-                      style: isSanskrit(quiz.questions[currentQ].question)
+                      currentQ.question,
+                      style: isSanskrit(currentQ.question)
                           ? Theme.of(context).textTheme.displayMedium!.copyWith(
                               fontFamily: GoogleFonts.montserrat().fontFamily)
                           : Theme.of(context).textTheme.displaySmall,
@@ -55,25 +57,25 @@ class _QuizPageState extends State<QuizPage> {
                   // The four answers
                   Expanded(
                       child: AnswerTile(
-                    option: quiz.questions[currentQ].answers[0],
+                    option: currentQ.answers[0],
                     index: 0,
                     currentQuiz: widget.currentQuiz,
                   )),
                   Expanded(
                       child: AnswerTile(
-                    option: quiz.questions[currentQ].answers[1],
+                    option: currentQ.answers[1],
                     index: 1,
                     currentQuiz: widget.currentQuiz,
                   )),
                   Expanded(
                       child: AnswerTile(
-                    option: quiz.questions[currentQ].answers[2],
+                    option: currentQ.answers[2],
                     index: 2,
                     currentQuiz: widget.currentQuiz,
                   )),
                   Expanded(
                       child: AnswerTile(
-                    option: quiz.questions[currentQ].answers[3],
+                    option: currentQ.answers[3],
                     index: 3,
                     currentQuiz: widget.currentQuiz,
                   )),
@@ -91,11 +93,8 @@ class _QuizPageState extends State<QuizPage> {
                           onPressed: (watchState.selectedIndex == -1)
                               ? null
                               : () {
-                                  if (readState.ansSubmitted) {
+                                  if (quiz.ansSubmitted) {
                                     readState.reset();
-                                    if (quiz.showSummary) {
-                                      context.read<MyAppState>().navigateTo(3);
-                                    }
                                   } else {
                                     readState.onAnsSubmitted();
                                   }
@@ -109,7 +108,7 @@ class _QuizPageState extends State<QuizPage> {
                             ),
                           ),
                           child: Text(
-                            watchState.ansSubmitted ? 'Next' : 'Submit',
+                            quiz.ansSubmitted ? 'Next' : 'Submit',
                           ),
                         ),
                       ),
