@@ -323,7 +323,7 @@ class QuizHintPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   Paragraph(
-                    title: 'एतत् किम्? (What\'s this?)',
+                    title: 'कः विषयः? (The concept)',
                     content: explainContent,
                     bulletContent: explainBullets,
                     postContent: explainPost,

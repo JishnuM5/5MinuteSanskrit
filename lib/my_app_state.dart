@@ -386,8 +386,6 @@ class MyAppState extends ChangeNotifier {
     }
 
     if (quiz.showHint) {
-      print(hintPages);
-      print(quiz.hintPageRef);
       currentHintPage = hintPages[quiz.hintPageRef!]!;
     }
 
