@@ -73,6 +73,7 @@ Widget errorMessage(Object? error, BuildContext context) {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
+              // The user can sign out and retry processes
               ElevatedButton.icon(
                 onPressed: () {
                   FirebaseAuth.instance.signOut();
@@ -125,9 +126,11 @@ class _AuthPageState extends State<AuthPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(25),
                   child: FloatingBox(
-                    child: login
-                        ? LoginWidget(switchToSignUp: toggle)
-                        : SignUpWidget(switchToSignIn: toggle),
+                    child: SingleChildScrollView(
+                      child: login
+                          ? LoginWidget(switchToSignUp: toggle)
+                          : SignUpWidget(switchToSignIn: toggle),
+                    ),
                   ),
                 ),
               ),
@@ -259,12 +262,11 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
 
     if (!emailVerified) {
       sendVerificationEmail();
+      timer = Timer.periodic(
+        const Duration(seconds: 5),
+        (context) => checkEmailVerified(),
+      );
     }
-
-    timer = Timer.periodic(
-      const Duration(seconds: 5),
-      (context) => checkEmailVerified(),
-    );
   }
 
   @override

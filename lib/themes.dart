@@ -1,24 +1,33 @@
 // This file contains the theme, logo, and other important values/widgets used throughout the app
 
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'main.dart';
 
+class ConstColors {
+  static const background = Color.fromRGBO(238, 238, 238, 1);
+  static const red = Color.fromRGBO(183, 28, 28, 1);
+  static const yellow = Color.fromRGBO(251, 192, 45, 1);
+  static const green = Color.fromRGBO(46, 125, 50, 1);
+  static const primary = Color.fromARGB(255, 8, 70, 125);
+  static const shadeLight = Color.fromARGB(255, 116, 189, 234);
+  static const shade = Color.fromARGB(255, 87, 158, 201);
+  static const shadeDark = Color.fromARGB(255, 74, 123, 154);
+  static const grey = Color.fromARGB(255, 221, 221, 221);
+}
+
 // This theme variable is used to keep design consistent throughout the application
 final theme = ThemeData(
   // These are the colors used
-  colorScheme:
-      ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 11, 83, 148)),
+  colorScheme: ColorScheme.fromSeed(seedColor: ConstColors.primary),
   useMaterial3: true,
-  primaryColorLight: const Color.fromARGB(255, 111, 168, 220),
   fontFamily: GoogleFonts.montserrat().fontFamily,
 
   // These are themes for various widgets in the app
   navigationBarTheme: NavigationBarThemeData(
-    labelTextStyle: MaterialStateProperty.all<TextStyle?>(
-      GoogleFonts.courierPrime(),
-    ),
+    indicatorColor: ConstColors.shade,
+    // This background color is different from the constant grey
+    backgroundColor: Colors.grey[300],
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: OutlinedButton.styleFrom(
@@ -26,31 +35,41 @@ final theme = ThemeData(
         borderRadius: BorderRadius.circular(10),
       ),
       minimumSize: const Size.fromHeight(42.5),
-      backgroundColor: const Color.fromARGB(255, 11, 83, 148),
+      backgroundColor: ConstColors.primary,
       foregroundColor: Colors.white,
     ),
+  ),
+  snackBarTheme: const SnackBarThemeData(backgroundColor: ConstColors.primary),
+  scaffoldBackgroundColor: ConstColors.background,
+  iconButtonTheme: const IconButtonThemeData(
+    style: ButtonStyle(iconColor: WidgetStatePropertyAll(ConstColors.primary)),
   ),
 
   // These are the set text styles
   textTheme: TextTheme(
-    headlineLarge: TextStyle(
-        fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 27.5),
+    // Used in logo, quiz titles, and error page
     headlineMedium: TextStyle(
         fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 25),
+    // Used for summary info labels
     headlineSmall: TextStyle(
         fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 18),
+    // Used throughout auth, quiz, and profile pages
     bodyLarge: TextStyle(
         fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 16),
     bodyMedium: TextStyle(
         fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 14.5),
+    // Used for error text on error page
     bodySmall: TextStyle(
         fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 13),
+    // Used for page headers and summary info
     displayLarge: TextStyle(
         fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 29),
     displayMedium:
         TextStyle(fontFamily: GoogleFonts.baloo2().fontFamily, fontSize: 25),
+    // Used on auth pages and question text
     displaySmall: TextStyle(
         fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 19),
+    // Used throughout for small text and labels
     labelSmall: TextStyle(
         fontFamily: GoogleFonts.courierPrime().fontFamily, fontSize: 13),
   ),
@@ -88,16 +107,17 @@ final shadow = BoxShadow(
 
 // This is a custom box widget used throughout the app
 class InkWellBox extends StatelessWidget {
-  const InkWellBox(
-      {super.key,
-      required this.maxWidth,
-      required this.maxHeight,
-      required this.child,
-      required this.color,
-      this.onTap});
+  const InkWellBox({
+    super.key,
+    this.maxWidth,
+    this.maxHeight,
+    required this.child,
+    required this.color,
+    this.onTap,
+  });
 
-  final double maxWidth;
-  final double maxHeight;
+  final double? maxWidth;
+  final double? maxHeight;
   final Widget child;
   final Color color;
   final void Function()? onTap;
@@ -106,8 +126,8 @@ class InkWellBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      highlightColor: Colors.blueGrey.withOpacity(0.2),
-      splashColor: Colors.blueGrey.withOpacity(0.5),
+      highlightColor: ConstColors.shadeDark.withOpacity(0.2),
+      splashColor: ConstColors.shadeDark.withOpacity(0.5),
       child: Ink(
         decoration: BoxDecoration(
           boxShadow: [shadow],
@@ -118,7 +138,6 @@ class InkWellBox extends StatelessWidget {
           constraints:
               BoxConstraints.tightFor(width: maxWidth, height: maxHeight),
           padding: const EdgeInsets.all(15.0),
-          alignment: Alignment.center,
           child: child,
         ),
       ),
@@ -128,13 +147,14 @@ class InkWellBox extends StatelessWidget {
 
 // This is a custom box widget used throughout the app
 class FloatingBox extends StatelessWidget {
-  const FloatingBox({super.key, required this.child});
+  const FloatingBox({super.key, required this.child, this.padding = 20.0});
   final Widget child;
+  final double padding;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10.0),
@@ -152,23 +172,87 @@ showTextSnackBar(String message) {
   ));
 }
 
-// An animation for the title I was playing with but never implemented
-class AnimatedTitle extends StatelessWidget {
-  const AnimatedTitle({
-    super.key,
-  });
+class BulletPoint extends StatelessWidget {
+  final String text;
+  final TextStyle? textStyle;
+
+  const BulletPoint({super.key, required this.text, required this.textStyle});
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedTextKit(
-      isRepeatingAnimation: false,
-      animatedTexts: [
-        FadeAnimatedText(
-          'Welcome to',
-          textStyle: Theme.of(context).textTheme.displayLarge,
-          fadeInEnd: 2,
-          fadeOutBegin: double.maxFinite,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2.5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(' • ', style: textStyle),
+          Expanded(
+            child: Text(
+              text,
+              style: textStyle,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class Paragraph extends StatelessWidget {
+  const Paragraph({
+    super.key,
+    required this.content,
+    required this.bulletContent,
+    required this.postContent,
+    this.title = "",
+  });
+
+  final String content;
+  final List<String> bulletContent;
+  final String postContent;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    bool smallScreen = isSmallScreen(context);
+
+    TextStyle? titleStyle = (smallScreen)
+        ? Theme.of(context).textTheme.bodyLarge!.copyWith(height: 1)
+        : Theme.of(context).textTheme.displaySmall;
+
+    TextStyle? contentStyle = (smallScreen)
+        ? Theme.of(context).textTheme.bodyMedium
+        : Theme.of(context).textTheme.bodyLarge;
+
+    double spacing = (smallScreen) ? 2.5 : 5;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (title.isNotEmpty) ...[
+          Text(
+            title,
+            style: titleStyle!.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const Divider(),
+        ],
+        SizedBox(height: spacing),
+        if (content.isNotEmpty)
+          Text(
+            content,
+            style: contentStyle,
+          ),
+        ...bulletContent.map(
+          (text) => BulletPoint(
+            text: text,
+            textStyle: contentStyle,
+          ),
         ),
+        if (postContent.isNotEmpty)
+          Text(
+            postContent,
+            style: contentStyle,
+          ),
       ],
     );
   }
@@ -179,4 +263,8 @@ class AnimatedTitle extends StatelessWidget {
 bool isSanskrit(String text) {
   var sanskrit = RegExp(r'[\u0900-\u097F]');
   return sanskrit.hasMatch(text);
+}
+
+bool isSmallScreen(BuildContext context) {
+  return MediaQuery.of(context).size.width <= 500;
 }

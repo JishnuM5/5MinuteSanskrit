@@ -1,98 +1,12 @@
-// This class contains other widgets used on the quiz page
+// This class the summary page
 
 import 'dart:ui';
-
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'classes.dart';
 import 'my_app_state.dart';
 import 'themes.dart';
-
-// This widget is an answer tile, shown on the quiz page with an answer option
-class AnswerTile extends StatelessWidget {
-  const AnswerTile({
-    super.key,
-    required this.index,
-    required this.option,
-    required this.currentQuiz,
-  });
-
-  final int index;
-  final String option;
-  final int currentQuiz;
-
-  @override
-  Widget build(BuildContext context) {
-    var watchState = context.watch<MyAppState>();
-    var readState = context.read<MyAppState>();
-    Quiz quiz = readState.quizzes[currentQuiz];
-    Border? border;
-
-    // Here, the border of an answer is set based on selection/submission
-    if (watchState.selectedIndex == index) {
-      if (watchState.quizzes[currentQuiz].ansSubmitted) {
-        if (quiz.questions[quiz.currentQ].correctIndex == index) {
-          border = Border.all(
-            color: Colors.green[800]!,
-            width: 4.0,
-          );
-        } else {
-          border = Border.all(
-            color: Colors.red[900]!,
-            width: 4.0,
-          );
-        }
-      } else {
-        border = Border.all(
-          color: Theme.of(context).primaryColorDark,
-          width: 4.0,
-        );
-      }
-    } else {
-      if (watchState.quizzes[currentQuiz].ansSubmitted &&
-          quiz.questions[quiz.currentQ].correctIndex == index) {
-        border = Border.all(
-          color: Colors.green[800]!,
-          width: 4.0,
-        );
-      } else {
-        border = null;
-      }
-    }
-
-    // This is the widget that contains the answer
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: MouseRegion(
-        cursor: watchState.quizzes[currentQuiz].ansSubmitted
-            ? SystemMouseCursors.basic
-            : SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: watchState.quizzes[currentQuiz].ansSubmitted
-              ? null
-              : () => readState.onAnsSelected(index),
-          child: Container(
-            decoration: BoxDecoration(
-              border: border,
-              borderRadius: BorderRadius.circular(10),
-              color: Theme.of(context).primaryColorLight,
-              boxShadow: [shadow],
-            ),
-            padding: const EdgeInsets.all(10.0),
-            alignment: Alignment.center,
-            child: Text(
-              option,
-              style: isSanskrit(option)
-                  ? Theme.of(context).textTheme.bodyLarge
-                  : null,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 // This is the summary page shown after the user answers all questions
 class SummaryPage extends StatefulWidget {
@@ -112,6 +26,7 @@ class _SummaryPageState extends State<SummaryPage> {
     playConfettiAnimation();
   }
 
+  // This method briefly plays the confetti animation
   void playConfettiAnimation() {
     _confettiController.play();
     Future.delayed(const Duration(milliseconds: 200), () {
@@ -139,15 +54,18 @@ class _SummaryPageState extends State<SummaryPage> {
           children: [
             Column(
               children: [
-                // A congraulatory message
+                // A congratulatory message
                 Text(
                   'उत्तमम्!',
-                  style: textTheme.headlineLarge,
+                  style: textTheme.displayMedium!.copyWith(
+                    fontSize: 31.5,
+                  ),
                 ),
                 const Padding(
                   padding: EdgeInsets.all(5.0),
                   child: Divider(),
                 ),
+                // A party popper button that scales when hovered on and shoots plays confetti on click
                 Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: MouseRegion(
@@ -179,6 +97,7 @@ class _SummaryPageState extends State<SummaryPage> {
                                           width: 0,
                                         ),
                                       ),
+                                      // A custom shadow in the background
                                       child: Opacity(
                                         opacity: 0.4,
                                         child: ColorFiltered(
@@ -197,7 +116,8 @@ class _SummaryPageState extends State<SummaryPage> {
                                 ),
                                 Image(
                                   image: const AssetImage(
-                                      'assets/party-popper.png'),
+                                    'assets/party-popper.png',
+                                  ),
                                   height: (isHovering) ? 210 : 200,
                                 ),
                               ],
@@ -206,22 +126,35 @@ class _SummaryPageState extends State<SummaryPage> {
                         )),
                   ),
                 ),
-                Row(
-                  children: [
-                    StatsBox(
-                      stat: '${currentSesh.correctQs}/${currentSesh.totalQs}',
-                      label: 'correct this session',
+                // Various statistics about the current session
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        StatsTile(
+                          stat:
+                              '${currentSesh.correctQs} / ${currentSesh.totalQs}',
+                          label: 'correct this session',
+                          color: ConstColors.shadeLight,
+                        ),
+                        const SizedBox(width: 10),
+                        StatsTile(
+                          stat: formatMilliseconds(currentSesh.elapsedMS),
+                          label: 'time spent',
+                          color: ConstColors.shade,
+                        ),
+                        const SizedBox(width: 10),
+                        StatsTile(
+                          stat: '${currentSesh.points}',
+                          label: 'points earned this session',
+                          color: ConstColors.shadeDark,
+                        ),
+                      ],
                     ),
-                    StatsBox(
-                      stat: formatMilliseconds(currentSesh.elapsedMS),
-                      label: 'time spent',
-                    ),
-                    StatsBox(
-                      stat: '${currentSesh.points}',
-                      label: 'points earned this session',
-                    ),
-                  ],
-                )
+                  ),
+                ),
               ],
             ),
             ConfettiWidget(
@@ -235,6 +168,7 @@ class _SummaryPageState extends State<SummaryPage> {
     );
   }
 
+  // This method formats milliseconds to minutes and seconds to display
   String formatMilliseconds(int milliseconds) {
     int seconds = milliseconds ~/ 1000;
     int minutes = seconds ~/ 60;
@@ -247,50 +181,46 @@ class _SummaryPageState extends State<SummaryPage> {
   }
 }
 
-class StatsBox extends StatelessWidget {
-  const StatsBox({
+class StatsTile extends StatelessWidget {
+  const StatsTile({
     super.key,
     required this.stat,
     required this.label,
+    required this.color,
   });
 
   final String stat;
   final String label;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
+    final tTheme = Theme.of(context).textTheme;
+    TextStyle? statStyle =
+        isSmallScreen(context) ? tTheme.displaySmall : tTheme.displayLarge;
+    TextStyle? labelStyle =
+        isSmallScreen(context) ? tTheme.labelSmall : tTheme.headlineSmall;
+
     return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        // A box showing the number of points earned from this quiz
-        child: InkWellBox(
-          maxWidth: 400,
-          maxHeight: 200,
-          color: Theme.of(context).primaryColorLight,
-          child: Column(
-            children: [
-              const SizedBox(height: 30),
-              Text(
-                stat,
-                style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    label,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          onTap: () {},
+      child: InkWellBox(
+        color: color,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              stat,
+              style: statStyle!.copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              style: labelStyle,
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
+        onTap: () {},
       ),
     );
   }

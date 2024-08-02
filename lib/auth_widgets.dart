@@ -4,9 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sanskrit_web_app/my_app_state.dart';
+import 'my_app_state.dart';
 import 'auth_pages.dart';
 import 'main.dart';
+import 'themes.dart';
 
 // This widget displays and handles login
 class LoginWidget extends StatefulWidget {
@@ -104,14 +105,14 @@ class _LoginWidgetState extends State<LoginWidget> {
               const SizedBox(height: 10),
               // This is the forgot password button
               MouseRegion(
-                cursor: MaterialStateMouseCursor.clickable,
+                cursor: WidgetStateMouseCursor.clickable,
                 child: GestureDetector(
                   child: Text(
                     'Forgot Password?',
                     style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          color: Theme.of(context).primaryColorLight,
+                          color: ConstColors.shade,
                           decoration: TextDecoration.underline,
-                          decorationColor: Theme.of(context).primaryColorLight,
+                          decorationColor: ConstColors.shade,
                         ),
                   ),
                   onTap: () => Navigator.of(context).push(MaterialPageRoute(
@@ -130,10 +131,10 @@ class _LoginWidgetState extends State<LoginWidget> {
                       recognizer: TapGestureRecognizer()
                         ..onTap = widget.switchToSignUp,
                       text: 'Sign up',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColorLight,
+                      style: const TextStyle(
+                        color: ConstColors.shade,
                         decoration: TextDecoration.underline,
-                        decorationColor: Theme.of(context).primaryColorLight,
+                        decorationColor: ConstColors.shade,
                       ),
                     ),
                   ],
@@ -328,10 +329,10 @@ class _SignUpWidgetState extends State<SignUpWidget> {
                       recognizer: TapGestureRecognizer()
                         ..onTap = widget.switchToSignIn,
                       text: 'Sign in',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColorLight,
+                      style: const TextStyle(
+                        color: ConstColors.shade,
                         decoration: TextDecoration.underline,
-                        decorationColor: Theme.of(context).primaryColorLight,
+                        decorationColor: ConstColors.shade,
                       ),
                     ),
                   ],
@@ -360,6 +361,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
         password: _passwordController.text.trim(),
       );
       // Here, a new user is created locally
+      // ignore: use_build_context_synchronously
       context.read<MyAppState>().updateUserName(_nameController.text.trim());
     } on FirebaseAuthException catch (error) {
       // Here, an error message is shown based on the type of error given
@@ -386,7 +388,7 @@ class _SignUpWidgetState extends State<SignUpWidget> {
       });
     }
 
-    // Once this method is completed, the loading page is no longer shown
+    // Once this method is complete, the loading page is no longer shown
     navigatorKey.currentState!.popUntil((route) => route.isFirst);
   }
 }
@@ -407,12 +409,16 @@ class _VerifiedHomePageState extends State<VerifiedHomePage> {
   @override
   void initState() {
     super.initState();
-    _future = Future.wait([
+    var futureList = [
       context.read<MyAppState>().readQuizzes(),
-      (widget.newUser)
-          ? context.read<MyAppState>().createUserInDB()
-          : context.read<MyAppState>().readUser(),
-    ]).then((_) {
+      context.read<MyAppState>().readHintPages(),
+      context.read<MyAppState>().readUser(),
+    ];
+    if (widget.newUser) {
+      futureList.insert(2, context.read<MyAppState>().createUserInDB());
+    }
+
+    _future = Future.wait(futureList).then((_) {
       context.read<MyAppState>().navigateTo(0);
       return Future.value([]);
     });
@@ -430,7 +436,8 @@ class _VerifiedHomePageState extends State<VerifiedHomePage> {
         } else if (snapshot.connectionState == ConnectionState.waiting) {
           return animatedLogo(context, true);
         } else {
-          return const MyHomePage(
+          return MyHomePage(
+            newUser: widget.newUser,
             title: '5 Minute संस्कृतम्',
           );
         }

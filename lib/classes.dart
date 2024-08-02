@@ -1,9 +1,13 @@
 // This file contains all of the custom classes used in the project
 
 import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'themes.dart';
 
 // The question class manages each question
-// It contains a question, a list of answers, and a correct answer index
+// It contains a question, a list of answers, a correct answer index, and state variables
+// The state variables: counts of the number times each is answered, and answered correctly
 class Question {
   final String question;
   final List<String> answers;
@@ -32,19 +36,29 @@ class Question {
     );
   }
 
+  // This method updates state variables from a map
   void readFromState(Map<String, dynamic> qState) {
     timesCorrect = qState['timesCorrect'];
     timesAnswered = qState['timesAnswered'];
   }
 }
 
+enum QuizStatus {
+  green,
+  yellow,
+  red,
+  complete,
+}
+
 // The quiz class manages a list of questions
-// It also contains the quiz name and various variables that keep track of the quiz state
+// It also contains the quiz name and many variables that keep track of the quiz's state
 class Quiz {
   final List<Question> questions;
   final String name;
   final bool show;
   final DateTime start;
+  final bool showHint;
+  final String? hintPageRef;
 
   bool mastered = false;
   int points = 0;
@@ -54,12 +68,18 @@ class Quiz {
   int correctQs = 0;
   // TODO: hardcoded to sessions of 5
   Session currentSesh = Session(totalQs: 5);
+  DateTime? lastShown;
 
-  Quiz(
-      {required this.questions,
-      required this.name,
-      required this.show,
-      required this.start});
+  QuizStatus status = QuizStatus.green;
+
+  Quiz({
+    required this.questions,
+    required this.name,
+    required this.show,
+    required this.start,
+    required this.showHint,
+    this.hintPageRef,
+  });
 
   // This constructor creates a quiz from a map, with questions ordered in a list
   factory Quiz.fromMap(Map<String, dynamic> quizMap) {
@@ -84,10 +104,12 @@ class Quiz {
       name: quizMap['name'],
       show: quizMap['show'],
       start: quizMap['start'].toDate(),
+      showHint: quizMap['showHint'],
+      hintPageRef: quizMap['hintPageRef'],
     ));
   }
 
-  // This method updates the quiz state variables based on a map
+  // This method updates the quiz state variables from a map
   void readFromState(Map<String, dynamic> quizState) {
     mastered = quizState['mastered'];
     points = quizState['points'];
@@ -95,6 +117,11 @@ class Quiz {
     ansSubmitted = quizState['ansSubmitted'];
     currentQ = quizState['currentQ'];
     correctQs = quizState['correctQs'];
+
+    final lSState = quizState['lastShown'];
+    if (lSState != null) {
+      lastShown = lSState.toDate();
+    }
 
     Map<String, dynamic> seshState = Map.from(quizState['currentSesh']);
     currentSesh.readFromState(seshState);
@@ -113,6 +140,7 @@ class Quiz {
 Quiz sampleQuiz = Quiz(
   name: 'Sample Quiz',
   show: true,
+  showHint: false,
   start: DateTime.fromMicrosecondsSinceEpoch(0),
   questions: [
     Question(
@@ -151,10 +179,40 @@ class AppUser {
   // This constructor creates a user from a map
   factory AppUser.fromMap(Map<String, dynamic> userMap) {
     return (AppUser(
-        name: userMap['name'], quizStates: Map.from(userMap['quizStates'])));
+      name: userMap['name'],
+      quizStates: Map.from(userMap['quizStates']),
+    ));
   }
 }
 
+class LeaderboardUser {
+  String name;
+  int lbPoints;
+
+  LeaderboardUser({required this.name, required this.lbPoints});
+
+  factory LeaderboardUser.fromMap(Map<String, dynamic> userMap) {
+    return LeaderboardUser(
+        name: userMap['name'], lbPoints: userMap['lbPoints']);
+  }
+}
+
+// A sample leaderboard list
+List<LeaderboardUser> sampleLBUsers = [
+  LeaderboardUser(name: "LeBron James", lbPoints: 205),
+  LeaderboardUser(name: "Serena Williams", lbPoints: 200),
+  LeaderboardUser(name: "Lionel Messi", lbPoints: 175),
+  LeaderboardUser(name: "Roger Federer", lbPoints: 220),
+  LeaderboardUser(name: "Cristiano Ronaldo", lbPoints: 190),
+  LeaderboardUser(name: "Usain Bolt", lbPoints: 140),
+  LeaderboardUser(name: "Michael Phelps", lbPoints: 210),
+  LeaderboardUser(name: "Simone Biles", lbPoints: 160),
+  LeaderboardUser(name: "Tom Brady", lbPoints: 180),
+  LeaderboardUser(name: "Rafael Nadal", lbPoints: 170),
+  LeaderboardUser(name: "Virat Kohli", lbPoints: 155),
+];
+
+// The session class contains data variables which keep track of a batch of 5 questions
 class Session {
   int elapsedMS;
   int totalQs;
@@ -163,23 +221,134 @@ class Session {
   int points;
   DateTime? lastAnswered;
 
-  Session(
-      {required this.totalQs,
-      this.elapsedMS = 0,
-      this.currentQ = 0,
-      this.correctQs = 0,
-      this.points = 0});
+  Session({
+    required this.totalQs,
+    this.elapsedMS = 0,
+    this.currentQ = 0,
+    this.correctQs = 0,
+    this.points = 0,
+  });
 
+  // This method updates state variables from a map
   void readFromState(Map<String, dynamic> seshState) {
     final lAState = seshState['lastAnswered'];
     if (lAState != null) {
       lastAnswered = lAState.toDate();
     }
-
     elapsedMS = seshState['elapsedMS'];
     totalQs = seshState['totalQs'];
     currentQ = seshState['currentQ'];
     correctQs = seshState['correctQs'];
     points = seshState['points'];
+  }
+}
+
+class QuizHintPage extends StatelessWidget {
+  const QuizHintPage({
+    super.key,
+    required this.topic,
+    required this.explainContent,
+    required this.explainBullets,
+    required this.explainPost,
+    required this.exampleContent,
+    required this.exampleBullets,
+    required this.examplePost,
+  });
+
+  final String topic;
+  final String explainContent;
+  final List<String> explainBullets;
+  final String explainPost;
+  final String exampleContent;
+  final List<String> exampleBullets;
+  final String examplePost;
+
+  factory QuizHintPage.fromMap(Map<String, dynamic> hintMap) {
+    List<String> explainBullets = [];
+    for (dynamic explainBullet in hintMap['explainBullets']) {
+      explainBullets.add(explainBullet.toString().replaceAll('\\n', '\n'));
+    }
+
+    List<String> exampleBullets = [];
+    for (dynamic exampleBullet in hintMap['exampleBullets']) {
+      exampleBullets.add(exampleBullet.toString().replaceAll('\\n', '\n'));
+    }
+
+    return (QuizHintPage(
+      topic: hintMap['topic'].replaceAll('\\n', '\n'),
+      explainContent: hintMap['explainContent'].replaceAll('\\n', '\n'),
+      explainBullets: explainBullets,
+      explainPost: hintMap['explainPost'].replaceAll('\\n', '\n'),
+      exampleContent: hintMap['exampleContent'].replaceAll('\\n', '\n'),
+      exampleBullets: exampleBullets,
+      examplePost: hintMap['examplePost'].replaceAll('\\n', '\n'),
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height - 50,
+        width: MediaQuery.of(context).size.width - 15,
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Image(
+                        image: AssetImage('assets/colored-bulb.png'),
+                        height: 30,
+                      ),
+                      const SizedBox(width: 15),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: Text(
+                          'Hint: $topic',
+                          style: Theme.of(context)
+                              .textTheme
+                              .displayMedium!
+                              .copyWith(
+                                fontFamily: GoogleFonts.montserrat().fontFamily,
+                              ),
+                          softWrap: false,
+                          overflow: TextOverflow.fade,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Paragraph(
+                    title: 'एतत् किम्? (What\'s this?)',
+                    content: explainContent,
+                    bulletContent: explainBullets,
+                    postContent: explainPost,
+                  ),
+                  const SizedBox(height: 15),
+                  Paragraph(
+                    title: 'उदाहरणानि (Examples)',
+                    content: exampleContent,
+                    bulletContent: exampleBullets,
+                    postContent: examplePost,
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              right: 7.5,
+              top: 7.5,
+              child: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

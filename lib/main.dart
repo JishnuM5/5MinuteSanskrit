@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'leaderboard_page.dart';
 import 'auth_pages.dart';
 import 'classes.dart';
 import 'firebase_options.dart';
@@ -11,7 +12,7 @@ import 'my_app_state.dart';
 import 'profile_page.dart';
 import 'quiz_page.dart';
 import 'app_bars.dart';
-import 'quiz_widgets.dart';
+import 'summary_page.dart';
 import 'themes.dart';
 
 //This is the main method, from where the code runs
@@ -53,14 +54,28 @@ class MyApp extends StatelessWidget {
 
 // This class manages the framework of the app
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({super.key, required this.title, required this.newUser});
   final String title;
+  final bool newUser;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.newUser) {
+      Future.delayed(Duration.zero, () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) => const TutorialPopup(),
+        );
+      });
+    }
+  }
+
   // The selected index state manages page navigation
   @override
   Widget build(BuildContext context) {
@@ -72,78 +87,34 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar = const NavBar(navBarIndex: 0);
         break;
       case 1:
-        page = const ProfilePage();
+        page = const LeaderboardPage();
         appBar = const NavBar(navBarIndex: 1);
         break;
       case 2:
-        page = QuizPage(currentQuiz: context.read<MyAppState>().currentQuiz);
-        appBar = const QuizBar(navBarIndex: 1);
+        page = const ProfilePage();
+        appBar = const NavBar(navBarIndex: 2);
+        break;
       case 3:
         page = const SummaryPage();
+        appBar = const QuizBar(navBarIndex: 1);
+        break;
+      case 4:
+        page = QuizPage(currentQuiz: context.read<MyAppState>().currentQuiz);
         appBar = const QuizBar(navBarIndex: 1);
         break;
       default:
         throw UnimplementedError();
     }
 
+    // The total number of points that a user has is calculated here
     int totalPoints = 0;
     for (Quiz quiz in context.watch<MyAppState>().quizzes) {
       totalPoints += quiz.points;
       totalPoints += context.watch<MyAppState>().masteredQuizPoints;
     }
-
     return Scaffold(
       // The top bar of the app
-      appBar: AppBar(
-        toolbarHeight: 60,
-        backgroundColor: Colors.white,
-        title: Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-              child: logo,
-            )
-          ],
-        ),
-        actions: <Widget>[
-          // This widget is the point counter
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Container(
-              alignment: Alignment.center,
-              height: 37.5,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.black,
-                ),
-                borderRadius: BorderRadius.circular(10),
-                color: Theme.of(context).primaryColor,
-                boxShadow: [shadow],
-              ),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 7.5, vertical: 2.5),
-                child: Row(
-                  children: [
-                    const Image(
-                      image: AssetImage('assets/star.png'),
-                      height: 15,
-                    ),
-                    const SizedBox(width: 5),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2.5),
-                      child: Text(
-                        '$totalPoints',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: topBar(context, totalPoints),
       // The bottom navigation bar of the app
       bottomNavigationBar: appBar,
       // The body of the app
@@ -178,8 +149,10 @@ class _MainPageState extends State<MainPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Text("This Week's Quizzes",
-                style: Theme.of(context).textTheme.displayLarge),
+            Text(
+              "This Week's Quizzes",
+              style: Theme.of(context).textTheme.displayLarge,
+            ),
             const Padding(
               padding: EdgeInsets.all(5.0),
               child: Divider(),
@@ -188,6 +161,7 @@ class _MainPageState extends State<MainPage> {
               children: quizList,
             ),
             const SizedBox(height: 15),
+            // An expanding tile that shows mastered quizzes
             ExpansionTile(
               shape: const Border(),
               title: const Text('See mastered quizzes'),
@@ -200,7 +174,7 @@ class _MainPageState extends State<MainPage> {
                           children: [
                             const Icon(
                               Icons.check_circle_rounded,
-                              color: Colors.green,
+                              color: ConstColors.green,
                             ),
                             const SizedBox(width: 10),
                             Text(quiz),
@@ -228,18 +202,41 @@ class QuizTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var currentSesh = context.watch<MyAppState>().quizzes[index].currentSesh;
+    // Here, data values are retrieved and stored
+    Quiz quiz = context.watch<MyAppState>().quizzes[index];
     int remainingQs = context.read<MyAppState>().remainingQs(index);
     double pctMastered = context.read<MyAppState>().pctMastered(index);
 
+    // This method and boolean control whether the user can access the next session
     bool showSesh = true;
+    DateTime? noonAfterLastAns;
+
     if (context.read<MyAppState>().lastQAnswered(index)) {
-      DateTime now = DateTime.now();
-      final noonToday = DateTime(now.year, now.month, now.day, 12, 0, 0);
-      final lastAns = currentSesh.lastAnswered!;
-      if (lastAns.isAfter(noonToday) || DateTime.now().isBefore(noonToday)) {
-        showSesh = false;
+      final lastAns = quiz.currentSesh.lastAnswered!;
+      noonAfterLastAns = DateTime(lastAns.year, lastAns.month, lastAns.day, 12);
+
+      if (lastAns.isAfter(noonAfterLastAns)) {
+        noonAfterLastAns = noonAfterLastAns.add(const Duration(days: 1));
       }
+      if (DateTime.now().isBefore(noonAfterLastAns)) {
+        showSesh = false;
+      } else {
+        quiz.lastShown = noonAfterLastAns;
+      }
+    }
+
+    if (showSesh) {
+      DateTime lastShown = quiz.lastShown ?? quiz.start;
+      Duration diff = DateTime.now().difference(lastShown);
+      if (diff <= const Duration(days: 1)) {
+        context.read<MyAppState>().setQuizStatus(index, QuizStatus.green);
+      } else if (diff <= const Duration(days: 3)) {
+        context.read<MyAppState>().setQuizStatus(index, QuizStatus.yellow);
+      } else {
+        context.read<MyAppState>().setQuizStatus(index, QuizStatus.red);
+      }
+    } else {
+      context.read<MyAppState>().setQuizStatus(index, QuizStatus.complete);
     }
 
     return Padding(
@@ -248,6 +245,7 @@ class QuizTile extends StatelessWidget {
         height: 155,
         child: Stack(
           children: [
+            // This container shows a progress bar of quiz mastery
             Positioned(
               left: 10,
               right: 10,
@@ -255,7 +253,9 @@ class QuizTile extends StatelessWidget {
               height: 55,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColorLight,
+                  color: ConstColors.shade.withOpacity(
+                    (quiz.status == QuizStatus.complete) ? 0.7 : 1,
+                  ),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 padding: const EdgeInsets.fromLTRB(7.5, 25, 7.5, 7.5),
@@ -263,7 +263,9 @@ class QuizTile extends StatelessWidget {
                   children: [
                     Text(
                       'Mastery:',
-                      style: Theme.of(context).textTheme.labelSmall,
+                      style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                            color: const Color.fromARGB(255, 234, 234, 234),
+                          ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -272,7 +274,10 @@ class QuizTile extends StatelessWidget {
                         value: pctMastered,
                         backgroundColor: Colors.white.withOpacity(0.3),
                         valueColor: AlwaysStoppedAnimation<Color>(
-                            Theme.of(context).primaryColor),
+                          ConstColors.primary.withOpacity(
+                            (quiz.status == QuizStatus.complete) ? 0.7 : 1,
+                          ),
+                        ),
                         borderRadius: BorderRadius.circular(5),
                       ),
                     )
@@ -280,13 +285,29 @@ class QuizTile extends StatelessWidget {
                 ),
               ),
             ),
+            // This is the clickable quiz tile
             Material(
+              elevation: 10.0,
               clipBehavior: Clip.antiAlias,
-              borderRadius: BorderRadius.circular(10),
+              shape: RoundedRectangleBorder(
+                side: BorderSide(
+                  color: (quiz.status == QuizStatus.green)
+                      ? ConstColors.green
+                      : (quiz.status == QuizStatus.yellow)
+                          ? ConstColors.yellow
+                          : (quiz.status == QuizStatus.red)
+                              ? ConstColors.red
+                              : Colors.transparent,
+                  width: 5,
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: InkWellBox(
                 maxWidth: double.maxFinite,
                 maxHeight: 120,
-                color: Theme.of(context).primaryColor,
+                color: ConstColors.primary.withOpacity(
+                  (quiz.status == QuizStatus.complete) ? 0.7 : 1,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -294,25 +315,31 @@ class QuizTile extends StatelessWidget {
                       quiz.name,
                       style: (isSanskrit(quiz.name))
                           ? Theme.of(context).textTheme.displayMedium!.copyWith(
-                                fontSize: 27.5,
+                                color: ConstColors.grey,
                               )
-                          : Theme.of(context).textTheme.headlineLarge,
+                          : Theme.of(context)
+                              .textTheme
+                              .headlineMedium!
+                              .copyWith(color: ConstColors.grey),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 10),
+                    // Here, the remaining number of questions in the current session are displayed
                     Text(
                       (showSesh)
                           ? "$remainingQs question(s) remaining this session"
-                          : "Session complete!",
-                      style: Theme.of(context).textTheme.headlineSmall,
+                          : "Daily session complete!",
+                      style: const TextStyle(color: ConstColors.grey),
                     ),
                   ],
                 ),
                 onTap: () {
+                  // When the tile is clicked, the quiz page is prepared, and the user navigates there
+                  // However, the user gets an info message if the session is complete and the next isn't ready
                   if (showSesh) {
                     bool newSesh =
                         context.read<MyAppState>().setCurrentQuiz(index);
-                    context.read<MyAppState>().navigateTo(2);
+                    context.read<MyAppState>().navigateTo(4);
                     context.read<MyAppState>().reset(newSesh: newSesh);
                   } else {
                     showTextSnackBar(
@@ -378,11 +405,11 @@ Widget animatedLogo(BuildContext context, bool animate) {
                       style: Theme.of(context).textTheme.displayMedium),
                 ),
           const SizedBox(height: 10),
-          SizedBox(
+          const SizedBox(
             width: 50,
             height: 50,
             child: CircularProgressIndicator(
-              color: Theme.of(context).primaryColor,
+              color: ConstColors.primary,
             ),
           ),
         ],

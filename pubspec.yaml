@@ -41,6 +41,7 @@ dependencies:
   cloud_firestore: ^4.16.1
   firebase_auth: ^4.19.4
   confetti: ^0.7.0
+  card_swiper: ^3.0.1
 
 
 dev_dependencies:
