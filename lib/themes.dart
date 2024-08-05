@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'main.dart';
 
+// This is a predefined class with color values used throughout the app
 class ConstColors {
   static const background = Color.fromRGBO(238, 238, 238, 1);
   static const red = Color.fromRGBO(183, 28, 28, 1);
@@ -90,11 +91,17 @@ final logo = RichText(
         style: TextStyle(
           fontFamily: GoogleFonts.baloo2().fontFamily,
           fontSize: 25,
-          color: Colors.black,
+          color: ConstColors.primary,
         ),
       ),
     ],
   ),
+);
+
+// This is a condensed version of the logo used for smaller screen sizes
+const condensedLogo = Image(
+  image: AssetImage('assets/logo.png'),
+  height: 35,
 );
 
 // This is the standard shadow used throughout the app
@@ -128,6 +135,7 @@ class InkWellBox extends StatelessWidget {
       onTap: onTap,
       highlightColor: ConstColors.shadeDark.withOpacity(0.2),
       splashColor: ConstColors.shadeDark.withOpacity(0.5),
+      borderRadius: BorderRadius.circular(10),
       child: Ink(
         decoration: BoxDecoration(
           boxShadow: [shadow],
@@ -157,7 +165,7 @@ class FloatingBox extends StatelessWidget {
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: [shadow],
       ),
       child: child,
@@ -172,11 +180,12 @@ showTextSnackBar(String message) {
   ));
 }
 
+// This custom widget displays text as a bullet point with proper formatting
 class BulletPoint extends StatelessWidget {
+  const BulletPoint({super.key, required this.text, required this.textStyle});
+
   final String text;
   final TextStyle? textStyle;
-
-  const BulletPoint({super.key, required this.text, required this.textStyle});
 
   @override
   Widget build(BuildContext context) {
@@ -198,6 +207,7 @@ class BulletPoint extends StatelessWidget {
   }
 }
 
+// This custom widget displays a text paragraph with proper formatting and spacing
 class Paragraph extends StatelessWidget {
   const Paragraph({
     super.key,
@@ -214,6 +224,7 @@ class Paragraph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Text style and spacing changes based on screen size
     bool smallScreen = isSmallScreen(context);
 
     TextStyle? titleStyle = (smallScreen)
@@ -226,6 +237,7 @@ class Paragraph extends StatelessWidget {
 
     double spacing = (smallScreen) ? 2.5 : 5;
 
+    // A paragraph contains an optional title, initial text, bullet points, and further text
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -258,13 +270,14 @@ class Paragraph extends StatelessWidget {
   }
 }
 
-// This method returns whether text is in Sanskrit, or Devanagari script
+// This method checks whether text is in Sanskrit, or Devanagari script
 // If it is, the font size is slightly larger
 bool isSanskrit(String text) {
   var sanskrit = RegExp(r'[\u0900-\u097F]');
   return sanskrit.hasMatch(text);
 }
 
+// This method checks whether the current screen is small
 bool isSmallScreen(BuildContext context) {
   return MediaQuery.of(context).size.width <= 500;
 }

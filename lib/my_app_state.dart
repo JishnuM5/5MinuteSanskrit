@@ -12,7 +12,7 @@ class MyAppState extends ChangeNotifier {
   int pageIndex = 0;
   int startMS = 0;
 
-  // This method navigates to another page in the application
+  // This method navigates to another page in the application and runs appropriate functions
   // Errors are handled within the methods called
   Future navigateTo(int index) async {
     // If the user is leaving from the quiz page, update quiz mastery and save to database
@@ -22,12 +22,19 @@ class MyAppState extends ChangeNotifier {
         barrierDismissible: false,
         builder: (context) => const Center(child: CircularProgressIndicator()),
       );
-      if (checkQuizMastery()) {
-        quizzes[currentQuiz].mastered = true;
-      }
+
       // Subtract start time from current time and update elapsed time
       quizzes[currentQuiz].currentSesh.elapsedMS +=
           DateTime.now().millisecondsSinceEpoch - startMS;
+
+      // Check if the quiz is mastered
+      // If it is, set the quiz as mastered and update session history data
+      if (checkQuizMastery()) {
+        quizzes[currentQuiz].mastered = true;
+        updateSeshHistory(quizzes[currentQuiz]);
+      }
+
+      // Save changes to database
       await updateUserStates();
 
       // Schedule update method to be called after navigation
@@ -58,6 +65,7 @@ class MyAppState extends ChangeNotifier {
     for (int i = quizzes.length - 1; i >= 0; i--) {
       if (quizzes[i].mastered) {
         masteredQuizzes.add(quizzes[i].name);
+        // Mastered quiz points are handled separately since their quizzes aren't in the quiz list
         masteredQuizPoints += (quizzes[i].points);
         quizzes.removeAt(i);
       }
@@ -89,7 +97,7 @@ class MyAppState extends ChangeNotifier {
       currentQuiz = -1;
       currentQuizName = "";
 
-      // Here, each quiz is retrieved and added if the show flag is true
+      // Here, each quiz is added if it is to be shown
       for (DocumentSnapshot<Map<String, dynamic>> doc in value.docs) {
         Map<String, dynamic> quizMap = doc.data()!;
         Quiz quiz = Quiz.fromMap(quizMap);
@@ -105,11 +113,15 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
+  // This method retrieves hint pages from Firestore
   Future readHintPages() async {
     try {
+      // The hint page data is read from the database
       final hintRef = FirebaseFirestore.instance.collection('hintPages');
       QuerySnapshot<Map<String, dynamic>> value = await hintRef.get();
       hintPages = {};
+
+      // Here, each hint page is added from the data
       for (DocumentSnapshot<Map<String, dynamic>> doc in value.docs) {
         Map<String, dynamic> hintMap = doc.data()!;
         QuizHintPage hintPage = QuizHintPage.fromMap(hintMap);
@@ -124,6 +136,7 @@ class MyAppState extends ChangeNotifier {
   AppUser appUser = AppUser.empty();
   List<LeaderboardUser> lbUsers = [];
   late LeaderboardUser lbUser;
+  Map<String, dynamic> seshHistory = {};
 
   // This method updates the user's quiz data in the database
   // When an error is thrown, a snack bar is shown
@@ -142,19 +155,7 @@ class MyAppState extends ChangeNotifier {
       }
 
       // Turning session data into a map
-      Map<String, dynamic> seshState = {
-        'elapsedMS': quiz.currentSesh.elapsedMS,
-        'totalQs': quiz.currentSesh.totalQs,
-        'currentQ': quiz.currentSesh.currentQ,
-        'correctQs': quiz.currentSesh.correctQs,
-        'points': quiz.currentSesh.points,
-      };
-
-      // The last answered variable is retrieved
-      if (quiz.currentSesh.lastAnswered != null) {
-        seshState['lastAnswered'] =
-            Timestamp.fromDate(quiz.currentSesh.lastAnswered!);
-      }
+      Map<String, dynamic> seshState = quiz.currentSesh.toMap();
 
       // Putting all quiz data into a single map
       Map<String, dynamic> quizState = {
@@ -182,13 +183,25 @@ class MyAppState extends ChangeNotifier {
         totalPoints = totalPoints + quiz.points + masteredQuizPoints;
       }
 
+      // Creating map to update with, using seshHistory
+      Map<String, dynamic> updateMap = Map.from(seshHistory);
+      updateMap['quizStates.${quiz.name}'] = quizState;
+      updateMap['lbPoints'] = totalPoints;
+
       try {
-        await userRef.update(
-            {'quizStates.${quiz.name}': quizState, 'lbPoints': totalPoints});
+        await userRef.update(updateMap);
       } catch (error) {
         showTextSnackBar('Error saving data: $error');
       }
     }
+  }
+
+  // The current session from a quiz is added to a map with session history
+  // This is stored for later data analysis
+  void updateSeshHistory(Quiz quiz) {
+    String now = DateTime.now().toString();
+    String date = now.substring(0, now.indexOf('.'));
+    seshHistory['seshHistory.${quiz.name}.$date'] = quiz.currentSesh.toMap();
   }
 
   // This method updates the user's name locally. It is called when a new user account is created
@@ -209,15 +222,19 @@ class MyAppState extends ChangeNotifier {
     }
   }
 
-  // This method creates a user document in the database with quiz name
+  // This method creates a user document in the database with the user name
   // Errors from this method are handled in the parent widget
   Future createUserInDB() async {
     final userRef = FirebaseFirestore.instance.collection('users').doc(
           FirebaseAuth.instance.currentUser!.email!,
         );
     try {
-      await userRef
-          .set({'name': appUser.name, 'quizStates': {}, 'lbPoints': 0});
+      await userRef.set({
+        'name': appUser.name,
+        'quizStates': {},
+        'lbPoints': 0,
+        'seshHistory': {},
+      });
       return Future.value();
     } on Exception catch (error) {
       return Future.error('(From createUserInDB) $error');
@@ -264,6 +281,12 @@ class MyAppState extends ChangeNotifier {
   String currentQuizName = "";
   int selectedIndex = -1;
 
+  // This method checks whether the quiz is new for the user
+  bool isNewQuiz() {
+    Quiz quiz = quizzes[currentQuiz];
+    return quiz.currentQ == 0 && quiz.questions[0].timesAnswered == 0;
+  }
+
   // This method checks whether the last question of the session was answered
   bool lastQAnswered(int index) {
     Quiz quiz = quizzes[index];
@@ -278,17 +301,18 @@ class MyAppState extends ChangeNotifier {
   }
 
   // This method updates the quiz page when an answer is selected
-  // It gives the user points if the answer is correct
   void onAnsSubmitted() {
     Quiz quiz = quizzes[currentQuiz];
     Question question = quiz.questions[quiz.currentQ];
 
+    // Here, points are given for a correct answer based on the quiz's status
     if (selectedIndex == question.correctIndex) {
       int addPoints = (quiz.status == QuizStatus.green)
           ? 5
           : (quiz.status == QuizStatus.yellow)
               ? 3
               : 1;
+      // Bonuses are added as needed and points are added to the session and user account
       if (question.timesCorrect == 1) {
         addPoints += 5;
         if (question.timesAnswered == 1) {
@@ -298,6 +322,7 @@ class MyAppState extends ChangeNotifier {
       quiz.points += addPoints;
       quiz.currentSesh.points += addPoints;
 
+      // Other state variables are updated
       quiz.correctQs++;
       quiz.currentSesh.correctQs++;
       question.timesCorrect++;
@@ -337,6 +362,7 @@ class MyAppState extends ChangeNotifier {
           if (isLastSeshQ()) {
             // If on the last question, if the entire session was skipped, go to next session
             if (skipCount == 5) {
+              updateSeshHistory(quiz);
               quiz.currentSesh = Session(totalQs: 5);
               // TODO: hardcoded to session of 5
               if (quiz.currentQ == 4) {
@@ -381,10 +407,12 @@ class MyAppState extends ChangeNotifier {
 
       // TODO: hardcoded to sessions of 5
       quiz.currentQ = (quiz.currentQ == quiz.questions.length - 1) ? 0 : 5;
+      updateSeshHistory(quiz);
       quiz.currentSesh = Session(totalQs: 5);
       newSesh = true;
     }
 
+    // Set the quiz's hint page, if it has one
     if (quiz.showHint) {
       currentHintPage = hintPages[quiz.hintPageRef!]!;
     }
@@ -393,6 +421,7 @@ class MyAppState extends ChangeNotifier {
     return newSesh;
   }
 
+  // This method updates the quiz's status
   void setQuizStatus(int index, QuizStatus status) {
     final quiz = quizzes[index];
     quiz.status = status;
@@ -419,7 +448,7 @@ class MyAppState extends ChangeNotifier {
 
     // If the session had all mastered questions, count the next session
     if (remaining == 0) {
-      int start = (quiz.currentQ < 5) ? 5 : 0;
+      int start = (tempCurrentQ < 5) ? 5 : 0;
       for (int i = start; i < start + 5; i++) {
         if (quiz.questions[i].timesCorrect < 2) {
           remaining++;

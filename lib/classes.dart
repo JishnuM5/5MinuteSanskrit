@@ -1,6 +1,7 @@
 // This file contains all of the custom classes used in the project
 
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'themes.dart';
@@ -43,6 +44,7 @@ class Question {
   }
 }
 
+// This is an enum to store quiz statuses
 enum QuizStatus {
   green,
   yellow,
@@ -51,8 +53,9 @@ enum QuizStatus {
 }
 
 // The quiz class manages a list of questions
-// It also contains the quiz name and many variables that keep track of the quiz's state
+// It also contains many variables that keep track of the quiz's metadata and state
 class Quiz {
+  // These variables must be initialized when creating a quiz object
   final List<Question> questions;
   final String name;
   final bool show;
@@ -118,11 +121,13 @@ class Quiz {
     currentQ = quizState['currentQ'];
     correctQs = quizState['correctQs'];
 
+    // The last shown variable is only added if it's not null
     final lSState = quizState['lastShown'];
     if (lSState != null) {
       lastShown = lSState.toDate();
     }
 
+    // Reading the state of the current session
     Map<String, dynamic> seshState = Map.from(quizState['currentSesh']);
     currentSesh.readFromState(seshState);
 
@@ -185,6 +190,7 @@ class AppUser {
   }
 }
 
+// This is a simpler user class for the leaderboard
 class LeaderboardUser {
   String name;
   int lbPoints;
@@ -241,8 +247,27 @@ class Session {
     correctQs = seshState['correctQs'];
     points = seshState['points'];
   }
+
+  // This method returns a session as a map
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> seshMap = {
+      'elapsedMS': elapsedMS,
+      'totalQs': totalQs,
+      'currentQ': currentQ,
+      'correctQs': correctQs,
+      'points': points,
+    };
+
+    // The last answered variable is only added if not null
+    if (lastAnswered != null) {
+      seshMap['lastAnswered'] = Timestamp.fromDate(lastAnswered!);
+    }
+
+    return seshMap;
+  }
 }
 
+// The quiz hint page class creates a page widget that can be shown during a quiz
 class QuizHintPage extends StatelessWidget {
   const QuizHintPage({
     super.key,
@@ -255,6 +280,7 @@ class QuizHintPage extends StatelessWidget {
     required this.examplePost,
   });
 
+  // Various string variables make up the quiz page
   final String topic;
   final String explainContent;
   final List<String> explainBullets;
@@ -263,6 +289,8 @@ class QuizHintPage extends StatelessWidget {
   final List<String> exampleBullets;
   final String examplePost;
 
+  // This constructor builds a hint page from a map
+  // All newline characters are replaced with new lines
   factory QuizHintPage.fromMap(Map<String, dynamic> hintMap) {
     List<String> explainBullets = [];
     for (dynamic explainBullet in hintMap['explainBullets']) {
@@ -285,6 +313,7 @@ class QuizHintPage extends StatelessWidget {
     ));
   }
 
+  // The widget consists of a title and two paragraphs with information
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -294,7 +323,7 @@ class QuizHintPage extends StatelessWidget {
         child: Stack(
           children: [
             Padding(
-              padding: const EdgeInsets.all(15),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -321,13 +350,15 @@ class QuizHintPage extends StatelessWidget {
                       ),
                     ],
                   ),
+                  // Here an explanation of the concept is given
                   const SizedBox(height: 20),
                   Paragraph(
-                    title: 'कः विषयः? (The concept)',
+                    title: 'कः विषयः? (The Concept)',
                     content: explainContent,
                     bulletContent: explainBullets,
                     postContent: explainPost,
                   ),
+                  // Here are some examples of the concept
                   const SizedBox(height: 15),
                   Paragraph(
                     title: 'उदाहरणानि (Examples)',

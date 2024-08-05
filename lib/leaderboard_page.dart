@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'my_app_state.dart';
 import 'themes.dart';
 
+// This is the leaderboard page
 class LeaderboardPage extends StatelessWidget {
   const LeaderboardPage({super.key});
 
@@ -10,6 +11,8 @@ class LeaderboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final lbUsers = context.watch<MyAppState>().lbUsers;
     final lbUser = context.read<MyAppState>().lbUser;
+
+    // Some values are preset for the UI of the top 3 users
     const List<Color> topColors = [
       Color.fromARGB(255, 188, 156, 34),
       Color.fromARGB(255, 192, 192, 192),
@@ -24,7 +27,6 @@ class LeaderboardPage extends StatelessWidget {
         lbUsers.indexWhere((user) => user.name == lbUser.name) + 1;
 
     return Scaffold(
-      // A scroll view of the quiz tiles
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -37,6 +39,7 @@ class LeaderboardPage extends StatelessWidget {
               child: Divider(),
             ),
             const SizedBox(height: 10),
+            // The user's statistics and position on the leaderboard
             Row(
               children: [
                 Expanded(
@@ -100,9 +103,7 @@ class LeaderboardPage extends StatelessWidget {
                                 style: Theme.of(context)
                                     .textTheme
                                     .displaySmall!
-                                    .copyWith(
-                                      color: ConstColors.primary,
-                                    ),
+                                    .copyWith(color: ConstColors.primary),
                               ),
                             ],
                           ),
@@ -113,6 +114,7 @@ class LeaderboardPage extends StatelessWidget {
                 ),
               ],
             ),
+            // This is a list of the top 10 users on the leaderboard
             Padding(
               padding: const EdgeInsets.all(20),
               child: FloatingBox(
@@ -127,16 +129,18 @@ class LeaderboardPage extends StatelessWidget {
                       itemBuilder: (context, index) {
                         return Container(
                           decoration: BoxDecoration(
+                            // If any of the top 10 users is the current user, the row is highlighted
                             color: (index == currentUserRank - 1)
                                 ? ConstColors.shade
                                 : null,
-                            borderRadius: BorderRadius.circular(15),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                               vertical: 7.5,
                               horizontal: 7.5,
                             ),
+                            // A row contains the user's rank, name, and points
                             child: Row(
                               children: [
                                 Container(

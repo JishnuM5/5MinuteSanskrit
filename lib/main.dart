@@ -1,6 +1,7 @@
 // This is the main file of the project
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -63,16 +64,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // If the user is new, display the tutorial
   @override
   void initState() {
     super.initState();
     if (widget.newUser) {
-      Future.delayed(Duration.zero, () {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) => const TutorialPopup(),
-        );
-      });
+      SchedulerBinding.instance.addPostFrameCallback((_) => showDialog(
+            context: context,
+            builder: (BuildContext context) => const TutorialPopup(),
+          ));
     }
   }
 
@@ -110,8 +110,9 @@ class _MyHomePageState extends State<MyHomePage> {
     int totalPoints = 0;
     for (Quiz quiz in context.watch<MyAppState>().quizzes) {
       totalPoints += quiz.points;
-      totalPoints += context.watch<MyAppState>().masteredQuizPoints;
     }
+    totalPoints += context.watch<MyAppState>().masteredQuizPoints;
+
     return Scaffold(
       // The top bar of the app
       appBar: topBar(context, totalPoints),
@@ -207,10 +208,11 @@ class QuizTile extends StatelessWidget {
     int remainingQs = context.read<MyAppState>().remainingQs(index);
     double pctMastered = context.read<MyAppState>().pctMastered(index);
 
-    // This method and boolean control whether the user can access the next session
+    // This boolean logic controls whether the quiz's next session can be shown
     bool showSesh = true;
     DateTime? noonAfterLastAns;
 
+    // If the last question was answered, calculate the noon after the last question was answered
     if (context.read<MyAppState>().lastQAnswered(index)) {
       final lastAns = quiz.currentSesh.lastAnswered!;
       noonAfterLastAns = DateTime(lastAns.year, lastAns.month, lastAns.day, 12);
@@ -218,6 +220,9 @@ class QuizTile extends StatelessWidget {
       if (lastAns.isAfter(noonAfterLastAns)) {
         noonAfterLastAns = noonAfterLastAns.add(const Duration(days: 1));
       }
+
+      // Check if the current time is before the noon after the last answer
+      // If so, the user cannot access the next session
       if (DateTime.now().isBefore(noonAfterLastAns)) {
         showSesh = false;
       } else {
@@ -225,6 +230,7 @@ class QuizTile extends StatelessWidget {
       }
     }
 
+    // The quiz's status is set based on how long ago the last session is shown if available
     if (showSesh) {
       DateTime lastShown = quiz.lastShown ?? quiz.start;
       Duration diff = DateTime.now().difference(lastShown);
@@ -393,7 +399,10 @@ Widget animatedLogo(BuildContext context, bool animate) {
                     TyperAnimatedText(''),
                     TypewriterAnimatedText(
                       'संस्कृतम् ।',
-                      textStyle: Theme.of(context).textTheme.displayMedium,
+                      textStyle:
+                          Theme.of(context).textTheme.displayMedium!.copyWith(
+                                color: ConstColors.primary,
+                              ),
                       cursor: '।',
                       speed: const Duration(milliseconds: 200),
                     ),
@@ -401,8 +410,12 @@ Widget animatedLogo(BuildContext context, bool animate) {
                 )
               : Padding(
                   padding: const EdgeInsets.fromLTRB(0, 0, 4, 0),
-                  child: Text('संस्कृतम् । ',
-                      style: Theme.of(context).textTheme.displayMedium),
+                  child: Text(
+                    'संस्कृतम् । ',
+                    style: Theme.of(context).textTheme.displayMedium!.copyWith(
+                          color: ConstColors.primary,
+                        ),
+                  ),
                 ),
           const SizedBox(height: 10),
           const SizedBox(

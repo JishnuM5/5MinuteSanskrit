@@ -4,11 +4,6 @@
 - Write down every possible place for error, and type of error handling
 - Embed One Minute Sanskrit videos in hint pages
 
-## Before Pilot Program Release
-- Create a plan for the pilot program
-- Add data tracking
-
-
 ## Multiple Quiz Formatting and Accounts
 - All visible quizzes are going to be in a home page, displayed with an array
   - Whether a quiz is visible depends on its "show" value in the database and whether the quiz is mastered
@@ -35,7 +30,7 @@
   - The summary page is shown after every session (5 questions). It is slightly different when a quiz is mastered.
 
 ## Stretch Stretch Goals
-- Advanced UI and animations
+- Advanced UI and animations (like TutorialPopUp)
 - Improve the optimization of loading/saving quizzes and users (don't change database if no Qs answered)
 - Saving cache to avoid reading the database every time
 - Reauthenticate before changing password or deleting account
@@ -193,9 +188,10 @@ A Stream\<T\> like a Future\<T\> but it delivers 0+ values over time. This means
 - https://learn.microsoft.com/en-us/office/dev/scripts/resources/samples/get-table-data
   - Excel will give an output from script, and I can then copy-paste into another project that I use to write code.
 
-# Questions to Consider and Known Errors
+# Questions to Consider and Known "Errors"
 - If user cancels the email verification page within 5 seconds of sending the email verification, then the app crashes (This is because of an async wait function running to avoid the user from spamming emails; will fix later).
 - The app only works with 10 questions and sessions of 5, and new sessions only after 12 p.m.
-- Any new data from updated in the database externally only updates every time the user logs in
+- Any new data from updated in the database externally only updates every time the user logs in (esp for the leaderboard)
 - After 12 p.m. passes, the page needs to be manually rebuilt before the next session is available
-- COMMON FIX: Methods compile without () but cause problems
+- Favicons need to be updated manually before each deployment
+- COMMON FIX: Methods compile without () but cause problems (one is a reference, one is a call)

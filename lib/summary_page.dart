@@ -1,6 +1,5 @@
 // This class the summary page
 
-import 'dart:ui';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -83,44 +82,10 @@ class _SummaryPageState extends State<SummaryPage> {
                           width: 210,
                           child: Align(
                             alignment: Alignment.center,
-                            child: Stack(
-                              children: <Widget>[
-                                Transform.translate(
-                                  offset: const Offset(5, 5),
-                                  child: ImageFiltered(
-                                    imageFilter:
-                                        ImageFilter.blur(sigmaY: 7, sigmaX: 7),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Colors.transparent,
-                                          width: 0,
-                                        ),
-                                      ),
-                                      // A custom shadow in the background
-                                      child: Opacity(
-                                        opacity: 0.4,
-                                        child: ColorFiltered(
-                                          colorFilter: const ColorFilter.mode(
-                                              Colors.black, BlendMode.srcATop),
-                                          child: Image(
-                                            image: const AssetImage(
-                                              'assets/party-popper.png',
-                                            ),
-                                            height: (isHovering) ? 210 : 200,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Image(
-                                  image: const AssetImage(
-                                    'assets/party-popper.png',
-                                  ),
-                                  height: (isHovering) ? 210 : 200,
-                                ),
-                              ],
+                            child: Image(
+                              image:
+                                  const AssetImage('assets/party-popper.png'),
+                              height: (isHovering) ? 215 : 200,
                             ),
                           ),
                         )),
@@ -181,6 +146,7 @@ class _SummaryPageState extends State<SummaryPage> {
   }
 }
 
+// This is a tile that shows session statistics
 class StatsTile extends StatelessWidget {
   const StatsTile({
     super.key,
@@ -193,6 +159,7 @@ class StatsTile extends StatelessWidget {
   final String label;
   final Color color;
 
+  // The tile is an InkWell box with a numerical statistic and a label
   @override
   Widget build(BuildContext context) {
     final tTheme = Theme.of(context).textTheme;

@@ -42,8 +42,7 @@ class _ProfilePageState extends State<ProfilePage> {
               padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
               child: Divider(),
             ),
-            // This is the first section of the profile page, showing the current email
-            // It also gives the user the option to sign out
+            // In the first section of the profile, users can view their email, which cannot be modified
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
               child: FloatingBox(
@@ -266,7 +265,7 @@ class _AddQuizWidgetState extends State<AddQuizWidget> {
 
   Future<void> _addQuizToFirebase() async {
     try {
-      // Parse the JSON data and add the quiz to firebase
+      // Parse the JSON data and add the quiz to Firebase
       final jsonData = json.decode(_jsonController.text);
       await _firestore
           .collection('hintPages')

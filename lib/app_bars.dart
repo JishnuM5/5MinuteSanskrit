@@ -12,6 +12,7 @@ class NavBar extends StatelessWidget {
 
   final int navBarIndex;
 
+  // Users can switch between the home, leaderboard, and profile page with this bar
   @override
   Widget build(BuildContext context) {
     return NavigationBar(
@@ -97,6 +98,7 @@ class QuizBar extends StatelessWidget {
   }
 }
 
+// This is the top app bar
 AppBar topBar(BuildContext context, int totalPoints) {
   MyAppState readState = context.read<MyAppState>();
   bool showHint = context.watch<MyAppState>().pageIndex == 4 &&
@@ -110,11 +112,12 @@ AppBar topBar(BuildContext context, int totalPoints) {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-          child: logo,
+          child: (isSmallScreen(context)) ? condensedLogo : logo,
         )
       ],
     ),
     actions: <Widget>[
+      // This widget either opens up quiz hints or the tutorial, depending on the page
       (showHint)
           ? IconButton(
               onPressed: () => showHintPage(context),
@@ -169,8 +172,10 @@ AppBar topBar(BuildContext context, int totalPoints) {
   );
 }
 
+// THis is the widget that shows up on the tutorial dialog
 class TutorialPopup extends StatelessWidget {
   const TutorialPopup({super.key});
+  // The tutorial strings used to build the carousel
   static const List<String> titles = [
     'Welcome to 5 Minute संस्कृतम्!',
     'How It Works',
@@ -222,6 +227,7 @@ class TutorialPopup extends StatelessWidget {
           height: MediaQuery.of(context).size.height * 0.8,
           child: Stack(
             children: [
+              // The carousel is built as a swiper with various pages
               Swiper(
                 itemBuilder: (BuildContext context, int index) {
                   return TutorialSlide(
@@ -255,6 +261,7 @@ class TutorialPopup extends StatelessWidget {
   }
 }
 
+// This widget is used to build the individual slides on the tutorial page
 class TutorialSlide extends StatelessWidget {
   final String title;
   final String assetName;
@@ -271,6 +278,7 @@ class TutorialSlide extends StatelessWidget {
     required this.postContent,
   });
 
+  // A tutorial slide consists of a title, paragraph, and graphic
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -305,6 +313,7 @@ class TutorialSlide extends StatelessWidget {
   }
 }
 
+// This method shows the quiz hint page in a modal sheet
 Future<void> showHintPage(BuildContext context) {
   return showModalBottomSheet<void>(
       context: context,

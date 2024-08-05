@@ -1,8 +1,10 @@
 // This file contains the quiz page
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:sanskrit_web_app/app_bars.dart';
 import 'classes.dart';
 import 'my_app_state.dart';
 import 'themes.dart';
@@ -17,12 +19,24 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  // When the page is initialized, if the quiz
+  @override
+  void initState() {
+    super.initState();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      var readState = context.read<MyAppState>();
+      bool showHint = readState.quizzes[readState.currentQuiz].showHint;
+      if (context.read<MyAppState>().isNewQuiz() && showHint) {
+        showHintPage(context);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var watchState = context.watch<MyAppState>();
     var readState = context.read<MyAppState>();
     Quiz quiz = watchState.quizzes[widget.currentQuiz];
-    //var currentQ = watchState.showQs[sesh.currentQ - watchState.offsetIndex];
     var currentQ = quiz.questions[quiz.currentQ];
 
     return Scaffold(
