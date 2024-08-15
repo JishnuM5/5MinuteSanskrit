@@ -316,10 +316,11 @@ class TutorialSlide extends StatelessWidget {
 // This method shows the quiz hint page in a modal sheet
 Future<void> showHintPage(BuildContext context) {
   return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: ConstColors.background,
-      builder: (context) {
-        return context.read<MyAppState>().currentHintPage;
-      });
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: ConstColors.background,
+    builder: (context) {
+      return context.read<MyAppState>().currentHintPage;
+    },
+  );
 }

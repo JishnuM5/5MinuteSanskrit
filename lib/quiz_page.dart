@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:sanskrit_web_app/app_bars.dart';
+import 'package:inditrans/inditrans.dart' as transl;
+import 'app_bars.dart';
 import 'classes.dart';
 import 'my_app_state.dart';
 import 'themes.dart';
@@ -19,25 +20,59 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
-  // When the page is initialized, if the quiz
+  bool isTransliterated = false;
+  bool showTranslSwitch = false;
+
+  late String question;
+  late List<String> answers;
+
+  // When the page is initialized, if this is a new quiz and it has a hint page, display it
   @override
   void initState() {
     super.initState();
+    var readState = context.read<MyAppState>();
+    Quiz quiz = readState.quizzes[readState.currentQuiz];
+    question = quiz.questions[quiz.currentQ].question;
+    answers = List.from(quiz.questions[quiz.currentQ].answers);
+
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      var readState = context.read<MyAppState>();
-      bool showHint = readState.quizzes[readState.currentQuiz].showHint;
-      if (context.read<MyAppState>().isNewQuiz() && showHint) {
+      if (readState.isNewQuiz() && quiz.showHint) {
         showHintPage(context);
+      }
+
+      // If the quiz allows for it, initialize the transliteration API
+      if (quiz.canTransliterate) {
+        transl.init().then((value) {
+          setState(() {
+            showTranslSwitch = true;
+          });
+        });
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Various reference variables for readability
     var watchState = context.watch<MyAppState>();
     var readState = context.read<MyAppState>();
     Quiz quiz = watchState.quizzes[widget.currentQuiz];
-    var currentQ = quiz.questions[quiz.currentQ];
+    Question q = quiz.questions[quiz.currentQ];
+
+    // Display either transliterated or original text, based on the toggle switch value
+    if (isTransliterated) {
+      setState(() {
+        question = transliterate(q.question);
+        for (int i = 0; i < 4; i++) {
+          answers[i] = transliterate(q.answers[i]);
+        }
+      });
+    } else {
+      setState(() {
+        question = q.question;
+        answers = List.from(q.answers);
+      });
+    }
 
     return Scaffold(
       // This is a scroll view of questions
@@ -53,13 +88,34 @@ class _QuizPageState extends State<QuizPage> {
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    (showTranslSwitch)
+                        // A toggle switch, shown if the quiz allows transliteration and the API is initialized
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                "Transliterate:",
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                              Transform.scale(
+                                scale: 0.75,
+                                child: Switch(
+                                  value: isTransliterated,
+                                  onChanged: (value) => setState(() {
+                                    isTransliterated = value;
+                                  }),
+                                ),
+                              ),
+                            ],
+                          )
+                        : const SizedBox(height: 10),
+
                     // The question
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 5.0, vertical: 25),
+                      padding: const EdgeInsets.all(5),
                       child: Text(
-                        currentQ.question,
-                        style: isSanskrit(currentQ.question)
+                        question,
+                        style: isSanskrit(question)
                             ? Theme.of(context)
                                 .textTheme
                                 .displayMedium!
@@ -71,33 +127,37 @@ class _QuizPageState extends State<QuizPage> {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 15),
 
                     // The four answers
                     Expanded(
-                        child: AnswerTile(
-                      option: currentQ.answers[0],
-                      index: 0,
-                      currentQuiz: widget.currentQuiz,
-                    )),
+                      child: AnswerTile(
+                        option: answers[0],
+                        index: 0,
+                        currentQuiz: widget.currentQuiz,
+                      ),
+                    ),
                     Expanded(
-                        child: AnswerTile(
-                      option: currentQ.answers[1],
-                      index: 1,
-                      currentQuiz: widget.currentQuiz,
-                    )),
+                      child: AnswerTile(
+                        option: answers[1],
+                        index: 1,
+                        currentQuiz: widget.currentQuiz,
+                      ),
+                    ),
                     Expanded(
-                        child: AnswerTile(
-                      option: currentQ.answers[2],
-                      index: 2,
-                      currentQuiz: widget.currentQuiz,
-                    )),
+                      child: AnswerTile(
+                        option: answers[2],
+                        index: 2,
+                        currentQuiz: widget.currentQuiz,
+                      ),
+                    ),
                     Expanded(
-                        child: AnswerTile(
-                      option: currentQ.answers[3],
-                      index: 3,
-                      currentQuiz: widget.currentQuiz,
-                    )),
+                      child: AnswerTile(
+                        option: answers[3],
+                        index: 3,
+                        currentQuiz: widget.currentQuiz,
+                      ),
+                    ),
 
                     // This is the next/submit button
                     Row(
@@ -146,6 +206,41 @@ class _QuizPageState extends State<QuizPage> {
       ),
     );
   }
+
+  // This method transliterates a given string from Devanagari to IAST
+  String transliterate(String input) {
+    // This regular expression identifies devanagari text
+    RegExp devanagariRegex = RegExp(
+      r'''[\u0900-\u097F\u0966-\u096F\s,()\-\u0964\u0965.!?:"\';]+''',
+    );
+
+    // In this sub-method, the API is used to translate a substring
+    String transliteratePart(String devanagari) {
+      print(devanagari);
+      return transl.transliterate(
+        devanagari,
+        transl.Script.devanagari,
+        transl.Script.iast,
+      );
+    }
+
+    // Substrings up to a match are added to a result string as is
+    // Devanagari substrings are transliterated before being added
+    StringBuffer result = StringBuffer();
+    int lastMatchEnd = 0;
+    devanagariRegex.allMatches(input).forEach((match) {
+      result.write(input.substring(lastMatchEnd, match.start));
+      result.write(transliteratePart(match.group(0)!));
+      lastMatchEnd = match.end;
+    });
+
+    // If there is any non-Devanagari content at the end of the string, it's added, too
+    if (lastMatchEnd < input.length) {
+      result.write(input.substring(lastMatchEnd));
+    }
+
+    return result.toString();
+  }
 }
 
 // This widget is an answer tile, shown on the quiz page with an answer option
@@ -170,6 +265,8 @@ class AnswerTile extends StatelessWidget {
 
     // Here, the border of an answer is set based on selection/submission
     if (watchState.selectedIndex == index) {
+      // If this tile is the selected tile,
+      // Set the border to green/red if the answer was submitted and it was right/wrong
       if (watchState.quizzes[currentQuiz].ansSubmitted) {
         if (quiz.questions[quiz.currentQ].correctIndex == index) {
           border = Border.all(
@@ -182,12 +279,15 @@ class AnswerTile extends StatelessWidget {
             width: 4.0,
           );
         }
+        // Set the border to blue if answer isn't submitted
       } else {
         border = Border.all(
           color: ConstColors.primary,
           width: 4.0,
         );
       }
+      // If the tile wasn't selected
+      // Set the border to green if the answer was submitted and this is the correct tile
     } else {
       if (watchState.quizzes[currentQuiz].ansSubmitted &&
           quiz.questions[quiz.currentQ].correctIndex == index) {
@@ -195,6 +295,7 @@ class AnswerTile extends StatelessWidget {
           color: ConstColors.green,
           width: 4.0,
         );
+        // Else, the tile has no border
       } else {
         border = null;
       }

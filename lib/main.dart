@@ -349,7 +349,8 @@ class QuizTile extends StatelessWidget {
                     context.read<MyAppState>().reset(newSesh: newSesh);
                   } else {
                     showTextSnackBar(
-                        'Session completed! A new session will be available after 12 p.m.');
+                      'Session completed! A new session will be available after 12 p.m.',
+                    );
                   }
                 },
               ),

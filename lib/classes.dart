@@ -61,6 +61,7 @@ class Quiz {
   final bool show;
   final DateTime start;
   final bool showHint;
+  final bool canTransliterate;
   final String? hintPageRef;
 
   bool mastered = false;
@@ -81,6 +82,7 @@ class Quiz {
     required this.show,
     required this.start,
     required this.showHint,
+    required this.canTransliterate,
     this.hintPageRef,
   });
 
@@ -102,14 +104,15 @@ class Quiz {
       questions[index] = Question.fromMap(value);
     });
 
-    return (Quiz(
+    return Quiz(
       questions: questions,
       name: quizMap['name'],
       show: quizMap['show'],
       start: quizMap['start'].toDate(),
       showHint: quizMap['showHint'],
+      canTransliterate: quizMap['canTransliterate'],
       hintPageRef: quizMap['hintPageRef'],
-    ));
+    );
   }
 
   // This method updates the quiz state variables from a map
@@ -146,28 +149,34 @@ Quiz sampleQuiz = Quiz(
   name: 'Sample Quiz',
   show: true,
   showHint: false,
+  canTransliterate: true,
   start: DateTime.fromMicrosecondsSinceEpoch(0),
   questions: [
     Question(
-        question: 'Question 1',
-        answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
-        correctIndex: 0),
+      question: 'Question 1',
+      answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
+      correctIndex: 0,
+    ),
     Question(
-        question: 'Question 2',
-        answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
-        correctIndex: 0),
+      question: 'Question 2',
+      answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
+      correctIndex: 0,
+    ),
     Question(
-        question: 'Question 3',
-        answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
-        correctIndex: 0),
+      question: 'Question 3',
+      answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
+      correctIndex: 0,
+    ),
     Question(
-        question: 'Question 4',
-        answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
-        correctIndex: 0),
+      question: 'Question 4',
+      answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
+      correctIndex: 0,
+    ),
     Question(
-        question: 'Question 5',
-        answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
-        correctIndex: 0),
+      question: 'Question 5',
+      answers: ['Answer 1', 'Answer 2', 'Answer 3', 'Answer 4'],
+      correctIndex: 0,
+    ),
   ],
 );
 
@@ -316,15 +325,15 @@ class QuizHintPage extends StatelessWidget {
   // The widget consists of a title and two paragraphs with information
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height - 50,
-        width: MediaQuery.of(context).size.width - 15,
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
+    return SizedBox(
+      height: MediaQuery.of(context).size.height - 50,
+      width: MediaQuery.of(context).size.width - 15,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 7.5, horizontal: 12.5),
+        child: SingleChildScrollView(
+          child: Stack(
+            children: [
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
@@ -368,16 +377,16 @@ class QuizHintPage extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-            Positioned(
-              right: 7.5,
-              top: 7.5,
-              child: IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(),
+              Positioned(
+                right: 5,
+                top: 5,
+                child: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

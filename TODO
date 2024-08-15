@@ -3,6 +3,7 @@
   - Teachers must give a hint page ref if they choose to show one, make sure ref is valid
 - Write down every possible place for error, and type of error handling
 - Embed One Minute Sanskrit videos in hint pages
+- Social Sign In (seamless flow)
 
 ## Multiple Quiz Formatting and Accounts
 - All visible quizzes are going to be in a home page, displayed with an array
@@ -165,6 +166,7 @@ A Stream\<T\> like a Future\<T\> but it delivers 0+ values over time. This means
 ## Setting the UI
 - https://pub.dev/packages/google_fonts
 - https://infinum.com/blog/flutter-color-schemes/
+- https://www.youtube.com/watch?v=2W7POjFb88g (cool widget for animations)
 <br /><br />
 
 - Font Pairing: Courier New and Montserrat
@@ -194,4 +196,5 @@ A Stream\<T\> like a Future\<T\> but it delivers 0+ values over time. This means
 - Any new data from updated in the database externally only updates every time the user logs in (esp for the leaderboard)
 - After 12 p.m. passes, the page needs to be manually rebuilt before the next session is available
 - Favicons need to be updated manually before each deployment
+- Transliterate fully works, but you cannot un-transliterate a string that was originally transliterated
 - COMMON FIX: Methods compile without () but cause problems (one is a reference, one is a call)
