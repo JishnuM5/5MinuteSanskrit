@@ -1,5 +1,6 @@
 // This file contains the theme, logo, and other important values/widgets used throughout the app
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'main.dart';
@@ -77,32 +78,116 @@ final theme = ThemeData(
 );
 
 // This is the main logo used in the app
-final logo = RichText(
-  text: TextSpan(
-    style: TextStyle(
-      fontFamily: GoogleFonts.courierPrime().fontFamily,
-      fontSize: 25,
-      color: Colors.black,
-    ),
-    children: <TextSpan>[
-      const TextSpan(text: '5 Minute '),
-      TextSpan(
-        text: 'संस्कृतम् ।',
-        style: TextStyle(
-          fontFamily: GoogleFonts.baloo2().fontFamily,
-          fontSize: 25,
-          color: ConstColors.primary,
+Widget logo(CrossAxisAlignment align) {
+  return Column(
+    crossAxisAlignment: align,
+    children: [
+      RichText(
+        text: TextSpan(
+          style: TextStyle(
+            fontFamily: GoogleFonts.courierPrime().fontFamily,
+            fontSize: 25,
+            color: Colors.black,
+          ),
+          children: <TextSpan>[
+            const TextSpan(text: '5 Minute '),
+            TextSpan(
+              text: 'संस्कृतम् ।',
+              style: TextStyle(
+                fontFamily: GoogleFonts.baloo2().fontFamily,
+                fontSize: 25,
+                color: ConstColors.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.only(left: 2),
+        child: Text(
+          'by संस्कृतभरति USA ©',
+          style: theme.textTheme.labelSmall!.copyWith(height: 0.5),
         ),
       ),
     ],
-  ),
-);
+  );
+}
 
 // This is a condensed version of the logo used for smaller screen sizes
 const condensedLogo = Image(
   image: AssetImage('assets/logo.png'),
   height: 35,
 );
+
+// This is the animated logo that is displayed during loading
+Widget animatedLogo(BuildContext context, bool animate) {
+  return Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // The logo can be animated or static
+          (animate)
+              ? AnimatedTextKit(
+                  isRepeatingAnimation: false,
+                  repeatForever: false,
+                  animatedTexts: [
+                    TypewriterAnimatedText(
+                      '5 Minute',
+                      textStyle: Theme.of(context).textTheme.headlineMedium,
+                      cursor: '।',
+                      speed: const Duration(milliseconds: 200),
+                    ),
+                  ],
+                )
+              : Padding(
+                  padding: const EdgeInsets.fromLTRB(6, 5, 0, 0),
+                  child: Text(
+                    '5 Minute ',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                ),
+          (animate)
+              ? AnimatedTextKit(
+                  pause: const Duration(milliseconds: 3000),
+                  isRepeatingAnimation: false,
+                  repeatForever: false,
+                  animatedTexts: [
+                    TyperAnimatedText(''),
+                    TypewriterAnimatedText(
+                      'संस्कृतम् ।',
+                      textStyle:
+                          Theme.of(context).textTheme.displayMedium!.copyWith(
+                                color: ConstColors.primary,
+                              ),
+                      cursor: '।',
+                      speed: const Duration(milliseconds: 200),
+                    ),
+                  ],
+                )
+              : Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 4, 0),
+                  child: Text(
+                    'संस्कृतम् । ',
+                    style: Theme.of(context).textTheme.displayMedium!.copyWith(
+                          color: ConstColors.primary,
+                        ),
+                  ),
+                ),
+          const SizedBox(height: 10),
+          const SizedBox(
+            width: 50,
+            height: 50,
+            child: CircularProgressIndicator(
+              color: ConstColors.primary,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 
 // This is the standard shadow used throughout the app
 final shadow = BoxShadow(
@@ -260,6 +345,7 @@ class Paragraph extends StatelessWidget {
             textStyle: contentStyle,
           ),
         ),
+        SizedBox(height: spacing),
         if (postContent.isNotEmpty)
           Text(
             postContent,

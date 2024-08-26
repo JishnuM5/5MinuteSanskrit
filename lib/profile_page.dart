@@ -164,13 +164,33 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
+            // This widget will be implemented in the future for students to change their classroom info
+            // It will contain the current classroom name and an option for students to change their classroom
+            // Row(
+            //   children: [
+            //     Expanded(
+            //       child: Padding(
+            //         padding: const EdgeInsets.symmetric(
+            //             horizontal: 20, vertical: 15),
+            //         child: FloatingBox(
+            //           child: Column(
+            //             crossAxisAlignment: CrossAxisAlignment.start,
+            //             children: [
+            //               Text(
+            //                 'Classroom:',
+            //                 style: Theme.of(context).textTheme.labelSmall,
+            //               ),
+            //             ],
+            //           ),
+            //         ),
+            //       ),
+            //     ),
+            //   ],
+            // ),
+
             // If the user has an admin email, show the add quiz widget
             (user.email == 'jishnu.mehta@samskritabharatiusa.org')
-                ? const Column(
-                    children: [
-                      AddQuizWidget(),
-                    ],
-                  )
+                ? const AddQuizWidget()
                 : Container(),
 
             // This is the delete account button
@@ -197,16 +217,14 @@ class _ProfilePageState extends State<ProfilePage> {
                             // If they confirm, the user account and database data are deleted
                             onPressed: () {
                               deleteUserData()
-                                  .then(
-                                (value) =>
-                                    (showTextSnackBar("User account deleted")),
-                              )
-                                  .catchError((error) {
-                                (
-                                  showTextSnackBar(
-                                      "Error deleting user: $error"),
-                                );
-                              });
+                                  .then((value) => showTextSnackBar(
+                                        "User account deleted",
+                                      ))
+                                  .catchError(
+                                    (error) => showTextSnackBar(
+                                      "Error deleting user: $error",
+                                    ),
+                                  );
                               Navigator.of(context).pop();
                             },
                             child: const Text(
@@ -268,7 +286,9 @@ class _AddQuizWidgetState extends State<AddQuizWidget> {
       // Parse the JSON data and add the quiz to Firebase
       final jsonData = json.decode(_jsonController.text);
       await _firestore
-          .collection('hintPages')
+          .collection('quizzes')
+          .doc('Pilot Program')
+          .collection('beginner')
           .doc(_titleController.text)
           .set(jsonData);
       showTextSnackBar('Quiz added successfully!');

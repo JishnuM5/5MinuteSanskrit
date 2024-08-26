@@ -183,19 +183,18 @@ Quiz sampleQuiz = Quiz(
 // The user class contains a map of quizStates and the user's name
 class AppUser {
   String name;
+  String code;
   Map<String, Map<String, dynamic>> quizStates;
 
-  // This constructor creates an empty user, used to initialize a variable;
-  AppUser.empty() : this(name: '', quizStates: {});
-
-  AppUser({required this.name, required this.quizStates});
+  AppUser({required this.name, required this.code, required this.quizStates});
 
   // This constructor creates a user from a map
   factory AppUser.fromMap(Map<String, dynamic> userMap) {
-    return (AppUser(
+    return AppUser(
       name: userMap['name'],
+      code: userMap['code'],
       quizStates: Map.from(userMap['quizStates']),
-    ));
+    );
   }
 }
 
@@ -311,7 +310,7 @@ class QuizHintPage extends StatelessWidget {
       exampleBullets.add(exampleBullet.toString().replaceAll('\\n', '\n'));
     }
 
-    return (QuizHintPage(
+    return QuizHintPage(
       topic: hintMap['topic'].replaceAll('\\n', '\n'),
       explainContent: hintMap['explainContent'].replaceAll('\\n', '\n'),
       explainBullets: explainBullets,
@@ -319,7 +318,7 @@ class QuizHintPage extends StatelessWidget {
       exampleContent: hintMap['exampleContent'].replaceAll('\\n', '\n'),
       exampleBullets: exampleBullets,
       examplePost: hintMap['examplePost'].replaceAll('\\n', '\n'),
-    ));
+    );
   }
 
   // The widget consists of a title and two paragraphs with information
@@ -343,18 +342,21 @@ class QuizHintPage extends StatelessWidget {
                         height: 30,
                       ),
                       const SizedBox(width: 15),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5),
-                        child: Text(
-                          'Hint: $topic',
-                          style: Theme.of(context)
-                              .textTheme
-                              .displayMedium!
-                              .copyWith(
-                                fontFamily: GoogleFonts.montserrat().fontFamily,
-                              ),
-                          softWrap: false,
-                          overflow: TextOverflow.fade,
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 5),
+                          child: Text(
+                            'Hint: $topic',
+                            style: Theme.of(context)
+                                .textTheme
+                                .displayMedium!
+                                .copyWith(
+                                  fontFamily:
+                                      GoogleFonts.montserrat().fontFamily,
+                                ),
+                            softWrap: false,
+                            overflow: TextOverflow.fade,
+                          ),
                         ),
                       ),
                     ],
@@ -378,8 +380,8 @@ class QuizHintPage extends StatelessWidget {
                 ],
               ),
               Positioned(
-                right: 5,
-                top: 5,
+                right: 2.5,
+                top: 2.5,
                 child: IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.of(context).pop(),

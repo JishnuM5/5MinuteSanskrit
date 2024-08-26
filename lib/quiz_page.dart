@@ -35,20 +35,25 @@ class _QuizPageState extends State<QuizPage> {
     question = quiz.questions[quiz.currentQ].question;
     answers = List.from(quiz.questions[quiz.currentQ].answers);
 
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (readState.isNewQuiz() && quiz.showHint) {
-        showHintPage(context);
-      }
+    SchedulerBinding.instance.addPostFrameCallback(
+      (_) async {
+        if (readState.isNewQuiz() && quiz.showHint) {
+          showHintPage(context);
+        }
 
-      // If the quiz allows for it, initialize the transliteration API
-      if (quiz.canTransliterate) {
-        transl.init().then((value) {
-          setState(() {
-            showTranslSwitch = true;
-          });
-        });
-      }
-    });
+        // If the quiz allows for it, initialize the transliteration API
+        if (quiz.canTransliterate) {
+          try {
+            await transl.init();
+            setState(() {
+              showTranslSwitch = true;
+            });
+          } catch (error) {
+            showTextSnackBar('Error initializing transliterator: $error');
+          }
+        }
+      },
+    );
   }
 
   @override
@@ -216,7 +221,6 @@ class _QuizPageState extends State<QuizPage> {
 
     // In this sub-method, the API is used to translate a substring
     String transliteratePart(String devanagari) {
-      print(devanagari);
       return transl.transliterate(
         devanagari,
         transl.Script.devanagari,

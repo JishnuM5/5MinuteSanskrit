@@ -84,10 +84,16 @@ class MyAppState extends ChangeNotifier {
 
   // This method retrieves quiz data from the Firebase Firestore database
   // Errors from this method are handled in the parent widget
-  Future readQuizzes() async {
+  Future readQuizzes(String code) async {
     try {
       // This snapshot is of the entire quiz collection
-      final quizRef = FirebaseFirestore.instance.collection('quizzes');
+      var quizRef = FirebaseFirestore.instance.collection('quizzes');
+      if (code == 'choose') {
+        quizRef = quizRef.doc('Demo Quizzes').collection('all');
+      } else {
+        quizRef = quizRef.doc('Pilot Program').collection(code);
+      }
+
       QuerySnapshot<Map<String, dynamic>> value = await quizRef.get();
 
       // Reset values before retrieving data from new account
@@ -133,7 +139,7 @@ class MyAppState extends ChangeNotifier {
   }
 
 // This is the app user and a list of users for the leaderboard
-  AppUser appUser = AppUser.empty();
+  AppUser appUser = AppUser(name: "", code: "", quizStates: {});
   List<LeaderboardUser> lbUsers = [];
   late LeaderboardUser lbUser;
   Map<String, dynamic> seshHistory = {};
@@ -217,7 +223,7 @@ class MyAppState extends ChangeNotifier {
     updateUserName(name);
     try {
       await (userRef.update({'name': name}));
-    } on Exception catch (error) {
+    } catch (error) {
       Future.error('$error');
     }
   }
@@ -234,9 +240,10 @@ class MyAppState extends ChangeNotifier {
         'quizStates': {},
         'lbPoints': 0,
         'seshHistory': {},
+        'code': 'choose',
       });
       return Future.value();
-    } on Exception catch (error) {
+    } catch (error) {
       return Future.error('(From createUserInDB) $error');
     }
   }
@@ -257,6 +264,8 @@ class MyAppState extends ChangeNotifier {
 
         // Check if this is the current user's document, and process if so
         if (doc.id == FirebaseAuth.instance.currentUser!.email!) {
+          String code = userMap['code'];
+          await readQuizzes(code);
           appUser = AppUser.fromMap(userMap);
           lbUser = LeaderboardUser.fromMap(userMap);
 

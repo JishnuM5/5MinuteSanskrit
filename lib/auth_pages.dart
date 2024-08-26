@@ -1,8 +1,10 @@
-// This file contains the main pages used in user authentication
+// This file contains the main pages used by a user for account sign-in or creation
 
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'auth_flow.dart';
 import 'auth_widgets.dart';
 import 'main.dart';
 import 'themes.dart';
@@ -24,7 +26,7 @@ class _AuthNavState extends State<AuthNav> {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             // If there's an error, display the error message page
-            return errorMessage(snapshot.error, context);
+            return ErrorPage(error: snapshot.error);
           } else if (snapshot.connectionState == ConnectionState.waiting) {
             // If waiting, display a non-animated-logo loading page
             return animatedLogo(context, false);
@@ -37,56 +39,6 @@ class _AuthNavState extends State<AuthNav> {
           }
         });
   }
-}
-
-// This is the error message page
-Widget errorMessage(Object? error, BuildContext context) {
-  return Scaffold(
-    body: Center(
-      child: Padding(
-        padding: const EdgeInsets.all(25.0),
-        child: FloatingBox(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Oops! Something went wrong.',
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'क्षम्यताम्! We apologize for the inconvenience.',
-                style: Theme.of(context).textTheme.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Error: $error',
-                style: Theme.of(context).textTheme.bodySmall,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 30),
-              // The user can sign out and retry processes
-              ElevatedButton.icon(
-                onPressed: () {
-                  FirebaseAuth.instance.signOut();
-                },
-                icon: const Icon(Icons.arrow_back),
-                label: const Text('Return to Login'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
 }
 
 // This is the authentication page, where the user can log in, create a new account, etc.
@@ -118,7 +70,7 @@ class _AuthPageState extends State<AuthPage> {
                 style: Theme.of(context).textTheme.displayLarge,
               ),
             ),
-            logo,
+            logo(CrossAxisAlignment.center),
             // This is the center box that will either contain the log in or sign up widget
             Expanded(
               child: Align(
@@ -230,7 +182,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       showTextSnackBar("A reset password email was sent.");
 
       navigatorKey.currentState!.popUntil((route) => route.isFirst);
-    } on Exception catch (error) {
+    } catch (error) {
       showTextSnackBar(
         "Error sending email: $error",
       );
@@ -240,122 +192,128 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 }
 
-// Tis is the verify email page
-class VerifyEmailPage extends StatefulWidget {
-  const VerifyEmailPage({super.key});
+class PilotLevelPopup extends StatefulWidget {
+  const PilotLevelPopup({super.key});
 
   @override
-  State<VerifyEmailPage> createState() => _VerifyEmailPageState();
+  State<PilotLevelPopup> createState() => _PilotLevelPopupState();
 }
 
-class _VerifyEmailPageState extends State<VerifyEmailPage> {
-  bool newUser = false;
-  bool emailVerified = false;
-  bool canResendEmail = false;
-  Timer? timer;
-
-  // Here, values are initialized, and an initial verification email is sent
-  // The timer checks whether the user's email has been verified every 5 seconds
-  @override
-  void initState() {
-    super.initState();
-    emailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
-
-    if (!emailVerified) {
-      sendVerificationEmail();
-      timer = Timer.periodic(
-        const Duration(seconds: 5),
-        (context) => checkEmailVerified(),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    timer?.cancel();
-    super.dispose();
-  }
+class _PilotLevelPopupState extends State<PilotLevelPopup> {
+  String code = '';
 
   @override
   Widget build(BuildContext context) {
-    return (emailVerified)
-        // If the email is verified, then they are sent to the verified page, with further navigation logic
-        ? VerifiedHomePage(newUser: newUser)
-        // Else, a simple page is shown, where users can resend a verification email or cancel
-        : Scaffold(
-            // A simple app bar that lets the user go back
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              title: const Text('Verify Email'),
-              leading: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: () {
-                  FirebaseAuth.instance.signOut();
-                },
-                child: const Icon(Icons.arrow_back, color: Colors.black),
-              ),
-            ),
-            body: Padding(
-              padding: const EdgeInsets.all(25),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FloatingBox(
-                      child: Column(
-                    children: [
-                      const Text('A verification email has been sent.'),
-                      const SizedBox(height: 20),
-                      ElevatedButton.icon(
-                        onPressed:
-                            // Users can only send a verification email every 5 seconds
-                            canResendEmail ? sendVerificationEmail : null,
-                        icon: const Icon(Icons.email),
-                        label: const Text('Resend Email'),
-                      ),
-                      const SizedBox(height: 10),
-                      TextButton(
-                        onPressed: () {
-                          // The cancel button just signs the user out, but an account is created
-                          FirebaseAuth.instance.signOut();
+    return Dialog(
+      backgroundColor: ConstColors.background,
+      child: SingleChildScrollView(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.8,
+          height: MediaQuery.of(context).size.height * 0.8,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Title
+                Text(
+                  'Select Your Quiz Level',
+                  style: Theme.of(context).textTheme.displayLarge,
+                ),
+                const SizedBox(height: 10),
+
+                // Explanation
+                const Text(
+                  'Select your quiz level to receive appropriate quizzes during the pilot program. You\'ll be logged out, and your account will update the next time you log in.',
+                ),
+                const SizedBox(height: 20),
+
+                // Level options
+                buildLevelOption(
+                  context,
+                  title: 'Beginner',
+                  icon: Icons.star,
+                  tooltip:
+                      'Start with the basics: conversation skills, telling the time, and action words',
+                  levelCode: 'beginner',
+                ),
+                const SizedBox(height: 10),
+                buildLevelOption(
+                  context,
+                  title: 'Advanced',
+                  icon: Icons.school,
+                  tooltip:
+                      'Challenge yourself with पुंलिङ्ग विभक्तिः and an intro to सन्धिः/संयोगः',
+                  levelCode: 'advanced',
+                ),
+                const Spacer(),
+                ElevatedButton(
+                  onPressed: code == ''
+                      ? null
+                      : () async {
+                          await updateLevel(code);
+                          // ignore: use_build_context_synchronously
+                          Navigator.of(context).pop();
                         },
-                        child: const Text('Cancel'),
-                      )
-                    ],
-                  )),
-                ],
-              ),
+                  child: const Text('Confirm'),
+                ),
+              ],
             ),
-          );
+          ),
+        ),
+      ),
+    );
   }
 
-// This method sends the user a verification email
-// If an error comes up, it displays a snack bar
-  Future sendVerificationEmail() async {
+  Widget buildLevelOption(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required String tooltip,
+    required String levelCode,
+  }) {
+    Color foreground = code == levelCode ? ConstColors.shade : Colors.grey;
+
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        onTap: () => setState(() {
+          code = levelCode;
+        }),
+        child: Container(
+          decoration: BoxDecoration(
+            color: code == levelCode ? ConstColors.primary : ConstColors.grey,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: foreground, width: 3),
+          ),
+          padding: const EdgeInsets.all(15),
+          child: Row(
+            children: [
+              Icon(icon, color: foreground, size: 30),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                      color: foreground,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  updateLevel(String code) async {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(
+          FirebaseAuth.instance.currentUser!.email!,
+        );
     try {
-      await FirebaseAuth.instance.currentUser!.sendEmailVerification();
-
-      // After an email is sent, the user must wait 5 seconds before sending another one
-      setState(() => canResendEmail = false);
-      await Future.delayed(const Duration(seconds: 5));
-      setState(() => canResendEmail = true);
-    } on Exception catch (error) {
-      showTextSnackBar('Error sending email: $error');
-    }
-  }
-
-// This method checks whether the user is verified
-// It reloads the current user's data, and if they are verified, cancels the timer
-  Future checkEmailVerified() async {
-    await FirebaseAuth.instance.currentUser!.reload();
-    setState(() {
-      emailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
-      newUser = true;
-    });
-
-    if (emailVerified) {
-      timer?.cancel();
+      await userRef.update({'code': code});
+      await FirebaseAuth.instance.signOut();
+      return Future.value(code);
+    } catch (error) {
+      showTextSnackBar('Error updating level: $error');
     }
   }
 }

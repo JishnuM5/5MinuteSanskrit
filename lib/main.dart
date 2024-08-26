@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'leaderboard_page.dart';
 import 'auth_pages.dart';
@@ -16,7 +15,7 @@ import 'app_bars.dart';
 import 'summary_page.dart';
 import 'themes.dart';
 
-//This is the main method, from where the code runs
+//This is the main method, from where the levelCode runs
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -68,12 +67,22 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    if (widget.newUser) {
-      SchedulerBinding.instance.addPostFrameCallback((_) => showDialog(
-            context: context,
-            builder: (BuildContext context) => const TutorialPopup(),
-          ));
-    }
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (widget.newUser) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) => const TutorialPopup(),
+        );
+      }
+      if (context.read<MyAppState>().appUser.code == "choose") {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) => const PilotLevelPopup(),
+        );
+      }
+    });
   }
 
   // The selected index state manages page navigation
@@ -248,7 +257,7 @@ class QuizTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: SizedBox(
-        height: 155,
+        height: 162.5,
         child: Stack(
           children: [
             // This container shows a progress bar of quiz mastery
@@ -270,13 +279,14 @@ class QuizTile extends StatelessWidget {
                     Text(
                       'Mastery:',
                       style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                            fontSize: 16.5,
                             color: const Color.fromARGB(255, 234, 234, 234),
                           ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: LinearProgressIndicator(
-                        minHeight: 10,
+                        minHeight: 12.5,
                         value: pctMastered,
                         backgroundColor: Colors.white.withOpacity(0.3),
                         valueColor: AlwaysStoppedAnimation<Color>(
@@ -304,13 +314,13 @@ class QuizTile extends StatelessWidget {
                           : (quiz.status == QuizStatus.red)
                               ? ConstColors.red
                               : Colors.transparent,
-                  width: 5,
+                  width: 6.5,
                 ),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: InkWellBox(
                 maxWidth: double.maxFinite,
-                maxHeight: 120,
+                maxHeight: 125,
                 color: ConstColors.primary.withOpacity(
                   (quiz.status == QuizStatus.complete) ? 0.7 : 1,
                 ),
@@ -328,6 +338,8 @@ class QuizTile extends StatelessWidget {
                               .headlineMedium!
                               .copyWith(color: ConstColors.grey),
                       textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.fade,
                     ),
                     const SizedBox(height: 10),
                     // Here, the remaining number of questions in the current session are displayed
@@ -360,74 +372,4 @@ class QuizTile extends StatelessWidget {
       ),
     );
   }
-}
-
-// This is the animated logo that is displayed on the main page.
-Widget animatedLogo(BuildContext context, bool animate) {
-  return Scaffold(
-    body: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // The logo can be animated or static
-          (animate)
-              ? AnimatedTextKit(
-                  isRepeatingAnimation: false,
-                  repeatForever: false,
-                  animatedTexts: [
-                    TypewriterAnimatedText(
-                      '5 Minute',
-                      textStyle: Theme.of(context).textTheme.headlineMedium,
-                      cursor: '।',
-                      speed: const Duration(milliseconds: 200),
-                    ),
-                  ],
-                )
-              : Padding(
-                  padding: const EdgeInsets.fromLTRB(6, 5, 0, 0),
-                  child: Text(
-                    '5 Minute ',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                ),
-          (animate)
-              ? AnimatedTextKit(
-                  pause: const Duration(milliseconds: 3000),
-                  isRepeatingAnimation: false,
-                  repeatForever: false,
-                  animatedTexts: [
-                    TyperAnimatedText(''),
-                    TypewriterAnimatedText(
-                      'संस्कृतम् ।',
-                      textStyle:
-                          Theme.of(context).textTheme.displayMedium!.copyWith(
-                                color: ConstColors.primary,
-                              ),
-                      cursor: '।',
-                      speed: const Duration(milliseconds: 200),
-                    ),
-                  ],
-                )
-              : Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 4, 0),
-                  child: Text(
-                    'संस्कृतम् । ',
-                    style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                          color: ConstColors.primary,
-                        ),
-                  ),
-                ),
-          const SizedBox(height: 10),
-          const SizedBox(
-            width: 50,
-            height: 50,
-            child: CircularProgressIndicator(
-              color: ConstColors.primary,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
 }

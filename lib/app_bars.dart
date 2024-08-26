@@ -70,6 +70,8 @@ class QuizBar extends StatelessWidget {
           child: Text(
             currentQuiz.name,
             style: Theme.of(context).textTheme.headlineMedium,
+            softWrap: false,
+            overflow: TextOverflow.fade,
           ),
         ),
         Center(
@@ -112,7 +114,9 @@ AppBar topBar(BuildContext context, int totalPoints) {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-          child: (isSmallScreen(context)) ? condensedLogo : logo,
+          child: (isSmallScreen(context))
+              ? condensedLogo
+              : logo(CrossAxisAlignment.start),
         )
       ],
     ),
@@ -172,7 +176,7 @@ AppBar topBar(BuildContext context, int totalPoints) {
   );
 }
 
-// THis is the widget that shows up on the tutorial dialog
+// This is the widget that shows up on the tutorial dialog
 class TutorialPopup extends StatelessWidget {
   const TutorialPopup({super.key});
   // The tutorial strings used to build the carousel

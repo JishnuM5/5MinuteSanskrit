@@ -1,9 +1,23 @@
 # To-Do List
-- Create teacher accounts
-  - Teachers must give a hint page ref if they choose to show one, make sure ref is valid
+- Notes: Firebase can take references and accounts for newline characters
+
 - Write down every possible place for error, and type of error handling
 - Embed One Minute Sanskrit videos in hint pages
 - Social Sign In (seamless flow)
+
+## Pilot Program and Accounts
+- The user can sign up for the Beginner or Advanced quiz level, each with different weekly quizzes
+  - Brand new users: will set their quiz level during sign up
+  - Verified users: will set their quiz level after signing in **between AuthPage and AppNav** with a popup that cannot be dismissed
+    - They will then be signed out (with points and data reset) and info updated
+- After the pilot program, users will choose their account type after they verify their email
+  - The classroom list is fetched, which contains its ID and list of quizzes; if the user enters a valid classroomID, then the quizzes, users, and hint pages are fetched
+  - The quizzes are split by public and private collections
+    - Public collections accessible by most teachers but only modifiable by teachers with admin access codes
+    - Private collections are modifiable by only teachers and their personal collections
+- To speed up document reads after things start to scale up, create a script that exports user data to a Google Sheet and then deletes the data in Firestore
+
+
 
 ## Multiple Quiz Formatting and Accounts
 - All visible quizzes are going to be in a home page, displayed with an array
@@ -32,10 +46,12 @@
 
 ## Stretch Stretch Goals
 - Advanced UI and animations (like TutorialPopUp)
+  - Allow users to select a profile icon and display them on the leaderboard
 - Improve the optimization of loading/saving quizzes and users (don't change database if no Qs answered)
-- Saving cache to avoid reading the database every time
+  - Saving cache to avoid reading the database every time
 - Reauthenticate before changing password or deleting account
 - Allow custom number of questions in quizzes and sessions and custom session start times
+- Question variety beyond multiple choice, multimedia support for questions
  <br /><br />
 
  # Notes
@@ -194,7 +210,12 @@ A Stream\<T\> like a Future\<T\> but it delivers 0+ values over time. This means
 - If user cancels the email verification page within 5 seconds of sending the email verification, then the app crashes (This is because of an async wait function running to avoid the user from spamming emails; will fix later).
 - The app only works with 10 questions and sessions of 5, and new sessions only after 12 p.m.
 - Any new data from updated in the database externally only updates every time the user logs in (esp for the leaderboard)
-- After 12 p.m. passes, the page needs to be manually rebuilt before the next session is available
+  - After 12 p.m. passes, the page needs to be manually rebuilt before the next session is available
 - Favicons need to be updated manually before each deployment
-- Transliterate fully works, but you cannot un-transliterate a string that was originally transliterated
+```
+<!-- Favicon -->
+<link rel="shortcut icon" href="assets/assets/favicon.ico" type="image/x-icon">
+s<link rel="icon" href="assets/assets/favicon.ico" type="image/x-icon">
+```
+- Transliterate fully works, but you cannot un-transliterate a string that started out transliterated
 - COMMON FIX: Methods compile without () but cause problems (one is a reference, one is a call)
