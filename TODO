@@ -1,5 +1,7 @@
 # To-Do List
 - Notes: Firebase can take references and accounts for newline characters
+- Timezone changes
+- Clarify that quizzes are 10 questions, not 5
 
 - Write down every possible place for error, and type of error handling
 - Embed One Minute Sanskrit videos in hint pages
@@ -44,7 +46,7 @@
   - The home page will show the number of questions remaining in a session (number) and the number of questions mastered (progress bar).
   - The summary page is shown after every session (5 questions). It is slightly different when a quiz is mastered.
 
-## Stretch Stretch Goals
+## Stretch Goals
 - Advanced UI and animations (like TutorialPopUp)
   - Allow users to select a profile icon and display them on the leaderboard
 - Improve the optimization of loading/saving quizzes and users (don't change database if no Qs answered)
@@ -52,6 +54,7 @@
 - Reauthenticate before changing password or deleting account
 - Allow custom number of questions in quizzes and sessions and custom session start times
 - Question variety beyond multiple choice, multimedia support for questions
+- Allow more questions, custom sessions, and custom quiz release time
  <br /><br />
 
  # Notes
@@ -172,12 +175,10 @@ A Stream\<T\> like a Future\<T\> but it delivers 0+ values over time. This means
 # Links:
 - https://goo.gle/FlutterInFocus (YouTube playlist)
 
-## Programming Concept References
-- https://stackoverflow.com/questions/60249996/difference-between-getter-and-a-regular-method-in-dart  
-
-### State Management
+### State Management and Other App Dev Concepts
 - https://docs.flutter.dev/data-and-backend/state-mgmt/simple
-- https://flutterbyexample.com/lesson/change-notifier-provider 
+- https://flutterbyexample.com/lesson/change-notifier-provider
+- https://stackoverflow.com/questions/60249996/difference-between-getter-and-a-regular-method-in-dar 
 
 ## Setting the UI
 - https://pub.dev/packages/google_fonts
@@ -191,31 +192,25 @@ A Stream\<T\> like a Future\<T\> but it delivers 0+ values over time. This means
 - Logo/Cursor: https://en.wikipedia.org/wiki/Danda, https://pub.dev/documentation/animated_text_kit/latest/#typewriter
 - Container/Button Decor: radius of 15 for rounded borders, constant shadow; see themes.dart
 
-## Database:
+## Database and Authentication:
 - https://docs.flutter.dev/data-and-backend/serialization/json 
 - https://firebase.google.com/docs/firestore/query-data/get-data
-- https://firebase.google.com/docs/firestore/manage-data/export-import
-- https://firebase.google.com/docs/firestore/manage-data/add-data#dart_1
-
-- What's stored in the database: Quiz(questions, name, show, mastery), User(name, quizStates)
-
-### Authentication
+  - https://firebase.google.com/docs/firestore/manage-data/add-data#dart_1
 - https://www.youtube.com/watch?v=4vKiJZNPhss 
+
 
 ### Converting Data to a File
 - https://learn.microsoft.com/en-us/office/dev/scripts/resources/samples/get-table-data
   - Excel will give an output from script, and I can then copy-paste into another project that I use to write code.
 
-# Questions to Consider and Known "Errors"
+# Known "Errors"
 - If user cancels the email verification page within 5 seconds of sending the email verification, then the app crashes (This is because of an async wait function running to avoid the user from spamming emails; will fix later).
-- The app only works with 10 questions and sessions of 5, and new sessions only after 12 p.m.
-- Any new data from updated in the database externally only updates every time the user logs in (esp for the leaderboard)
-  - After 12 p.m. passes, the page needs to be manually rebuilt before the next session is available
+- Any new data from updated in the database externally only updates every time the user logs in/reloads (esp for the leaderboard)
 - Favicons need to be updated manually before each deployment
 ```
 <!-- Favicon -->
 <link rel="shortcut icon" href="assets/assets/favicon.ico" type="image/x-icon">
 s<link rel="icon" href="assets/assets/favicon.ico" type="image/x-icon">
 ```
-- Transliterate fully works, but you cannot un-transliterate a string that started out transliterated
 - COMMON FIX: Methods compile without () but cause problems (one is a reference, one is a call)
+- Some new users are being handled as current users --> no Firestore doc created

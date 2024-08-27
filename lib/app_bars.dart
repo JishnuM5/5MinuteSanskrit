@@ -69,23 +69,26 @@ class QuizBar extends StatelessWidget {
         Center(
           child: Text(
             currentQuiz.name,
-            style: Theme.of(context).textTheme.headlineMedium,
+            style: isSmallScreen(context)
+                ? Theme.of(context).textTheme.headlineSmall
+                : Theme.of(context).textTheme.headlineMedium,
             softWrap: false,
-            overflow: TextOverflow.fade,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
+
+        // This is the question counter
         Center(
           child: Container(
             alignment: Alignment.center,
             width: 70,
             height: 40,
             decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 1.5),
-                borderRadius: BorderRadius.circular(10),
-                color: ConstColors.primary,
-                boxShadow: [shadow]),
-
-            // This is the question counter
+              border: Border.all(color: Colors.black, width: 1.5),
+              borderRadius: BorderRadius.circular(10),
+              color: ConstColors.primary,
+              boxShadow: [shadow],
+            ),
             child: Text(
               '${currentQuiz.currentQ + 1} / ${currentQuiz.questions.length}',
               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
@@ -187,7 +190,7 @@ class TutorialPopup extends StatelessWidget {
     'Maximize Your Points',
   ];
   static const List<String> info = [
-    'A microlearning web application to enhance your Sanskrit skills in just 5 minutes/day with weekly quizzes.',
+    'A microlearning web application to enhance your Sanskrit skills in just 5 minutes a day with weekly quizzes.',
     'Quizzes are divided into "sessions" of up to 5 questions each.',
     'Answering questions on time = more points. Quiz tiles indicate how long ago a session was assigned and the points per correct answer.',
     'There are other point bonuses:'

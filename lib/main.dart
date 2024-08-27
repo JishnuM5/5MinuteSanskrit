@@ -69,17 +69,17 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (widget.newUser) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) => const TutorialPopup(),
-        );
-      }
       if (context.read<MyAppState>().appUser.code == "choose") {
         showDialog(
           context: context,
           barrierDismissible: false,
           builder: (BuildContext context) => const PilotLevelPopup(),
+        );
+      }
+      if (widget.newUser) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) => const TutorialPopup(),
         );
       }
     });
@@ -339,7 +339,7 @@ class QuizTile extends StatelessWidget {
                               .copyWith(color: ConstColors.grey),
                       textAlign: TextAlign.center,
                       maxLines: 2,
-                      overflow: TextOverflow.fade,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 10),
                     // Here, the remaining number of questions in the current session are displayed

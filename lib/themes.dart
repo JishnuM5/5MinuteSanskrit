@@ -58,6 +58,7 @@ final theme = ThemeData(
     // Used throughout auth, quiz, and profile pages
     bodyLarge: TextStyle(
         fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 16),
+    // Used as the default text size
     bodyMedium: TextStyle(
         fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 14.5),
     // Used for error text on error page
@@ -66,6 +67,7 @@ final theme = ThemeData(
     // Used for page headers and summary info
     displayLarge: TextStyle(
         fontFamily: GoogleFonts.montserrat().fontFamily, fontSize: 29),
+    // Used for large Sanskrit text
     displayMedium:
         TextStyle(fontFamily: GoogleFonts.baloo2().fontFamily, fontSize: 25),
     // Used on auth pages and question text
@@ -105,7 +107,7 @@ Widget logo(CrossAxisAlignment align) {
       Padding(
         padding: const EdgeInsets.only(left: 2),
         child: Text(
-          'by संस्कृतभरति USA ©',
+          'by संस्कृतभारती USA ©',
           style: theme.textTheme.labelSmall!.copyWith(height: 0.5),
         ),
       ),

@@ -355,7 +355,7 @@ class QuizHintPage extends StatelessWidget {
                                       GoogleFonts.montserrat().fontFamily,
                                 ),
                             softWrap: false,
-                            overflow: TextOverflow.fade,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ),

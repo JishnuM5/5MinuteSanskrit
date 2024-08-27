@@ -168,7 +168,7 @@ class LeaderboardPage extends StatelessWidget {
                                     topUsers[index].name,
                                     style:
                                         Theme.of(context).textTheme.bodyMedium,
-                                    overflow: TextOverflow.fade,
+                                    overflow: TextOverflow.ellipsis,
                                     softWrap: false,
                                   ),
                                 ),
