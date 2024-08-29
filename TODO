@@ -206,11 +206,5 @@ A Stream\<T\> like a Future\<T\> but it delivers 0+ values over time. This means
 # Known "Errors"
 - If user cancels the email verification page within 5 seconds of sending the email verification, then the app crashes (This is because of an async wait function running to avoid the user from spamming emails; will fix later).
 - Any new data from updated in the database externally only updates every time the user logs in/reloads (esp for the leaderboard)
-- Favicons need to be updated manually before each deployment
-```
-<!-- Favicon -->
-<link rel="shortcut icon" href="assets/assets/favicon.ico" type="image/x-icon">
-s<link rel="icon" href="assets/assets/favicon.ico" type="image/x-icon">
-```
 - COMMON FIX: Methods compile without () but cause problems (one is a reference, one is a call)
 - Some new users are being handled as current users --> no Firestore doc created

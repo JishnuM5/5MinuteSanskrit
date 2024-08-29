@@ -229,7 +229,7 @@ class _AppNavState extends State<AppNav> {
         } else {
           return MyHomePage(
             newUser: widget.newUser,
-            title: '5 Minute संस्कृतम्',
+            title: '5 Minute संस्कृतम् ।',
           );
         }
       },

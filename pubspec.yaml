@@ -1,5 +1,5 @@
 name: sanskrit_web_app
-description: "A new Flutter project."
+description: "A free microlearning app to improve your Sanskrit skills with 5 minute daily quizzes."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -40,6 +40,7 @@ dependencies:
   confetti: ^0.7.0
   card_swiper: ^3.0.1
   inditrans: ^0.7.0
+  flutter_launcher_icons: ^0.13.1
 
 
 dev_dependencies:
@@ -92,3 +93,16 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_launcher_icons:
+  image_path: "assets/bg-logo.png"
+  android: "launcher_icon"
+  min_sdk_android: 23
+  adaptive_icon_background: "#eeeeee"
+  adaptive_icon_foreground: "assets/logo.png"
+  ios: "AppIcon"
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: "assets/bg-logo.png"
+  

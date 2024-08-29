@@ -1,11 +1,11 @@
 {
-    "name": "sanskrit_web_app",
-    "short_name": "sanskrit_web_app",
+    "name": "5 Minute संस्कृतम् ।",
+    "short_name": "5Mसं।",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#eeeeee",
+    "theme_color": "#eeeeee",
+    "description": "A free microlearning app to improve your Sanskrit skills with 5 minute daily quizzes.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

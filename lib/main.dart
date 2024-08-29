@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
         navigatorKey: navigatorKey,
         scaffoldMessengerKey: scaffoldMessengerKey,
         debugShowCheckedModeBanner: false,
-        title: '5 Minute संस्कृतम्',
+        title: '5 Minute संस्कृतम् ।',
         theme: theme,
         home: const AuthNav(),
       ),
