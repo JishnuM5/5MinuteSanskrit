@@ -1,5 +1,7 @@
 // This file contains pages used after account creation
 
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -196,23 +198,23 @@ class AppNav extends StatefulWidget {
 
 class _AppNavState extends State<AppNav> {
   late Future<List<dynamic>> _future;
-
   // An initState() is used so these methods are not called multiple times
   @override
   void initState() {
     super.initState();
-    var futureList = [
-      context.read<MyAppState>().readHintPages(),
-      context.read<MyAppState>().readUser(),
-    ];
-    if (widget.newUser) {
-      futureList.insert(1, context.read<MyAppState>().createUserInDB());
-    }
+    Future<List<dynamic>> initApp() async {
+      await FirebaseAuth.instance.currentUser!.reload();
+      await context.read<MyAppState>().readHintPages();
+      if (widget.newUser) {
+        await context.read<MyAppState>().createUserInDB();
+      }
+      await context.read<MyAppState>().readUser();
 
-    _future = Future.wait(futureList).then((_) {
       context.read<MyAppState>().navigateTo(0);
       return Future.value([]);
-    });
+    }
+
+    _future = initApp();
   }
 
   @override

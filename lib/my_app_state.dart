@@ -141,7 +141,6 @@ class MyAppState extends ChangeNotifier {
 // This is the app user and a list of users for the leaderboard
   AppUser appUser = AppUser(name: "", code: "", quizStates: {});
   List<LeaderboardUser> lbUsers = [];
-  late LeaderboardUser lbUser;
   Map<String, dynamic> seshHistory = {};
 
   // This method updates the user's quiz data in the database
@@ -150,9 +149,11 @@ class MyAppState extends ChangeNotifier {
     final userRef = FirebaseFirestore.instance.collection('users').doc(
           FirebaseAuth.instance.currentUser!.email!,
         );
+
     for (Quiz quiz in quizzes) {
       // Turning question data into a map
       final Map<String, Map<String, dynamic>> qStates = {};
+
       for (int i = 0; i < quiz.questions.length; i++) {
         qStates['q$i'] = {
           'timesCorrect': quiz.questions[i].timesCorrect,
@@ -186,8 +187,9 @@ class MyAppState extends ChangeNotifier {
       // Calculating the total number of points
       int totalPoints = 0;
       for (Quiz quiz in quizzes) {
-        totalPoints = totalPoints + quiz.points + masteredQuizPoints;
+        totalPoints = totalPoints + quiz.points;
       }
+      totalPoints += masteredQuizPoints;
 
       // Creating map to update with, using seshHistory
       Map<String, dynamic> updateMap = Map.from(seshHistory);
@@ -260,14 +262,12 @@ class MyAppState extends ChangeNotifier {
       // Each user document is iterated through and processed
       for (var doc in usersSnapshot.docs) {
         Map<String, dynamic> userMap = doc.data();
-        lbUsers.add(LeaderboardUser.fromMap(userMap));
 
         // Check if this is the current user's document, and process if so
         if (doc.id == FirebaseAuth.instance.currentUser!.email!) {
           String code = userMap['code'];
           await readQuizzes(code);
           appUser = AppUser.fromMap(userMap);
-          lbUser = LeaderboardUser.fromMap(userMap);
 
           // Here, the current user's quiz data is retrieved
           for (Quiz quiz in quizzes) {
@@ -277,6 +277,9 @@ class MyAppState extends ChangeNotifier {
             }
           }
           updateMasteredQuizzes();
+          // Otherwise, add user as a leaderboard user with limited points
+        } else {
+          lbUsers.add(LeaderboardUser.fromMap(userMap));
         }
       }
       return Future.value(appUser);

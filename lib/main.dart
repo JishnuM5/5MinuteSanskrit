@@ -88,6 +88,13 @@ class _MyHomePageState extends State<MyHomePage> {
   // The selected index state manages page navigation
   @override
   Widget build(BuildContext context) {
+    // The total number of points that a user has is calculated here
+    int totalPoints = 0;
+    for (Quiz quiz in context.watch<MyAppState>().quizzes) {
+      totalPoints += quiz.points;
+    }
+    totalPoints += context.watch<MyAppState>().masteredQuizPoints;
+
     Widget page;
     Widget? appBar;
     switch (context.watch<MyAppState>().pageIndex) {
@@ -96,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar = const NavBar(navBarIndex: 0);
         break;
       case 1:
-        page = const LeaderboardPage();
+        page = LeaderboardPage(totalPoints: totalPoints);
         appBar = const NavBar(navBarIndex: 1);
         break;
       case 2:
@@ -114,13 +121,6 @@ class _MyHomePageState extends State<MyHomePage> {
       default:
         throw UnimplementedError();
     }
-
-    // The total number of points that a user has is calculated here
-    int totalPoints = 0;
-    for (Quiz quiz in context.watch<MyAppState>().quizzes) {
-      totalPoints += quiz.points;
-    }
-    totalPoints += context.watch<MyAppState>().masteredQuizPoints;
 
     return Scaffold(
       // The top bar of the app

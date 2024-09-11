@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sanskrit_web_app/classes.dart';
 import 'my_app_state.dart';
 import 'themes.dart';
 
 // This is the leaderboard page
 class LeaderboardPage extends StatelessWidget {
-  const LeaderboardPage({super.key});
+  const LeaderboardPage({super.key, required this.totalPoints});
+  final int totalPoints;
 
   @override
   Widget build(BuildContext context) {
-    final lbUsers = context.watch<MyAppState>().lbUsers;
-    final lbUser = context.read<MyAppState>().lbUser;
+    // Variables are initialized and the current user with updated points is added to the list of users
+    List<LeaderboardUser> lbUsers =
+        List.from(context.read<MyAppState>().lbUsers);
+    String name = context.watch<MyAppState>().appUser.name;
+    lbUsers.add(LeaderboardUser(name: name, lbPoints: totalPoints));
 
     // Some values are preset for the UI of the top 3 users
     const List<Color> topColors = [
@@ -23,8 +28,7 @@ class LeaderboardPage extends StatelessWidget {
     // Sort users in descending order, get up to top 10, and get current user's rank
     lbUsers.sort((a, b) => b.lbPoints.compareTo(a.lbPoints));
     final topUsers = lbUsers.take(10).toList();
-    final currentUserRank =
-        lbUsers.indexWhere((user) => user.name == lbUser.name) + 1;
+    final currentUserRank = lbUsers.indexWhere((user) => user.name == name) + 1;
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -55,7 +59,7 @@ class LeaderboardPage extends StatelessWidget {
                                   ),
                         ),
                         Text(
-                          '${lbUser.lbPoints}',
+                          '$totalPoints',
                           style: Theme.of(context)
                               .textTheme
                               .displayLarge!

@@ -205,6 +205,7 @@ A Stream\<T\> like a Future\<T\> but it delivers 0+ values over time. This means
 
 # Known "Errors"
 - If user cancels the email verification page within 5 seconds of sending the email verification, then the app crashes (This is because of an async wait function running to avoid the user from spamming emails; will fix later).
-- Any new data from updated in the database externally only updates every time the user logs in/reloads (esp for the leaderboard)
-- COMMON FIX: Methods compile without () but cause problems (one is a reference, one is a call)
-- Some new users are being handled as current users --> no Firestore doc created
+- Any new data from updated in the database externally only updates every time the user logs in/reloads
+- Some new users are being handled as current users --> no Firestore doc created (fixed?)
+- Rarely, users run into problems with quiz completion or old summary pages (noted once)
+- NO PERIODS IN QUIZ NAMES

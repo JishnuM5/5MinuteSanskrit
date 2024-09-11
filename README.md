@@ -1,6 +1,6 @@
 ![5 Minute संस्कृतम् । Logo](assets/logo.png)
 
-#  संस्कृतम् ।
+# 5 Minute संस्कृतम् ।
 By Jishnu M.
 
 Welcome to 5 Minute Sanskrit, a microlearning web application designed to enhance your Sanskrit skills in just 5 minutes a day! This application offers a fun and engaging way to learn and practice Sanskrit through weekly quizzes and personalized sessions. Go to **https://jishnum5.github.io/5MinuteSanskrit/** to try the app today!
