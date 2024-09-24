@@ -197,12 +197,13 @@ class AppNav extends StatefulWidget {
 }
 
 class _AppNavState extends State<AppNav> {
-  late Future<List<dynamic>> _future;
+  late Future<dynamic> _future;
   // An initState() is used so these methods are not called multiple times
   @override
   void initState() {
     super.initState();
-    Future<List<dynamic>> initApp() async {
+    Future<dynamic> initApp() async {
+      await Future.delayed(const Duration(seconds: 5));
       await FirebaseAuth.instance.currentUser!.reload();
       await context.read<MyAppState>().readHintPages();
       if (widget.newUser) {
@@ -211,7 +212,7 @@ class _AppNavState extends State<AppNav> {
       await context.read<MyAppState>().readUser();
 
       context.read<MyAppState>().navigateTo(0);
-      return Future.value([]);
+      return Future.value();
     }
 
     _future = initApp();

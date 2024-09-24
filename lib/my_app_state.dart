@@ -111,8 +111,6 @@ class MyAppState extends ChangeNotifier {
           quizzes.add(quiz);
         }
       }
-
-      await Future.delayed(const Duration(seconds: 4), () {});
       return Future.value(quizzes);
     } catch (error) {
       return Future.error('(From readQuizzes) $error');

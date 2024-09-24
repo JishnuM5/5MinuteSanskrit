@@ -20,7 +20,6 @@
 - To speed up document reads after things start to scale up, create a script that exports user data to a Google Sheet and then deletes the data in Firestore
 
 
-
 ## Multiple Quiz Formatting and Accounts
 - All visible quizzes are going to be in a home page, displayed with an array
   - Whether a quiz is visible depends on its "show" value in the database and whether the quiz is mastered
@@ -55,6 +54,7 @@
 - Allow custom number of questions in quizzes and sessions and custom session start times
 - Question variety beyond multiple choice, multimedia support for questions
 - Allow more questions, custom sessions, and custom quiz release time
+- Email notifications
  <br /><br />
 
  # Notes
@@ -205,7 +205,6 @@ A Stream\<T\> like a Future\<T\> but it delivers 0+ values over time. This means
 
 # Known "Errors"
 - If user cancels the email verification page within 5 seconds of sending the email verification, then the app crashes (This is because of an async wait function running to avoid the user from spamming emails; will fix later).
-- Any new data from updated in the database externally only updates every time the user logs in/reloads
-- Some new users are being handled as current users --> no Firestore doc created (fixed?)
-- Rarely, users run into problems with quiz completion or old summary pages (noted once)
+- Any new data from updated in the database externally only updates every time the user logs in/reloads.
+- For users far away (or with slow network connections), some Firestore write commands are skipped.
 - NO PERIODS IN QUIZ NAMES
